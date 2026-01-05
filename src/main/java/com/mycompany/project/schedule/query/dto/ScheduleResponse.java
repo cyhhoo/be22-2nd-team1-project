@@ -1,4 +1,4 @@
-package com.mycompany.project.schedule.dto;
+package com.mycompany.project.schedule.query.dto;
 
 import com.mycompany.project.schedule.entity.AcademicSchedule;
 import com.mycompany.project.schedule.entity.ScheduleType;

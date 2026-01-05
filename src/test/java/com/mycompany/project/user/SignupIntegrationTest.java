@@ -1,7 +1,7 @@
 package com.mycompany.project.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mycompany.project.user.dto.SignupRequest;
+import com.mycompany.project.user.command.dto.SignupRequest;
 import com.mycompany.project.user.entity.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
