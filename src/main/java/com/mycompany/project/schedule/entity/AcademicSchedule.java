@@ -14,6 +14,17 @@ import java.time.LocalDate;
 @Table(name = "tbl_academic_schedule")
 public class AcademicSchedule extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long scheduleId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "academic_year_id")
+    private AcademicYear academicYear;
+
+    @Column(nullable = false)
+    private LocalDate scheduleDate;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ScheduleType scheduleType; // ENUM: START, EXAM, HOLIDAY

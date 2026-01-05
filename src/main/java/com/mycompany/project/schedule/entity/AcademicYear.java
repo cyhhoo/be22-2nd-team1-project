@@ -13,6 +13,10 @@ import java.time.LocalDate;
 @Table(name = "tbl_academic_year")
 public class AcademicYear {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long academicYearId;
+
     @Column(nullable = false)
     private Integer year; // 2025, 2026...
 
