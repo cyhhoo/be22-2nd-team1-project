@@ -52,3 +52,11 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Custom Settings ###
+# 로컬 개발용 설정 파일 (DB 정보 등 민감 정보 포함)
+src/main/resources/application-local.yaml
+
+# OS별/사용자별 다를 수 있는 업로드 경로 등은 별도 관리 권장
+# 만약 application.yaml 자체를 공유하지 않으려면 아래 주석 해제
+# src/main/resources/application.yaml
