@@ -1,4 +1,4 @@
-package com.mycompany.project.system.controller;
+package com.mycompany.project.system.command.controller;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "시스템 초기화 (System Initialization)", description = "초기 데이터 적재를 위한 관리자 전용 API")
 @RestController
 @RequestMapping("/api/system/init")
-public class SystemInitController {
+public class SystemInitCommandController {
 
     /*
      * [구현 가이드: 보안 주의]
