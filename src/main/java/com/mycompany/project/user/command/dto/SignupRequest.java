@@ -1,4 +1,4 @@
-package com.mycompany.project.user.dto;
+package com.mycompany.project.user.command.dto;
 
 import com.mycompany.project.user.entity.Role;
 import lombok.Getter;
