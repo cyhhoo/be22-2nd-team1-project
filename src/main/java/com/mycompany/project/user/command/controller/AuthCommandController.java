@@ -22,4 +22,5 @@ public class AuthCommandController {
   public ApiDTO<Long> signup(@RequestBody SignupRequest request) {
     return ApiDTO.success(userCommandService.signup(request));
   }
+
 }
