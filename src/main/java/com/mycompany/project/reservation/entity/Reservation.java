@@ -8,6 +8,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "tbl_reservation")
 @Getter
@@ -15,9 +17,10 @@ import lombok.NoArgsConstructor;
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long reservationId;
-
-    // private Long userId; // Applicant
-    // private Long targetId; // Facility or Teacher
-    // private String status; // PENDING, APPROVED, REJECTED, CANCELLED
+    private int reservationId;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private String status;
+    private LocalDateTime createdAt;
+    private String rejectionReason;
 }
