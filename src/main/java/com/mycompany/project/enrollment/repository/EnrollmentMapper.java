@@ -1,4 +1,4 @@
-package com.mycompany.project.enrollment.mapper;
+package com.mycompany.project.enrollment.repository;
 
 import org.apache.ibatis.annotations.Mapper;
 

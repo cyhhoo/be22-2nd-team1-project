@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class Course {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long courseId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long courseId;
 
-    // private String name;
+  // private String name;
 }
