@@ -1,5 +1,7 @@
 package com.mycompany.project.reservation.controller;
 
+import com.mycompany.project.reservation.repository.ReservationRepository;
+import com.mycompany.project.reservation.service.ReservationService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,8 +15,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/reservations")
 public class ReservationController {
+    private final ReservationService reservationService;
+    private final ReservationRepository reservationRepository;
 
-    /*
+
+  public ReservationController(ReservationService reservationService, ReservationRepository reservationRepository) {
+    this.reservationService = reservationService;
+    this.reservationRepository = reservationRepository;
+  }
+
+  /*
      * [구현 가이드: Service 의존성 주입]
      * private final ReservationService reservationService;
      */
