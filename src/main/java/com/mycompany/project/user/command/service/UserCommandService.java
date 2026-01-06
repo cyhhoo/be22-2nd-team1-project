@@ -1,7 +1,7 @@
 package com.mycompany.project.user.command.service;
 
 import com.mycompany.project.user.command.dto.AccountActivationRequest;
-import com.mycompany.project.user.command.dto.SignupRequest;
+import com.mycompany.project.user.command.dto.UserRegisterRequest;
 import com.mycompany.project.user.entity.User;
 import com.mycompany.project.user.entity.UserStatus;
 import com.mycompany.project.user.repository.UserRepository;
@@ -21,7 +21,7 @@ public class UserCommandService {
   }
 
   @Transactional
-  public Long signup(SignupRequest request) {
+  public Long registerUser(UserRegisterRequest request) {
     // 1. 이메일 중복 검사
     if (userRepository.existsByEmail(request.getEmail())) {
       throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");

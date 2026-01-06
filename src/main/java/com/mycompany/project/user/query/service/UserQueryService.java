@@ -1,8 +1,10 @@
 package com.mycompany.project.user.query.service;
 
+import com.mycompany.project.common.exception.AccountInactiveException;
 import com.mycompany.project.user.query.dto.LoginRequest;
 import com.mycompany.project.user.entity.User;
 import com.mycompany.project.user.entity.Token; // 추가
+import com.mycompany.project.user.entity.UserStatus;
 import com.mycompany.project.user.query.dto.TokenResponse;
 import com.mycompany.project.user.repository.UserRepository;
 import com.mycompany.project.user.repository.TokenRepository; // 추가
@@ -19,7 +21,8 @@ public class UserQueryService {
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
 
-  public UserQueryService(UserRepository userRepository, TokenRepository tokenRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
+  public UserQueryService(UserRepository userRepository, TokenRepository tokenRepository,
+      PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
     this.userRepository = userRepository;
     this.tokenRepository = tokenRepository; // 추가
     this.passwordEncoder = passwordEncoder;
@@ -40,9 +43,9 @@ public class UserQueryService {
     return new TokenResponse(accessToken, refreshToken);
   }
 
-
   /**
    * 로그인 및 토큰 발급
+   * 
    * @param request 로그인 요청
    * @return 토큰 응답
    */
@@ -55,7 +58,13 @@ public class UserQueryService {
     if (user.isLocked()) {
       throw new IllegalArgumentException("계정이 잠금되었습니다. 관리자에게 문의하세요.");
     }
-    // 2. 비밀번호 불일치 체크
+
+    // 2. 비활성 상태 확인
+    if (user.getStatus() == UserStatus.INACTIVE) {
+      throw new AccountInactiveException("계정이 활성화되지 않았습니다. 최초 비밀번호 변경 및 계정 활성화를 진행해주세요.");
+    }
+
+    // 3. 비밀번호 불일치 체크
     if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
       // 실패 처리 호출
       user.loginFail();
@@ -91,6 +100,5 @@ public class UserQueryService {
     // 5. 새 토큰 발급 및 저장
     return generateAndSaveToken(user);
   }
-
 
 }

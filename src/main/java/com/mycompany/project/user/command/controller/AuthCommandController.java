@@ -1,7 +1,8 @@
 package com.mycompany.project.user.command.controller;
 
 import com.mycompany.project.common.dto.ApiDTO;
-import com.mycompany.project.user.command.dto.SignupRequest;
+import com.mycompany.project.user.command.dto.AccountActivationRequest;
+import com.mycompany.project.user.command.dto.UserRegisterRequest;
 import com.mycompany.project.user.command.service.UserCommandService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,9 +19,15 @@ public class AuthCommandController {
     this.userCommandService = userCommandService;
   }
 
-  @PostMapping("/signup")
-  public ApiDTO<Long> signup(@RequestBody SignupRequest request) {
-    return ApiDTO.success(userCommandService.signup(request));
+  @PostMapping("/register")
+  public ApiDTO<Long> register(@RequestBody UserRegisterRequest request) {
+    return ApiDTO.success(userCommandService.registerUser(request));
+  }
+
+  @PostMapping("/activate")
+  public ApiDTO<Void> activate(@RequestBody AccountActivationRequest request) {
+    userCommandService.activateAccount(request);
+    return ApiDTO.success(null);
   }
 
 }
