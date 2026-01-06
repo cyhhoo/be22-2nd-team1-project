@@ -20,5 +20,11 @@ public class AuthQueryController {
   @PostMapping("/login")
     public ApiDTO<TokenResponse> login(@RequestBody LoginRequest request) {
         return ApiDTO.success(userQueryService.login(request));
-    }
+  }
+
+  @PostMapping("/reissue")
+  public ApiDTO<TokenResponse> reissue(@CookieValue(value = "RefreshToken",required = true) String refreshToken) {
+
+    return ApiDTO.success(userQueryService.reissue(refreshToken));
+  }
 }
