@@ -47,40 +47,4 @@ public class User extends BaseEntity {
 
   private LocalDateTime lastLoginAt; // 마지막 로그인 일시
 
-  /**
-   * 초기 계정 활성화 메서드
-   * 계정 생성 후 첫 로그인 시, 동작
-   * @param encodedPassword
-   */
-  public void activate(String encodedPassword) {
-    this.status = UserStatus.ACTIVE;
-    this.password = encodedPassword;
-    this.loginFailCount = 0;
-  }
-
-  /**
-   * 로그인 성공 시, 카운트 초기화 및 마지막 접속일 갱신
-   */
-  public void loginSuccess(){
-    this.loginFailCount = 0;
-    this.lastLoginAt = LocalDateTime.now();
-  }
-
-  /**
-   * 로그인 실패 시, 실패 카운트 증가 및 5회 이상 실패시 계정 잠금
-   */
-  public void loginFail(){
-    this.loginFailCount++;
-    if(this.loginFailCount >=5){
-      this.status = UserStatus.LOCKED;
-    }
-  }
-
-  /**
-   * 계정 잠금 상태 확인 메서드
-   * @return 잠금 상태 여부 (LOCKED 면 true, 아니면 false)
-   */
-  public boolean isLocked(){
-    return this.status == UserStatus.LOCKED;
-  }
 }
