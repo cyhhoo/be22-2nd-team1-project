@@ -1,6 +1,6 @@
 package com.mycompany.project.user.query.controller;
 
-import com.mycompany.project.common.dto.ApiDTO;
+import com.mycompany.project.common.response.ApiResponse;
 import com.mycompany.project.user.query.dto.LoginRequest;
 import com.mycompany.project.user.query.dto.TokenResponse;
 import com.mycompany.project.user.query.service.UserQueryService;
@@ -18,13 +18,13 @@ public class AuthQueryController {
   }
 
   @PostMapping("/login")
-    public ApiDTO<TokenResponse> login(@RequestBody LoginRequest request) {
-        return ApiDTO.success(userQueryService.login(request));
+    public ApiResponse<TokenResponse> login(@RequestBody LoginRequest request) {
+        return ApiResponse.success(userQueryService.login(request));
   }
 
   @PostMapping("/reissue")
-  public ApiDTO<TokenResponse> reissue(@CookieValue(value = "RefreshToken",required = true) String refreshToken) {
+  public ApiResponse<TokenResponse> reissue(@CookieValue(value = "RefreshToken",required = true) String refreshToken) {
 
-    return ApiDTO.success(userQueryService.reissue(refreshToken));
+    return ApiResponse.success(userQueryService.reissue(refreshToken));
   }
 }

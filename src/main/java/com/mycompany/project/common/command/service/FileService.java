@@ -1,6 +1,6 @@
-package com.mycompany.project.common.service;
+package com.mycompany.project.common.command.service;
 
-import com.mycompany.project.common.dto.FileDTO;
+import com.mycompany.project.common.response.FileResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +17,7 @@ public class FileService {
     // 파일 저장 경로: 프로젝트 루트/uploads
     private final String uploadDir = "uploads/";
 
-    public FileDTO uploadFile(MultipartFile file) {
+    public FileResponse uploadFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("파일이 비어있습니다.");
         }
@@ -41,7 +41,7 @@ public class FileService {
         }
 
         // 4. 결과 반환 (URL은 /uploads/파일명 형태로 접근)
-        return FileDTO.builder()
+        return FileResponse.builder()
                 .originalFileName(originalFilename)
                 .savedFileName(savedFilename)
                 .filePath(filePath.toString())
