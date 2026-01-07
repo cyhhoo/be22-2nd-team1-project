@@ -58,11 +58,4 @@ public class BulkUploadLog {
     @Column(name = "request_id", nullable = false, length = 50)
     private String requestId;
 
-    public enum UploadType {
-        STUDENT_REG, ATTENDANCE_REG, TEACHER_REG
-    }
-
-    public enum UploadStatus {
-        PENDING, PROCESSING, COMPLETED, FAILED
-    }
 }

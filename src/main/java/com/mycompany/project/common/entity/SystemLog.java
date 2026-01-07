@@ -14,6 +14,8 @@ import java.util.List;
 @Table(name = "tbl_log")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @EntityListeners(AuditingEntityListener.class) // created_at 자동 주입용
 public class SystemLog {
 

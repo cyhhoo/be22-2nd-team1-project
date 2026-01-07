@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.mycompany.project.common.aop.SystemLoggable;
+import com.mycompany.project.common.entity.ChangeType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -38,6 +40,7 @@ public class UserCommandService {
    * @return
    */
   @Transactional
+  @SystemLoggable(type = ChangeType.CREATE, tableCodeId = 1) // 1: tbl_user 임시 ID
   public Long registerUser(UserRegisterRequest request) {
     // 1. 이메일 중복 검사
     if (userRepository.existsByEmail(request.getEmail())) {
