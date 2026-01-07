@@ -1,13 +1,22 @@
 package com.mycompany.project.reservation.service;
 
+import com.mycompany.project.reservation.dto.ReservationDTO;
+import com.mycompany.project.reservation.mapper.reservationMapper;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import com.mycompany.project.reservation.repository.ReservationRepository;
-import com.mycompany.project.reservation.mapper.ReservationMapper;
+
+import java.util.List;
+
 
 @Service
-@RequiredArgsConstructor
 public class ReservationService {
-    private final ReservationRepository reservationRepository;
-    private final ReservationMapper reservationMapper;
+  private final ReservationRepository reservationRepository;
+
+
+  public ReservationService(ReservationRepository reservationRepository) {
+    this.reservationRepository = reservationRepository;
+  }
+
 }

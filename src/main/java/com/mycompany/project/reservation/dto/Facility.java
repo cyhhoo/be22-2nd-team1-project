@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class facility {
+public class Facility {
   private int facilityId;
   private String name;
   private String status;

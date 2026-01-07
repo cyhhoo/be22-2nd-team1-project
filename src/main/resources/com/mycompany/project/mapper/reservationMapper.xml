@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.project.reservation.mapper.reservationMapper">
+
+    <select id="selectAvailableFacilities" resultType="ReservationDTO">
+        select f.name AS 시설명, r.start_time AS "대여 시작 시간", f.status AS "대여 가능"
+        from tbl_reservation r
+        join tbl_facility f
+        ON r.facility_id = f.facility_id
+        AND f.status = 'Y';
+    </select>
+
+</mapper>
