@@ -1,6 +1,6 @@
 package com.mycompany.project.user.command.controller;
 
-import com.mycompany.project.common.dto.ApiDTO;
+import com.mycompany.project.common.response.ApiResponse;
 import com.mycompany.project.user.command.dto.AccountActivationRequest;
 import com.mycompany.project.user.command.dto.UserRegisterRequest;
 import com.mycompany.project.user.command.service.UserCommandService;
@@ -20,14 +20,14 @@ public class AuthCommandController {
   }
 
   @PostMapping("/register")
-  public ApiDTO<Long> register(@RequestBody UserRegisterRequest request) {
-    return ApiDTO.success(userCommandService.registerUser(request));
+  public ApiResponse<Long> register(@RequestBody UserRegisterRequest request) {
+    return ApiResponse.success(userCommandService.registerUser(request));
   }
 
   @PostMapping("/activate")
-  public ApiDTO<Void> activate(@RequestBody AccountActivationRequest request) {
+  public ApiResponse<Void> activate(@RequestBody AccountActivationRequest request) {
     userCommandService.activateAccount(request);
-    return ApiDTO.success(null);
+    return ApiResponse.success(null);
   }
 
 }
