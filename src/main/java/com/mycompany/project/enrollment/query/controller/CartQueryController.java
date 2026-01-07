@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "", description = "")
 @RestController
 @RequestMapping("/api/")
-public class EnrollmentQueryController {
+public class CartQueryController {
 
 }
