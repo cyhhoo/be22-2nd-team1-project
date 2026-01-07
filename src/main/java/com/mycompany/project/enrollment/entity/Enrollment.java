@@ -1,17 +1,26 @@
 package com.mycompany.project.enrollment.entity;
 
+import com.mycompany.project.common.entity.BaseEntity;
 import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Table(name = "tbl_enrollment")
+@Table(
+    name = "tbl_enrollment",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_enrollment_user_course",
+            columnNames = {"user_id", "course_id"}
+        )
+    }
+)
 @Getter
-@NoArgsConstructor
-public class Enrollment {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+public class Enrollment extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,11 +28,11 @@ public class Enrollment {
 
   // Command 쪽은 객체 그래프 탐색과 무결성을 위해 연관관계 매핑 유지
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "user_id", nullable = false)
   private User student;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "course_id")
+  @JoinColumn(name = "course_id", nullable = false)
   private Course course;
 
   @Enumerated(EnumType.STRING)
@@ -47,6 +56,6 @@ public class Enrollment {
 }
 
 /*
-* Command는 JPA를 쓰고, **Query는 MyBatis(또는 QueryDSL)**를 쓴다.
-* Mapper가 query쪽, Command가 repository쪽
-* */
+ * Command는 JPA를 쓰고, **Query는 MyBatis(또는 QueryDSL)**를 쓴다.
+ * Mapper가 query쪽, Command가 repository쪽
+ * */
