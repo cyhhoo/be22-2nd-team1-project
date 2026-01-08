@@ -1,6 +1,6 @@
 package com.mycompany.project.user.query.service;
 
-import com.mycompany.project.common.exception.AccountInactiveException;
+import com.mycompany.project.exception.AccountInactiveException;
 import com.mycompany.project.user.query.dto.LoginRequest;
 import com.mycompany.project.user.entity.User;
 import com.mycompany.project.user.entity.Token; // 추가
