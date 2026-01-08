@@ -1,4 +1,4 @@
-package com.mycompany.project.common.config;
+package com.mycompany.project.config;
 
 import com.mycompany.project.common.security.JwtAuthenticationFilter;
 import com.mycompany.project.common.security.JwtTokenProvider;

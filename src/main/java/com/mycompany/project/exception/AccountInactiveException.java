@@ -1,4 +1,4 @@
-package com.mycompany.project.common.exception;
+package com.mycompany.project.exception;
 
 public class AccountInactiveException extends RuntimeException {
   public AccountInactiveException(String message) {
