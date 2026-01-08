@@ -1,10 +1,11 @@
 package com.mycompany.project.common.config;
 
-import com.mycompany.project.common.security.JwtAuthenticationFilter;
-import com.mycompany.project.common.security.JwtTokenProvider;
+import com.mycompany.project.jwtsecurity.JwtAuthenticationFilter;
+import com.mycompany.project.jwtsecurity.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -43,7 +44,21 @@ public class SecurityConfig {
             // 로그인/회원가입 API는 누구나 접근 가능
             .requestMatchers("/api/auth/**").permitAll()
             // 업로드된 파일 접근 허용
-            .requestMatchers("/uploads/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+
+            // 관리자 전용
+            .requestMatchers("api/users/**").hasRole("ADMIN")
+
+            // 학사 일정 관련 (조회 : 아무나, 관리 : 관리자)
+            .requestMatchers(HttpMethod.GET, "api/schedule/").authenticated()
+            .requestMatchers("api/schedule/**").hasRole("ADMIN")
+
+            // 강의 관리 (조회 : 아무나, 관리 : 교사 ,관리자)
+
+            // 수강 신청 (학생만)
+
+            // 시설 예약 (아무나)
+
             // 그 외 모든 요청은 인증 필요
             .anyRequest().authenticated())
 

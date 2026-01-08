@@ -1,4 +1,4 @@
-package com.mycompany.project.user.query.dto;
+package com.mycompany.project.auth.query.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
