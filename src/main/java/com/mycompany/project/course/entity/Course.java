@@ -66,7 +66,7 @@ public class Course {
 
   @Builder
   public Course(Long teacherDetailId, Long academicYearId, Long subjectId, String name,
-                CourseType courseType, Integer maxCapacity, Integer tuition) {
+      CourseType courseType, Integer maxCapacity, Integer tuition) {
     this.teacherDetailId = teacherDetailId;
     this.academicYearId = academicYearId;
     this.subjectId = subjectId;
@@ -80,5 +80,43 @@ public class Course {
   public void addTimeSlot(CourseTimeSlot timeSlot) {
     this.timeSlots.add(timeSlot);
     timeSlot.assignCourse(this);
+  }
+
+  /**
+   * 강좌 정보 수정 메서드
+   * <p>
+   * 비즈니스 로직을 엔티티 내에 캡슐화하여,
+   * Service에서는 이 메서드를 호출(메시지 전송)하는 방식으로 수정합니다.
+   * </p>
+   *
+   * @param name            강좌명
+   * @param courseType      강좌 타입
+   * @param maxCapacity     최대 수강 인원
+   * @param tuition         수강료
+   * @param subjectId       과목 ID
+   * @param academicYearId  학년 ID
+   * @param teacherDetailId 교사 ID
+   * @param status          강좌 상태
+   */
+  public void update(String name, CourseType courseType, Integer maxCapacity, Integer tuition,
+      Long subjectId, Long academicYearId, Long teacherDetailId, CourseStatus status) {
+    // null이 아닌 값만 수정하거나, 정책에 따라 null도 허용하여 덮어쓸 수 있습니다.
+    // 여기서는 입력된 값으로 전면 수정하는 방식을 적용합니다.
+    if (name != null)
+      this.name = name;
+    if (courseType != null)
+      this.courseType = courseType;
+    if (maxCapacity != null && maxCapacity > 0)
+      this.maxCapacity = maxCapacity; // 0이하 방지
+    if (tuition != null && tuition >= 0)
+      this.tuition = tuition; // 음수 방지
+    if (subjectId != null)
+      this.subjectId = subjectId;
+    if (academicYearId != null)
+      this.academicYearId = academicYearId;
+    if (teacherDetailId != null)
+      this.teacherDetailId = teacherDetailId;
+    if (status != null)
+      this.status = status;
   }
 }
