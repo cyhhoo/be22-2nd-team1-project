@@ -44,21 +44,7 @@ public class SecurityConfig {
             // 로그인/회원가입 API는 누구나 접근 가능
             .requestMatchers("/api/auth/**").permitAll()
             // 업로드된 파일 접근 허용
-            .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
-
-            // 관리자 전용
-            .requestMatchers("api/users/**").hasRole("ADMIN")
-
-            // 학사 일정 관련 (조회 : 아무나, 관리 : 관리자)
-            .requestMatchers(HttpMethod.GET, "api/schedule/").authenticated()
-            .requestMatchers("api/schedule/**").hasRole("ADMIN")
-
-            // 강의 관리 (조회 : 아무나, 관리 : 교사 ,관리자)
-
-            // 수강 신청 (학생만)
-
-            // 시설 예약 (아무나)
-
+            .requestMatchers("/uploads/**").permitAll()
             // 그 외 모든 요청은 인증 필요
             .anyRequest().authenticated())
 
