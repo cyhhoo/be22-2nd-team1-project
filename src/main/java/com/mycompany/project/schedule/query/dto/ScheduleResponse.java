@@ -1,7 +1,7 @@
 package com.mycompany.project.schedule.query.dto;
 
-import com.mycompany.project.schedule.entity.AcademicSchedule;
-import com.mycompany.project.schedule.entity.ScheduleType;
+import com.mycompany.project.schedule.command.domain.aggregate.AcademicSchedule;
+import com.mycompany.project.schedule.command.domain.aggregate.ScheduleType;
 import lombok.Getter;
 
 import java.time.LocalDate;

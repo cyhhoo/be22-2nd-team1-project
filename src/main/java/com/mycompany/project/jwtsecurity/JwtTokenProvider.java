@@ -1,6 +1,6 @@
 package com.mycompany.project.jwtsecurity;
 
-import com.mycompany.project.user.entity.Role;
+import com.mycompany.project.user.command.domain.aggregate.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

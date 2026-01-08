@@ -1,6 +1,6 @@
 package com.mycompany.project.auth.command.dto;
 
-import com.mycompany.project.user.entity.Role;
+import com.mycompany.project.user.command.domain.aggregate.Role;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
