@@ -1,4 +1,4 @@
-package com.mycompany.project.common.security;
+package com.mycompany.project.jwtsecurity;
 
 import com.mycompany.project.user.entity.Role;
 import io.jsonwebtoken.*;

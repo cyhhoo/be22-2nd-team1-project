@@ -1,10 +1,11 @@
-package com.mycompany.project.user.query.dto;
+package com.mycompany.project.auth.query.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 public class LoginRequest {
     private String email;
