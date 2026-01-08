@@ -1,7 +1,7 @@
 package com.mycompany.project.schedule.query.service;
 
 import com.mycompany.project.schedule.query.dto.ScheduleResponse;
-import com.mycompany.project.schedule.repository.AcademicScheduleRepository;
+import com.mycompany.project.schedule.command.domain.repository.AcademicScheduleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

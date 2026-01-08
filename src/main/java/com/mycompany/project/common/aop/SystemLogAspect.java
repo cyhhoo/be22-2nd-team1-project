@@ -2,8 +2,8 @@ package com.mycompany.project.common.aop;
 
 import com.mycompany.project.common.entity.SystemLog;
 import com.mycompany.project.common.repository.SystemLogRepository;
-import com.mycompany.project.user.entity.User;
-import com.mycompany.project.user.repository.UserRepository;
+import com.mycompany.project.user.command.domain.aggregate.User;
+import com.mycompany.project.user.command.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

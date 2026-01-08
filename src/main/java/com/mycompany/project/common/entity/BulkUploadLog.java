@@ -1,6 +1,6 @@
 package com.mycompany.project.common.entity;
 
-import com.mycompany.project.user.entity.AdminDetail; // AdminDetail 위치에 맞게 import
+import com.mycompany.project.user.command.domain.aggregate.AdminDetail; // AdminDetail 위치에 맞게 import
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
