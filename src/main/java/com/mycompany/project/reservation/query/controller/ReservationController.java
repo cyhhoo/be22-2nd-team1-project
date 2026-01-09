@@ -1,7 +1,7 @@
-package com.mycompany.project.reservation.controller;
+package com.mycompany.project.reservation.query.controller;
 
-import com.mycompany.project.reservation.repository.ReservationRepository;
-import com.mycompany.project.reservation.service.ReservationService;
+import com.mycompany.project.reservation.command.repository.ReservationRepository;
+import com.mycompany.project.reservation.query.service.ReservationService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;

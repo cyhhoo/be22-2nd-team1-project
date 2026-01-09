@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.project.reservation.query.mapper.ReservationMapper">
+    <select id="selectAvailableFacilities"
+            resultType="com.mycompany.project.reservation.query.dto.FacilityDTO">
+
+        SELECT
+        f.facility_id AS facilityId,
+        f.name        AS name,
+        f.status      AS status
+        FROM tbl_facility f
+        LEFT JOIN tbl_reservation r
+        ON f.facility_id = r.facility_id
+        AND r.startTime = #{startTime}
+        AND DATE(r.startTime) = #{reservationDate}
+        AND r.status IN ('WAITING', 'APPROVED')
+        WHERE f.status = 'AVAILABLE'
+        AND r.reservation_id IS NULL
+        ORDER BY f.name
+    </select>
+
+
+    <select id="selectMyReservations"
+            resultType="com.mycompany.project.reservation.query.dto.ReservationDTO">
+        SELECT
+        r.reservation_id AS reservationId,
+        r.startTime AS startTime,
+        r.endTime AS endTime,
+        r.status AS status,
+        r.createdAt AS createdAt,
+        r.rejectionReason AS rejectionReason
+        FROM tbl_reservation r
+        WHERE r.student_id = #{studentId}
+        <if test="status != null and status != ''">
+            AND r.status = #{status}
+        </if>
+        ORDER BY r.startTime DESC
+    </select>
+
+    <select id="selectReservationList"
+            resultType="com.mycompany.project.reservation.query.dto.ReservationDTO">
+        SELECT
+        r.reservation_id AS reservationId,
+        r.startTime AS startTime,
+        r.endTime AS endTime,
+        r.status AS status,
+        r.createdAt AS createdAt,
+        r.rejectionReason AS rejectionReason
+        FROM tbl_reservation r
+        WHERE 1=1
+        <if test="studentId != null">
+            AND r.student_id = #{studentId}
+        </if>
+        <if test="status != null and status != ''">
+            AND r.status = #{status}
+        </if>
+        ORDER BY r.startTime DESC
+    </select>
+
+</mapper>

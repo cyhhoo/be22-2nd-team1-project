@@ -1,4 +1,4 @@
-package com.mycompany.project.reservation.entity;
+package com.mycompany.project.reservation.command.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

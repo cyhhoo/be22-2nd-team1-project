@@ -1,4 +1,4 @@
-package com.mycompany.project.reservation.dto;
+package com.mycompany.project.reservation.query.dto;
 
 
 import lombok.*;
@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class facility {
+public class FacilityDTO {
   private int facilityId;
   private String name;
   private String status;

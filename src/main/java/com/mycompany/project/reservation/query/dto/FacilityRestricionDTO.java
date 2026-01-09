@@ -1,4 +1,4 @@
-package com.mycompany.project.reservation.dto;
+package com.mycompany.project.reservation.query.dto;
 
 import lombok.*;
 
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class FacilityRestricion {
+public class FacilityRestricionDTO {
   private int restrictionId;
   private LocalDateTime startDate;
   private LocalDateTime endDate;
