@@ -12,11 +12,22 @@ import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.course.dto.CourseCreateReqDTO;
 import com.mycompany.project.course.entity.CourseStatus;
 import com.mycompany.project.course.entity.CourseTimeSlot;
+import com.mycompany.project.course.repository.CourseChangeRequestRepository;
+import com.mycompany.project.course.entity.CourseChangeRequest;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CourseService {
+    /*
+     * [Architecture Note]
+     * - Command (CUD): Use JPA (CourseRepository) for domain entity state changes.
+     * - Query (Read): Use MyBatis (CourseMapper) for complex reads and duplicate
+     * checks.
+     */
     private final CourseRepository courseRepository;
+
+    private final CourseChangeRequestRepository courseChangeRequestRepository;
     private final CourseMapper courseMapper;
 
     /**
@@ -24,10 +35,8 @@ public class CourseService {
      */
     @Transactional
     public void createCourse(CourseCreateReqDTO dto) {
-        // 1. 유효성 검증 (최대 정원, 필수 값 등) -> DTO validation or here
-        if (dto.getMaxCapacity() == null || dto.getMaxCapacity() <= 0) {
-            throw new IllegalArgumentException("최대 정원은 0보다 커야 합니다.");
-        }
+        // 1. 유효성 검증 (DTO Validation으로 처리되지만, 비즈니스 로직 상 추가 검증 필요 시 여기에 작성)
+        // (기존의 if (maxCapacity <= 0) 등은 @Min 어노테이션으로 대체됨)
 
         // 2. 강좌 엔티티 생성 (Status = PENDING)
         Course course = Course.builder()
@@ -38,55 +47,34 @@ public class CourseService {
                 .subjectId(dto.getSubjectId())
                 .academicYearId(dto.getAcademicYearId())
                 .teacherDetailId(dto.getTeacherDetailId())
+                .status(CourseStatus.PENDING) // 초기 상태 PENDING 설정
                 .build();
-        // save를 먼저 해서 ID를 확보하거나, Cascade 설정을 이용
-        // 여기서는 builder 패턴으로 만들고, 엔티티 내부에서 초기값을 처리했음(Status 등).
-        // 하지만 builder에 status 설정이 없으므로 엔티티 기본값(OPEN)을 덮어써야 할 수도 있음.
-        // Course 엔티티에서 초기값을 필드 선언 시 PENDING으로 변경하거나, builder 후 설정 필요.
-        // 현재 Course 엔티티의 초기값은 OPEN임.
-        // 따라서 명시적으로 PENDING 설정 필요.
 
-        // *참고: Course 엔티티에 public setStatus가 없으므로 update 메서드 사용하거나 Status 변경 메서드 추가 필요.
-        // 혹은 Builder에 status 포함. (Builder에 status 필드가 없음, Course 생성자 확인 필요)
-
-        // Course 엔티티 Builder 확인 결과: status 필드 없음.
-        // -> Course를 먼저 생성 후, 별도의 메서드를 통해 Status를 변경하거나,
-        // Builder에 status를 추가하는 것이 좋음.
-        // 여기서는 엔티티 수정 없이 진행하기 위해, 일단 save 후 update 메서드를 통해 상태 변경 (약간 비효율적이나 안전)
-        // 또는 Course 엔티티에 편의 메서드 추가 권장.
-        // **계획 변경 없이 진행하려면**: Course 엔티티는 protected 생성자 + Builder 패턴임.
-        // Builder에 없는 필드는 기본값 적용됨.
-
-        // [수정] Course.java의 Builder에 status 추가가 안되어 있으므로
-        // Course 생성 후 바로 접근하여 수정할 수 있는 방법이 제한적(update 메서드 사용).
-        // 하지만 update 메서드는 "수정"용이므로, 최초 생성 시점의 상태 제어를 위해
-        // Course 엔티티 생성을 위한 정적 팩토리 메서드나 Builder 수정이 이상적임.
-        // **여기서는 update 메서드를 활용하여 status를 PENDING으로 설정합니다.**
-
-        // Course 저장
+        // Course 저장 (JPA: INSERT)
         course = courseRepository.save(course);
-        course.update(null, null, null, null, null, null, null, CourseStatus.PENDING); // 상태 변경
 
-        // 3. 시간표(TimeSlot) 저장 및 중복 검증
+        // 3. 시간표(TimeSlot) 저장 및 중복 검증 (MyBatis 사용)
         if (dto.getTimeSlots() != null) {
-            for (CourseCreateReqDTO.TimeSlotDTO slotDto : dto.getTimeSlots()) {
-                // 교사 중복 검증
-                boolean isTeacherConflict = courseRepository.existsByTeacherAndSchedule(
+            for (com.mycompany.project.course.dto.TimeSlotDTO slotDto : dto.getTimeSlots()) {
+                // 교사 중복 검증 (MyBatis)
+                int teacherConflictCount = courseMapper.countTeacherSchedule(
                         dto.getAcademicYearId(),
                         dto.getTeacherDetailId(),
                         slotDto.getDayOfWeek(),
                         slotDto.getPeriod());
-                if (isTeacherConflict) {
+
+                if (teacherConflictCount > 0) {
                     throw new IllegalStateException("해당 시간에 담당 교사의 다른 수업이 존재합니다.");
                 }
 
-                // 강의실 중복 검증
-                boolean isClassroomConflict = courseRepository.existsByClassroomAndSchedule(
+                // 강의실 중복 검증 (MyBatis)
+                int classroomConflictCount = courseMapper.countClassroomSchedule(
                         dto.getAcademicYearId(),
                         slotDto.getClassroom(),
                         slotDto.getDayOfWeek(),
                         slotDto.getPeriod());
-                if (isClassroomConflict) {
+
+                if (classroomConflictCount > 0) {
                     throw new IllegalStateException("해당 시간에 강의실이 이미 사용 중입니다.");
                 }
 
@@ -99,18 +87,7 @@ public class CourseService {
                 course.addTimeSlot(timeSlot); // 연관관계 매핑
             }
         }
-        // Cascade.ALL로 인해 timeSlots도 자동 저장됨 (save를 다시 호출하지 않아도 Dirty Checking으로 저장되지
-        // 않음,
-        // 연관관계 맺은 후 save 필요하거나, 처음에 course를 save하지 않고 연관관계 맺은 뒤 save해야 함)
-
-        // [수정 로직]:
-        // 1. Course 객체 생성 (비영속) -> Status PENDING 설정 불가(Builder없음).
-        // 2. 일단 Course 저장 (영속) -> OPEN 상태
-        // 3. update 메서드로 PENDING 변경
-        // 4. TimeSlot 검증 및 추가
-        // 5. Transaction 종료 시 Dirty Checking으로 TimeSlot Insert 및 Course Update 발생
-
-        // 주의: CreatedDate 등 필수 컬럼 문제가 없다면 동작함.
+        // Cascade.ALL로 인해 timeSlots도 자동 저장됨
     }
 
     /**
@@ -130,9 +107,12 @@ public class CourseService {
 
     /**
      * 강좌 반려 (PENDING -> REFUSE)
+     * 
+     * @param courseId 강좌 ID
+     * @param reason   반려 사유
      */
     @Transactional
-    public void refuseCourse(Long courseId) {
+    public void refuseCourse(Long courseId, String reason) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
 
@@ -140,6 +120,7 @@ public class CourseService {
             throw new IllegalStateException("승인 대기 상태의 강좌만 반려할 수 있습니다.");
         }
 
+        course.setRejectionReason(reason);
         course.update(null, null, null, null, null, null, null, CourseStatus.REFUSE);
     }
 
@@ -165,4 +146,64 @@ public class CourseService {
                 dto.getTeacherDetailId(),
                 dto.getStatus());
     }
+
+    /**
+     * 강좌 변경 요청 생성 (즉시 반영 X)
+     * 
+     * @param courseId 강좌 ID
+     * @param dto      변경할 데이터 DTO
+     * @param reason   변경 사유
+     */
+    @Transactional
+    public Long requestCourseUpdate(Long courseId, CourseUpdateReqDTO dto, String reason) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+
+        CourseChangeRequest request = CourseChangeRequest.builder()
+                .course(course)
+                .reason(reason)
+                .targetMaxCapacity(dto.getMaxCapacity())
+                .targetTuition(dto.getTuition())
+                .build();
+
+        CourseChangeRequest savedRequest = courseChangeRequestRepository.save(request);
+        return savedRequest.getId();
+    }
+
+    /**
+     * 강좌 변경 요청 승인 (Course에 반영)
+     */
+    @Transactional
+    public void approveChangeRequest(Long requestId) {
+        CourseChangeRequest request = courseChangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청입니다."));
+
+        if (request.getRequestStatus() != CourseChangeRequest.RequestStatus.PENDING) {
+            throw new IllegalStateException("대기 상태인 요청만 승인할 수 있습니다.");
+        }
+
+        // 요청 데이터로 Course 업데이트 (핵심 데이터만 예시)
+        Course course = request.getCourse();
+        // DTO의 다른 필드들은 현재 ChangeRequest에 저장하지 않았으므로 null 처리하거나 기존 값 유지
+        // 여기서는 예시로 저장된 MaxCapacity, Tuition만 반영
+        course.update(null, null, request.getTargetMaxCapacity(), request.getTargetTuition(), null, null, null, null);
+
+        request.approve();
+    }
+
+    /**
+     * 강좌 변경 요청 반려
+     */
+    @Transactional
+    public void rejectChangeRequest(Long requestId, String reason) {
+        CourseChangeRequest request = courseChangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청입니다."));
+
+        if (request.getRequestStatus() != CourseChangeRequest.RequestStatus.PENDING) {
+            throw new IllegalStateException("대기 상태인 요청만 반려할 수 있습니다.");
+        }
+
+        request.reject(reason);
+    }
+
 }

@@ -1,10 +1,7 @@
 package com.mycompany.project.course.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -15,6 +12,8 @@ import java.util.List;
 @Entity
 @Table(name = "tbl_course")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA는 기본 생성자가 필수 (protected 권장)
 @EntityListeners(AuditingEntityListener.class) // 생성일 자동 주입
 public class Course {
@@ -44,12 +43,15 @@ public class Course {
   @Column(name = "max_capacity", nullable = false)
   private Integer maxCapacity;
 
+  @Builder.Default
   @Column(name = "current_count")
   private Integer currentCount = 0; // 기본값 0
 
+  @Builder.Default
   @Column(name = "tuition")
   private Integer tuition = 0; // 기본값 0
 
+  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(name = "status", length = 20)
   private CourseStatus status = CourseStatus.OPEN; // 기본값 OPEN
@@ -58,23 +60,15 @@ public class Course {
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
+  @Column(name = "rejection_reason", length = 500)
+  private String rejectionReason; // 반려 사유
+
   // 양방향 연관관계 (Course -> CourseTimeSlot)
   // cascade = ALL: 강좌가 삭제되면 시간표도 같이 삭제
   // orphanRemoval = true: 리스트에서 제거되면 DB에서도 삭제
+  @Builder.Default
   @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CourseTimeSlot> timeSlots = new ArrayList<>();
-
-  @Builder
-  public Course(Long teacherDetailId, Long academicYearId, Long subjectId, String name,
-      CourseType courseType, Integer maxCapacity, Integer tuition) {
-    this.teacherDetailId = teacherDetailId;
-    this.academicYearId = academicYearId;
-    this.subjectId = subjectId;
-    this.name = name;
-    this.courseType = courseType;
-    this.maxCapacity = maxCapacity;
-    this.tuition = tuition;
-  }
 
   // 연관관계 편의 메서드 (객체 양쪽에 값을 넣어줌)
   public void addTimeSlot(CourseTimeSlot timeSlot) {
@@ -119,4 +113,9 @@ public class Course {
     if (status != null)
       this.status = status;
   }
+
+  public void setRejectionReason(String rejectionReason) {
+    this.rejectionReason = rejectionReason;
+  }
+
 }

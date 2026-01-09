@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mycompany.project.course.mapper.CourseMapper">
-    <!--<select id="" resultType="Blog">
-        select * from Blog where id = #{id}
-    </select>-->
+
+    <!-- 교사 중복 스케줄 조회 (반려/폐강 제외) -->
+    <select id="countTeacherSchedule" resultType="int">
+        SELECT COUNT(*)
+        FROM tbl_course c
+        JOIN tbl_course_time_slot cts ON c.course_id = cts.course_id
+        WHERE c.academic_year_id = #{academicYearId}
+          AND c.teacher_detail_id = #{teacherDetailId}
+          AND cts.day_of_week = #{dayOfWeek}
+          AND cts.period = #{period}
+          AND c.status NOT IN ('CANCELED', 'REFUSE')
+    </select>
+
+    <!-- 강의실 중복 스케줄 조회 (반려/폐강 제외) -->
+    <select id="countClassroomSchedule" resultType="int">
+        SELECT COUNT(*)
+        FROM tbl_course c
+        JOIN tbl_course_time_slot cts ON c.course_id = cts.course_id
+        WHERE c.academic_year_id = #{academicYearId}
+          AND cts.classroom = #{classroom}
+          AND cts.day_of_week = #{dayOfWeek}
+          AND cts.period = #{period}
+          AND c.status NOT IN ('CANCELED', 'REFUSE')
+    </select>
+
 </mapper>

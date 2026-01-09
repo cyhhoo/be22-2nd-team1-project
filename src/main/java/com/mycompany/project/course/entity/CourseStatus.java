@@ -8,3 +8,5 @@ public enum CourseStatus {
   CANCELED, // 폐강 == 삭제
   REFUSE // 거절 == 반려
 }
+
+

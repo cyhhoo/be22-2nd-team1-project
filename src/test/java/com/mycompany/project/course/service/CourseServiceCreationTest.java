@@ -41,8 +41,8 @@ class CourseServiceCreationTest {
         dto.setSubjectId(50L);
 
         // 시간표 추가
-        List<CourseCreateReqDTO.TimeSlotDTO> timeSlots = new ArrayList<>();
-        CourseCreateReqDTO.TimeSlotDTO slot = new CourseCreateReqDTO.TimeSlotDTO();
+        List<com.mycompany.project.course.dto.TimeSlotDTO> timeSlots = new ArrayList<>();
+        com.mycompany.project.course.dto.TimeSlotDTO slot = new com.mycompany.project.course.dto.TimeSlotDTO();
         slot.setDayOfWeek("MON");
         slot.setPeriod(1);
         slot.setClassroom("Room 101");
@@ -71,10 +71,12 @@ class CourseServiceCreationTest {
         dto1.setName("Course 1");
         dto1.setCourseType(CourseType.MANDATORY);
         dto1.setMaxCapacity(30);
+        dto1.setTuition(100000); // 필수값
+        dto1.setSubjectId(10L); // 필수값
         dto1.setAcademicYearId(1L);
         dto1.setTeacherDetailId(200L); // 선생님 200번
 
-        CourseCreateReqDTO.TimeSlotDTO slot1 = new CourseCreateReqDTO.TimeSlotDTO();
+        com.mycompany.project.course.dto.TimeSlotDTO slot1 = new com.mycompany.project.course.dto.TimeSlotDTO();
         slot1.setDayOfWeek("MON");
         slot1.setPeriod(1);
         slot1.setClassroom("Room 101");
@@ -87,10 +89,12 @@ class CourseServiceCreationTest {
         dto2.setName("Course 2");
         dto2.setCourseType(CourseType.MANDATORY);
         dto2.setMaxCapacity(30);
+        dto2.setTuition(100000); // 필수값
+        dto2.setSubjectId(20L); // 필수값
         dto2.setAcademicYearId(1L);
         dto2.setTeacherDetailId(200L); // 같은 선생님
 
-        CourseCreateReqDTO.TimeSlotDTO slot2 = new CourseCreateReqDTO.TimeSlotDTO();
+        com.mycompany.project.course.dto.TimeSlotDTO slot2 = new com.mycompany.project.course.dto.TimeSlotDTO();
         slot2.setDayOfWeek("MON");
         slot2.setPeriod(1);
         slot2.setClassroom("Room 102"); // 강의실은 다름
@@ -107,11 +111,14 @@ class CourseServiceCreationTest {
         // 1. 기존 강좌 등록 (Room 101, MON 1교시)
         CourseCreateReqDTO dto1 = new CourseCreateReqDTO();
         dto1.setName("Course 1");
+        dto1.setCourseType(CourseType.MANDATORY); // 필수값
         dto1.setMaxCapacity(30);
+        dto1.setTuition(100000); // 필수값
+        dto1.setSubjectId(10L); // 필수값
         dto1.setAcademicYearId(1L);
         dto1.setTeacherDetailId(200L);
 
-        CourseCreateReqDTO.TimeSlotDTO slot1 = new CourseCreateReqDTO.TimeSlotDTO();
+        com.mycompany.project.course.dto.TimeSlotDTO slot1 = new com.mycompany.project.course.dto.TimeSlotDTO();
         slot1.setDayOfWeek("MON");
         slot1.setPeriod(1);
         slot1.setClassroom("Room 101");
@@ -122,11 +129,14 @@ class CourseServiceCreationTest {
         // 2. 중복 강의실 신청 (다른 선생님, 같은 강의실, 같은 시간)
         CourseCreateReqDTO dto2 = new CourseCreateReqDTO();
         dto2.setName("Course 2");
+        dto2.setCourseType(CourseType.ELECTIVE); // 필수값
         dto2.setMaxCapacity(30);
+        dto2.setTuition(100000); // 필수값
+        dto2.setSubjectId(30L); // 필수값
         dto2.setAcademicYearId(1L);
         dto2.setTeacherDetailId(300L); // 다른 선생님
 
-        CourseCreateReqDTO.TimeSlotDTO slot2 = new CourseCreateReqDTO.TimeSlotDTO();
+        com.mycompany.project.course.dto.TimeSlotDTO slot2 = new com.mycompany.project.course.dto.TimeSlotDTO();
         slot2.setDayOfWeek("MON");
         slot2.setPeriod(1);
         slot2.setClassroom("Room 101"); // 같은 강의실
@@ -166,7 +176,7 @@ class CourseServiceCreationTest {
         approvedCourse.update(null, null, null, null, null, null, null, CourseStatus.PENDING);
 
         // 4. 반려
-        courseService.refuseCourse(courseId);
+        courseService.refuseCourse(courseId, "Test Refuse Reason");
         Course refusedCourse = courseRepository.findById(courseId).orElseThrow();
         assertEquals(CourseStatus.REFUSE, refusedCourse.getStatus());
     }
