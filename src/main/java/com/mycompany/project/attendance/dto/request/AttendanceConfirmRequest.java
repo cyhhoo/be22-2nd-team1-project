@@ -5,13 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CorrectionCreateRequest {
-    private Long attendanceId;
-    private Long requestedAttendanceCodeId;
-    private String requestReason;
-    private Long requestedBy;
+public class AttendanceConfirmRequest {
+    private Long courseId;
+    private LocalDate classDate;
+    private Integer period;
+    private Long userId;
 }

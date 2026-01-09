@@ -13,5 +13,12 @@ spring:
         format_sql: true
         show_sql: true
 
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.mycompany.project
+  configuration:
+    map-underscore-to-camel-case: true
+
+
 jwt:
   secret: testSecretKeyForTestingPurposesMustBeLongEnoughToSatisfyReviewRequirements2026!

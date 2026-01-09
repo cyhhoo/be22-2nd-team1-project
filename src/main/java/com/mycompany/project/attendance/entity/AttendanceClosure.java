@@ -2,9 +2,7 @@ package com.mycompany.project.attendance.entity;
 
 import com.mycompany.project.attendance.entity.enums.ScopeType;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +14,8 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@AllArgsConstructor
+@Builder
 @Table(name = "tbl_attendance_closure")
 public class AttendanceClosure {
 
@@ -31,7 +31,7 @@ public class AttendanceClosure {
 
     /** 범위 타입(MONTH/SEMESTER) */
     @Enumerated(EnumType.STRING)
-    @Column(name = "scope_type", nullable = false, columnDefinition = "ENUM('MONTH','SEMESTER')")
+    @Column(name = "scope_type", nullable = false, length = 20)
     private ScopeType scopeType;
 
     /**

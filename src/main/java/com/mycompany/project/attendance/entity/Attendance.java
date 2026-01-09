@@ -2,9 +2,7 @@ package com.mycompany.project.attendance.entity;
 
 import com.mycompany.project.attendance.entity.enums.AttendanceState;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +15,8 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@AllArgsConstructor
+@Builder
 @Table(name = "tbl_attendance")
 public class Attendance {
 
@@ -41,10 +41,9 @@ public class Attendance {
     /**
      * 출결 상태
      * - EnumType.STRING으로 저장해서 DB Enum과 문자열 매핑
-     * - columnDefinition은 스키마 검증(validate)에서 타입 불일치 방지용(환경에 따라 생략 가능)
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "ENUM('SAVED','CONFIRMED','CLOSED')")
+    @Column(nullable = false, length = 20)
     private AttendanceState state;
 
     /** 저장한 교사 */
@@ -141,6 +140,21 @@ public class Attendance {
     }
 
     /**
+     * 교사 저장/수정 처리
+     * - CONFIRMED/CLOSED 상태면 불가
+     */
+    public void saveByTeacher(Long teacherId, Long newAttendanceCodeId, String newReason) {
+        if (this.state == AttendanceState.CONFIRMED || this.state == AttendanceState.CLOSED) {
+            throw new IllegalStateException("확정 또는 마감된 출결은 수정할 수 없습니다.");
+        }
+        this.attendanceCodeId = newAttendanceCodeId;
+        this.reason = newReason;
+        this.savedBy = teacherId;
+        this.savedAt = LocalDateTime.now();
+        this.state = AttendanceState.SAVED;
+    }
+
+    /**
      * 확정 처리
      * - CLOSED면 확정 불가
      * - 확정자/확정시간 기록
@@ -159,6 +173,15 @@ public class Attendance {
     public void close() {
         this.state = AttendanceState.CLOSED;
         this.closedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 정정요청 승인 반영
+     * - CLOSED 상태도 허용
+     * - 상태는 변경하지 않음
+     */
+    public void applyCorrection(Long newAttendanceCodeId) {
+        this.attendanceCodeId = newAttendanceCodeId;
     }
 
     /**

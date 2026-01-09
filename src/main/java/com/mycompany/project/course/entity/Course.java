@@ -1,5 +1,6 @@
 package com.mycompany.project.course.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,5 +18,9 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long courseId;
 
-    // private String name;
+    @Column(name = "academic_year_id")
+    private Long academicYearId;
+
+    @Column(name = "teacher_id")
+    private Long teacherId;
 }

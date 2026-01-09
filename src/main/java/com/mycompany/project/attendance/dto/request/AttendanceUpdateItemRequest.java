@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CorrectionCreateRequest {
-    private Long attendanceId;
-    private Long requestedAttendanceCodeId;
-    private String requestReason;
-    private Long requestedBy;
+public class AttendanceUpdateItemRequest {
+    private Long enrollmentId;
+    private Long attendanceCodeId;
+    private String reason;
 }
