@@ -1,4 +1,4 @@
-package com.mycompany.project.reservation.dto;
+package com.mycompany.project.reservation.query.dto;
 
 import lombok.*;
 
