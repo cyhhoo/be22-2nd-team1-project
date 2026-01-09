@@ -1,6 +1,6 @@
 package com.mycompany.project.common.entity;
 
-import com.mycompany.project.user.entity.User;
+import com.mycompany.project.user.command.domain.aggregate.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -37,7 +37,7 @@ public class AttachFile {
 
     @Column(name = "file_ext", length = 10, nullable = false)
     private String fileExt;
-    
+
     private String contentType;
 
     @Column(name = "table_code_id")
@@ -45,7 +45,7 @@ public class AttachFile {
 
     @Column(name = "related_id")
     private Long relatedId;
-    
+
     @Column(name = "is_deleted", length = 1)
     private String isDeleted; // "Y" or "N"
 

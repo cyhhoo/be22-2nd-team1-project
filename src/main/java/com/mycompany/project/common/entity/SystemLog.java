@@ -1,6 +1,6 @@
 package com.mycompany.project.common.entity;
 
-import com.mycompany.project.user.entity.User;
+import com.mycompany.project.user.command.domain.aggregate.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -48,6 +48,5 @@ public class SystemLog {
     // LogDetail과 1:N 관계 (필요 시)
     @OneToMany(mappedBy = "systemLog", cascade = CascadeType.ALL)
     private List<LogDetail> logDetails = new ArrayList<>();
-
 
 }
