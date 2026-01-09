@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.project.enrollment.repository.CartMapper">
+
+
+    <select id="selectCartListByUserId" resultType="com.mycompany.project.enrollment.query.dto.CartListResponse">
+        SELECT
+            c.cart_id AS cartId,
+            co.name AS courseName,
+            u.name AS teacherName,
+            co.current_count AS currentCount,
+            co.max_capacity AS maxCapacity
+        FROM
+            tbl_cart c
+        JOIN
+            tbl_course co ON c.course_id = co.course_id
+        JOIN
+            tbl_teacher_detail td ON co.teacher_detail_id = td.teacher_detail_id
+        JOIN
+            tbl_user u ON td.user_id = u.user_id
+        WHERE
+            c.user_id = #{userId}
+        ORDER BY
+            c.created_at DESC
+    </select>
+
+</mapper>

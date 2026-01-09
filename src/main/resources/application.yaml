@@ -1,11 +1,29 @@
 spring:
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/test
-    username: swcamp
-    password: swcamp
+  profiles:
+    active: dev
+
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.mycompany.project
+  configuration:
+    map-underscore-to-camel-case: true
+
+#spring:
+#  datasource:
+#    driver-class-name: {driver class}
+#    url: jdbc:mariadb://{ip}:{port}/{database}
+#    username: {user}
+#    password: {password}
+#  jpa:
 
 
-image:
-  image-dir: /Users/gangseonghun/desktop
-  image-url: http://localhost:8080/productimgs/
+#jwt:
+#  secret: {시크릿 키 입력} }
