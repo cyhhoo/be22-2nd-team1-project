@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 public class TimeSlotDTO {
 
     @NotBlank(message = "요일은 필수 입력 값입니다.")

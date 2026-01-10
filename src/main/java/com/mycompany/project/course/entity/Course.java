@@ -92,26 +92,43 @@ public class Course {
    * @param teacherDetailId 교사 ID
    * @param status          강좌 상태
    */
-  public void update(String name, CourseType courseType, Integer maxCapacity, Integer tuition,
-      Long subjectId, Long academicYearId, Long teacherDetailId, CourseStatus status) {
-    // null이 아닌 값만 수정하거나, 정책에 따라 null도 허용하여 덮어쓸 수 있습니다.
-    // 여기서는 입력된 값으로 전면 수정하는 방식을 적용합니다.
+  /**
+   * 강좌 정보 수정 (상태 변경 제외)
+   */
+  public void updateCourseInfo(String name, CourseType courseType, Integer maxCapacity, Integer tuition,
+      Long subjectId, Long academicYearId, Long teacherDetailId) {
     if (name != null)
       this.name = name;
     if (courseType != null)
       this.courseType = courseType;
     if (maxCapacity != null && maxCapacity > 0)
-      this.maxCapacity = maxCapacity; // 0이하 방지
+      this.maxCapacity = maxCapacity;
     if (tuition != null && tuition >= 0)
-      this.tuition = tuition; // 음수 방지
+      this.tuition = tuition;
     if (subjectId != null)
       this.subjectId = subjectId;
     if (academicYearId != null)
       this.academicYearId = academicYearId;
     if (teacherDetailId != null)
       this.teacherDetailId = teacherDetailId;
-    if (status != null)
+  }
+
+  /**
+   * 강좌 상태 변경
+   */
+  public void changeStatus(CourseStatus status) {
+    if (status != null) {
       this.status = status;
+    }
+  }
+
+  /**
+   * 통합 업데이트 메서드 (정보 수정 + 상태 변경)
+   */
+  public void update(String name, CourseType courseType, Integer maxCapacity, Integer tuition,
+      Long subjectId, Long academicYearId, Long teacherDetailId, CourseStatus status) {
+    updateCourseInfo(name, courseType, maxCapacity, tuition, subjectId, academicYearId, teacherDetailId);
+    changeStatus(status);
   }
 
   public void setRejectionReason(String rejectionReason) {
