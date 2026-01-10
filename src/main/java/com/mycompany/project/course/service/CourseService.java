@@ -1,5 +1,6 @@
 package com.mycompany.project.course.service;
 
+import com.mycompany.project.course.dto.TimeSlotDTO;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import com.mycompany.project.course.repository.CourseRepository;
@@ -55,7 +56,7 @@ public class CourseService {
 
         // 3. 시간표(TimeSlot) 저장 및 중복 검증 (MyBatis 사용)
         if (dto.getTimeSlots() != null) {
-            for (com.mycompany.project.course.dto.TimeSlotDTO slotDto : dto.getTimeSlots()) {
+            for (TimeSlotDTO slotDto : dto.getTimeSlots()) {
                 // 교사 중복 검증 (MyBatis)
                 int teacherConflictCount = courseMapper.countTeacherSchedule(
                         dto.getAcademicYearId(),
@@ -164,6 +165,7 @@ public class CourseService {
                 .reason(reason)
                 .targetMaxCapacity(dto.getMaxCapacity())
                 .targetTuition(dto.getTuition())
+                .targetTeacherDetailId(dto.getTeacherDetailId()) // 교사 변경 요청 추가
                 .build();
 
         CourseChangeRequest savedRequest = courseChangeRequestRepository.save(request);
@@ -185,8 +187,15 @@ public class CourseService {
         // 요청 데이터로 Course 업데이트 (핵심 데이터만 예시)
         Course course = request.getCourse();
         // DTO의 다른 필드들은 현재 ChangeRequest에 저장하지 않았으므로 null 처리하거나 기존 값 유지
-        // 여기서는 예시로 저장된 MaxCapacity, Tuition만 반영
-        course.update(null, null, request.getTargetMaxCapacity(), request.getTargetTuition(), null, null, null, null);
+        course.updateCourseInfo(
+                null,
+                null,
+                request.getTargetMaxCapacity(),
+                request.getTargetTuition(),
+                null,
+                null,
+                request.getTargetTeacherDetailId() // 교사 변경 반영
+        );
 
         request.approve();
     }

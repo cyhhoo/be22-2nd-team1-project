@@ -44,6 +44,9 @@ public class CourseChangeRequest {
     @Column(name = "target_tuition")
     private Integer targetTuition;
 
+    @Column(name = "target_teacher_detail_id")
+    private Long targetTeacherDetailId;
+
     // 만약 시간표 변경 등이 포함된다면 복잡해지므로,
     // 여기서는 간단히 정원, 수강료 정도만 변경 요청한다고 가정하거나,
     // 전체 수정 데이터를 JSON String으로 저장하는 방식이 확장성이 좋음.
@@ -60,11 +63,13 @@ public class CourseChangeRequest {
     }
 
     @Builder
-    public CourseChangeRequest(Course course, String reason, Integer targetMaxCapacity, Integer targetTuition) {
+    public CourseChangeRequest(Course course, String reason, Integer targetMaxCapacity, Integer targetTuition,
+            Long targetTeacherDetailId) {
         this.course = course;
         this.reason = reason;
         this.targetMaxCapacity = targetMaxCapacity;
         this.targetTuition = targetTuition;
+        this.targetTeacherDetailId = targetTeacherDetailId;
     }
 
     public void approve() {
