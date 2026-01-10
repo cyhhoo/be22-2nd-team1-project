@@ -10,13 +10,14 @@ import com.mycompany.project.attendance.repository.AttendanceRepository;
 import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
+import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
-import com.mycompany.project.schedule.entity.AcademicYear;
-import com.mycompany.project.schedule.repository.AcademicYearRepository;
-import com.mycompany.project.user.entity.Role;
-import com.mycompany.project.user.entity.User;
+import com.mycompany.project.schedule.command.domain.aggregate.AcademicYear;
+import com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository;
+import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.user.command.domain.aggregate.User;
+import com.mycompany.project.user.command.domain.repository.UserRepository;
 import com.mycompany.project.user.repository.StudentDetailRepository;
-import com.mycompany.project.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AttendanceClosureCommandService {
 
-    private static final String ENROLLMENT_STATUS_APPLIED = "APPLIED";
+    private static final EnrollmentStatus ENROLLMENT_STATUS_APPLIED = EnrollmentStatus.APPLIED;
 
     private final AttendanceRepository attendanceRepository;
     private final AttendanceClosureRepository attendanceClosureRepository;
@@ -141,7 +142,7 @@ public class AttendanceClosureCommandService {
             return List.of(request.getCourseId());
         }
         return courseRepository.findByAcademicYearId(request.getAcademicYearId()).stream()
-            .map(Course::getCourseId)
+            .map(Course::getId)
             .collect(Collectors.toList());
     }
 
@@ -162,15 +163,15 @@ public class AttendanceClosureCommandService {
         if (request.getGrade() != null && request.getClassNo() != null) {
             String classNo = String.valueOf(request.getClassNo());
             matchedStudentIds = studentDetailRepository
-                .findByStudentIdInAndStudentGradeAndStudentClassNo(studentIds, request.getGrade(), classNo)
+                .findByIdInAndGradeAndClassNo(studentIds, request.getGrade(), classNo)
                 .stream()
-                .map(detail -> detail.getStudentId())
+                .map(detail -> detail.getId())
                 .collect(Collectors.toList());
         } else if (request.getGrade() != null) {
             matchedStudentIds = studentDetailRepository
-                .findByStudentIdInAndStudentGrade(studentIds, request.getGrade())
+                .findByIdInAndGrade(studentIds, request.getGrade())
                 .stream()
-                .map(detail -> detail.getStudentId())
+                .map(detail -> detail.getId())
                 .collect(Collectors.toList());
         } else {
             matchedStudentIds = List.of();

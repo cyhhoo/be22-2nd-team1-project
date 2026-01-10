@@ -14,9 +14,9 @@ import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
-import com.mycompany.project.user.entity.Role;
-import com.mycompany.project.user.entity.User;
-import com.mycompany.project.user.repository.UserRepository;
+import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.user.command.domain.aggregate.User;
+import com.mycompany.project.user.command.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,7 +125,7 @@ public class AttendanceCorrectionCommandService {
             .orElseThrow(() -> new IllegalArgumentException("수강신청 정보가 없습니다."));
         Course course = courseRepository.findById(enrollment.getCourseId())
             .orElseThrow(() -> new IllegalArgumentException("과목 정보가 없습니다."));
-        if (course.getTeacherId() == null || !course.getTeacherId().equals(teacherId)) {
+        if (course.getTeacherDetailId() == null || !course.getTeacherDetailId().equals(teacherId)) {
             throw new IllegalStateException("과목 담당 교사만 정정요청을 생성할 수 있습니다.");
         }
     }

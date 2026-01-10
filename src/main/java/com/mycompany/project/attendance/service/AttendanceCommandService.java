@@ -14,8 +14,9 @@ import com.mycompany.project.attendance.repository.AttendanceRepository;
 import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
+import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
-import com.mycompany.project.user.entity.TeacherDetail;
+import com.mycompany.project.user.command.domain.aggregate.TeacherDetail;
 import com.mycompany.project.user.repository.StudentDetailRepository;
 import com.mycompany.project.user.repository.TeacherDetailRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AttendanceCommandService {
 
-    private static final String ENROLLMENT_STATUS_APPLIED = "APPLIED";
+    private static final EnrollmentStatus ENROLLMENT_STATUS_APPLIED = EnrollmentStatus.APPLIED;
     private static final String DEFAULT_ATTENDANCE_CODE = "PRESENT";
 
     private final AttendanceRepository attendanceRepository;
@@ -220,13 +221,13 @@ public class AttendanceCommandService {
     }
 
     private void ensureCourseTeacher(Long userId, Course course) {
-        if (!Objects.equals(course.getTeacherId(), userId)) {
+        if (!Objects.equals(course.getTeacherDetailId(), userId)) {
             throw new IllegalStateException("과목 담당 교사만 처리할 수 있습니다.");
         }
     }
 
     private void ensureConfirmAuthority(Long userId, Course course) {
-        if (Objects.equals(course.getTeacherId(), userId)) {
+        if (Objects.equals(course.getTeacherDetailId(), userId)) {
             return;
         }
 
@@ -238,7 +239,7 @@ public class AttendanceCommandService {
         }
 
         List<Enrollment> enrollments = enrollmentRepository.findByCourseIdAndStatus(
-            course.getCourseId(), ENROLLMENT_STATUS_APPLIED
+            course.getId(), ENROLLMENT_STATUS_APPLIED
         );
         if (enrollments.isEmpty()) {
             throw new IllegalStateException("확정할 출결 대상이 없습니다.");
@@ -249,7 +250,7 @@ public class AttendanceCommandService {
             .collect(Collectors.toList());
 
         String classNo = String.valueOf(teacherDetail.getHomeroomClassNo());
-        long matchedCount = studentDetailRepository.countByStudentIdInAndStudentGradeAndStudentClassNo(
+        long matchedCount = studentDetailRepository.countByIdInAndGradeAndClassNo(
             studentIds, teacherDetail.getHomeroomGrade(), classNo
         );
         if (matchedCount != studentIds.size()) {

@@ -10,5 +10,5 @@ import java.util.List;
 public interface CartMapper {
 
   // 내 장바구니 목록 조회 (현재 신청 인원, 정원 포함 -> 마감 임박 확인용)
-  List<CartListResponse> selectCartListByUserId(@Param("userId") Long userId);
+  List<CartListResponse> selectCartListByStudentId(@Param("studentId") Long studentId);
 }

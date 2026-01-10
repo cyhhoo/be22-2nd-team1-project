@@ -11,8 +11,8 @@ import java.util.List;
 public interface EnrollmentMapper {
 
   // 내 수강 내역 조회 (과목명, 교사명 포함)
-  List<EnrollmentHistoryResponse> selectHistoryByUserId(@Param("userId") Long userId);
+  List<EnrollmentHistoryResponse> selectHistoryByStudentId(@Param("studentId") Long studentId);
 
   // 내 시간표 조회 (요일, 교시, 강의실 포함)
-  List<TimetableResponse> selectTimetableByUserId(@Param("userId") Long userId);
+  List<TimetableResponse> selectTimetableByStudentId(@Param("studentId") Long studentId);
 }

@@ -1,0 +1,28 @@
+  ### 출결 저장
+  POST http://localhost:8080/api/attendance/save
+    Content-Type: application/json
+
+  {
+    "courseId": 2001,
+    "classDate": "2025-03-01",
+    "period": 1,
+    "userId": 10,
+    "items": [
+      { "enrollmentId": 3001, "attendanceCodeId": 2, "reason": "지각" },
+      { "enrollmentId": 3002, "attendanceCodeId": 1, "reason": null }
+    ]
+  }
+
+  ### 출결 확정
+  POST http://localhost:8080/api/attendance/confirm
+  Content-Type: application/json
+
+  {
+    "courseId": 2001,
+    "classDate": "2025-03-01",
+    "period": 1,
+    "userId": 10
+  }
+
+  ### 출결 조회
+  GET http://localhost:8080/api/attendance?fromDate=2025-03-01&toDate=2025-03-01&courseId=2001&period=1

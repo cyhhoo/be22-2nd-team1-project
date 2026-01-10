@@ -10,14 +10,5 @@ import java.util.List;
 
 @Service
 public class ReservationService {
-  private final SqlSessionTemplate sqlSessionTemplate;
-
-  public ReservationService(SqlSessionTemplate sqlSessionTemplate) {
-    this.sqlSessionTemplate = sqlSessionTemplate;
-  }
-
-  public List<ReservationDTO> selectAvailableFacilities()
-
-  public List<ReservationDTO> reservation = sqlSessionTemplate.getMapper(ReservationMapper.class).selectAvailableFacilities
 
 }
