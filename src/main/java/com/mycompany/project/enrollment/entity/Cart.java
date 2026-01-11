@@ -2,7 +2,6 @@ package com.mycompany.project.enrollment.entity;
 
 import com.mycompany.project.common.entity.BaseEntity; // 1. 생성일시 기록용
 import com.mycompany.project.course.entity.Course;
-import com.mycompany.project.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 

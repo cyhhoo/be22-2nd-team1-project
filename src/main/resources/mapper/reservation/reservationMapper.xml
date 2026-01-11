@@ -14,14 +14,12 @@
         f.status      AS status
         FROM tbl_facility f
 
-        <!-- 이미 예약된 시설 제외 -->
         LEFT JOIN tbl_reservation r
         ON r.facility_id = f.facility_id
         AND r.reservation_date = #{reservationDate}
         AND r.start_time = #{startTime}
         AND r.status IN ('WAITING', 'APPROVED')
 
-        <!-- 이용 제한 기간 제외 -->
         LEFT JOIN tbl_facility_restriction fr
         ON fr.facility_id = f.facility_id
         AND #{reservationDate} BETWEEN fr.start_date AND fr.end_date
@@ -29,12 +27,10 @@
         WHERE f.status = 'AVAILABLE'
         AND r.reservation_id IS NULL
         AND fr.restriction_id IS NULL
-
-        <!-- 시설 운영시간 내 (startTime이 open_time 이상, close_time 미만) -->
         AND #{startTime} >= f.open_time
-        AND #{startTime} <  f.close_time
+        AND #{startTime} < f.close_time
+        ORDER BY f.name
 
-                            ORDER BY f.name
     </select>
 
 
@@ -83,4 +79,23 @@
         ORDER BY r.reservation_date DESC, r.start_time DESC
     </select>
 
+    <select id="selectAdminReservationStatus"
+            parameterType="map"
+            resultType="com.mycompany.project.reservation.query.dto.ReservationDTO">
+
+        SELECT
+        r.reservation_id,
+        r.facility_id,
+        r.reservation_date,
+        r.start_time,
+        r.end_time,
+        r.status,
+        r.student_id
+        FROM reservation r
+        WHERE r.admin_id = #{adminId}
+        AND r.reservation_date = #{reservationDate}
+        AND r.status = #{status}
+        ORDER BY r.start_time
+
+    </select>
 </mapper>

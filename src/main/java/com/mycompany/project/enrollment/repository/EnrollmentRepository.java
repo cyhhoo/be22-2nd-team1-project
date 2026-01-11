@@ -2,7 +2,7 @@ package com.mycompany.project.enrollment.repository;
 
 import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.enrollment.entity.Enrollment;
-import com.mycompany.project.user.entity.User;
+import com.mycompany.project.user.command.domain.aggregate.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: local
 
   jpa:
     database-platform: org.hibernate.dialect.MariaDBDialect
