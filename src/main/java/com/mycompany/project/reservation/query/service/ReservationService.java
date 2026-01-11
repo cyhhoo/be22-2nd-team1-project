@@ -2,11 +2,11 @@ package com.mycompany.project.reservation.query.service;
 
 import com.mycompany.project.reservation.query.dto.ReservationDTO;
 import com.mycompany.project.reservation.query.mapper.ReservationMapper;
+import lombok.RequiredArgsConstructor;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 
 @Service
 public class ReservationService {
@@ -16,8 +16,9 @@ public class ReservationService {
     this.sqlSessionTemplate = sqlSessionTemplate;
   }
 
-  public List<ReservationDTO> selectAvailableFacilities()
-
-  public List<ReservationDTO> reservation = sqlSessionTemplate.getMapper(ReservationMapper.class).selectAvailableFacilities
+  public List<ReservationDTO> selectAvailableFacilities() {
+    // TODO: Implement logic
+    return List.of();
+  }
 
 }
