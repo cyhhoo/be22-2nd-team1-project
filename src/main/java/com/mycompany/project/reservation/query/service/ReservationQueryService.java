@@ -18,18 +18,18 @@ public class ReservationQueryService {
 
     private final ReservationMapper reservationMapper;
 
-    // [RES-02] 예약 가능 시설 조회
+    // 예약 가능 시설 조회
     public List<FacilityDTO> getAvailableFacilities(LocalDate reservationDate, LocalTime startTime) {
         validateTimeRules(startTime);
         return reservationMapper.selectAvailableFacilities(reservationDate, startTime);
     }
 
-    // [RES-05] 나의 예약 조회 (status는 선택)
+    // 나의 예약 조회 (status는 선택)
     public List<ReservationDTO> getMyReservations(Long studentId, String status) {
         return reservationMapper.selectMyReservations(studentId, status);
     }
 
-    // [RES-08] 관리자 예약 현황 조회 (reservationDate/status 선택)
+    // 관리자 예약 현황 조회 (reservationDate/status 선택)
     public List<ReservationDTO> getAdminReservationStatus(Long adminId, LocalDate reservationDate, String status) {
         return reservationMapper.selectAdminReservationStatus(adminId, reservationDate, status);
     }
