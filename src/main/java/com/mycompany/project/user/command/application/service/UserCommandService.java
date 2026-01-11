@@ -1,9 +1,9 @@
 package com.mycompany.project.user.command.application.service;
 
-import com.mycompany.project.user.command.domain.aggregate.Role;
-import com.mycompany.project.user.command.domain.aggregate.User;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
-import com.mycompany.project.user.command.domain.repository.UserRepository;
+import com.mycompany.project.schedule.command.domain.aggregate.Subject;
+import com.mycompany.project.user.command.domain.aggregate.*;
+import com.mycompany.project.user.command.domain.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,15 +21,15 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class UserCommandService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-
-  public UserCommandService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-    this.userRepository = userRepository;
-    this.passwordEncoder = passwordEncoder;
-  }
+  private final StudentDetailRepository studentDetailRepository;
+  private final TeacherDetailRepository teacherDetailRepository;
+  private final SubjectRepository subjectRepository;
+  private final AdminDetailRepository adminDetailRepository;
 
   @Transactional
   public int importUser(MultipartFile file) {
@@ -99,6 +99,103 @@ public class UserCommandService {
           userRepository.save(user);
 
           count++;
+
+          // 역할별 상세 정보 저장
+          switch (role) {
+            case STUDENT:
+              // 1. CSV에서 학생 상세 정보 관련 정보 추출
+              String gradeStr = getCsvValue(data, headers, "grade");
+              String classNo = getCsvValue(data, headers, "classNo");
+              String studentNoStr = getCsvValue(data, headers, "studentNo");
+
+              // 2. 추출한 데이터 파싱
+              Integer grade = null;
+              Integer studentNo = null;
+              if (gradeStr != null) {
+                try {
+                  grade = Integer.parseInt(gradeStr);
+                } catch (NumberFormatException e) {
+                  // ignore
+                }
+              }
+              if (studentNoStr != null) {
+                try {
+                  studentNo = Integer.parseInt(studentNoStr);
+                } catch (NumberFormatException e) {
+                  // ignore
+                }
+              }
+
+              // 3. 엔티티 생성 및 저장
+              StudentDetail studentDetail = StudentDetail.builder()
+                  .user(user)
+                  .grade(grade)
+                  .classNo(classNo)
+                  .studentNo(studentNo)
+                  .build();
+
+              studentDetailRepository.save(studentDetail);
+              break;
+
+            case TEACHER:
+              // 1. CSV에서 교사 관련 데이터 추출
+              String subjectName = getCsvValue(data, headers, "subject");
+              String homeroomGradeStr = getCsvValue(data, headers, "homeroomGrade");
+              String homeroomClassStr = getCsvValue(data, headers, "homeroomClass");
+
+              // 2. 과목 조회
+              Subject subject = null;
+              if (subjectName != null && !subjectName.isEmpty()) {
+                subject = subjectRepository.findByName(subjectName).orElse(null);
+              }
+              // 3. 파싱
+              Integer hrGrade = null;
+              Integer hrClass = null;
+
+              if (homeroomGradeStr != null) {
+                try {
+                  hrGrade = Integer.parseInt(homeroomGradeStr);
+                } catch (NumberFormatException e) {
+                  // ignore
+                }
+              }
+              if (homeroomClassStr != null) {
+                try {
+                  hrClass = Integer.parseInt(homeroomClassStr);
+                } catch (NumberFormatException e) {
+                  // ignore
+                }
+              }
+
+              // 4. TeacherDetail 생성 및 저장
+              TeacherDetail teacherDetail = TeacherDetail.builder()
+                  .user(user)
+                  .subject(subject)
+                  .homeroomGrade(hrGrade)
+                  .homeroomClassNo(hrClass)
+                  .build();
+              teacherDetailRepository.save(teacherDetail);
+              break;
+
+            case ADMIN:
+              // 1. CSV에서 관리자 관련 데이터 추출
+              String levelStr = getCsvValue(data, headers, "adminLevel"); // 예: 1 or 5
+
+              // 2. Level 매핑 (기본값 설정 로직 등 필요)
+              AdminDetail.AdminLevel level = AdminDetail.AdminLevel.LEVEL_5; // 기본값
+              if ("1".equals(levelStr)) {
+                level = AdminDetail.AdminLevel.LEVEL_1;
+              }
+
+              // 3. AdminDetail 생성 및 저장
+              AdminDetail adminDetail = AdminDetail.builder()
+                  .user(user)
+                  .level(level)
+                  .build();
+              adminDetailRepository.save(adminDetail);
+              break;
+          }
+
         }
 
       }
