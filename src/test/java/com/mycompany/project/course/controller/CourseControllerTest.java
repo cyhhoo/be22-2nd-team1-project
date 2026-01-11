@@ -94,4 +94,31 @@ class CourseControllerTest {
 
         verify(courseService).requestCourseUpdate(eq(courseId), any(CourseUpdateReqDTO.class), eq(reason));
     }
+
+    @Test
+    @DisplayName("강좌 삭제 (DeleteCourse) 테스트")
+    void deleteCourseTest() throws Exception {
+        Long courseId = 1L;
+        String reason = "Enrollment under capacity";
+
+        mockMvc.perform(post("/api/courses/{courseId}/cancel", courseId)
+                .param("reason", reason))
+                .andExpect(status().isOk());
+
+        verify(courseService).deleteCourse(courseId, reason);
+    }
+
+    @Test
+    @DisplayName("수강생 강제 취소 테스트")
+    void forceCancelStudentTest() throws Exception {
+        Long courseId = 1L;
+        Long studentId = 100L;
+        String reason = "Violated code of conduct";
+
+        mockMvc.perform(post("/api/courses/{courseId}/students/{studentId}/force-cancel", courseId, studentId)
+                .param("reason", reason))
+                .andExpect(status().isOk());
+
+        verify(courseService).forceCancelStudent(courseId, studentId, reason);
+    }
 }

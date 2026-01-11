@@ -12,6 +12,11 @@ import com.mycompany.project.course.dto.CourseUpdateReqDTO;
 
 import com.mycompany.project.course.dto.CourseCreateReqDTO;
 import com.mycompany.project.course.repository.CourseChangeRequestRepository;
+import com.mycompany.project.enrollment.repository.EnrollmentRepository;
+import com.mycompany.project.attendance.repository.AttendanceRepository;
+import com.mycompany.project.attendance.entity.Attendance;
+import com.mycompany.project.enrollment.entity.Enrollment;
+import com.mycompany.project.course.dto.StudentDetailResDTO;
 
 import java.util.List;
 
@@ -27,8 +32,9 @@ public class CourseService {
     private final CourseRepository courseRepository;
 
     private final CourseChangeRequestRepository courseChangeRequestRepository;
-    private final com.mycompany.project.enrollment.repository.EnrollmentRepository enrollmentRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final CourseMapper courseMapper;
+    private final AttendanceRepository attendanceRepository;
 
     /**
      * 강좌 개설 신청 (상태: PENDING)
@@ -262,7 +268,7 @@ public class CourseService {
         if (!force) {
             long currentCount = enrollmentRepository.findByCourseId(courseId).stream()
                     .filter(e -> e
-                            .getStatus() == com.mycompany.project.enrollment.entity.Enrollment.EnrollmentStatus.APPLIED)
+                            .getStatus() == Enrollment.EnrollmentStatus.APPLIED)
                     .count();
             if (currentCount + studentIds.size() > course.getMaxCapacity()) {
                 throw new IllegalStateException("수강 정원이 초과되었습니다.");
@@ -290,7 +296,7 @@ public class CourseService {
                                 studentId, conflict.get("courseName")));
                     } else {
                         // 선택 과목이면 자동 취소
-                        com.mycompany.project.enrollment.entity.Enrollment existingEnrollment = enrollmentRepository
+                        Enrollment existingEnrollment = enrollmentRepository
                                 .findById(existingEnrollmentId).orElseThrow();
                         existingEnrollment.cancel();
                     }
@@ -298,7 +304,7 @@ public class CourseService {
             }
 
             // 2-2. 수강 등록
-            com.mycompany.project.enrollment.entity.Enrollment enrollment = com.mycompany.project.enrollment.entity.Enrollment
+            Enrollment enrollment = Enrollment
                     .builder()
                     .userId(studentId)
                     .courseId(courseId)
@@ -307,4 +313,81 @@ public class CourseService {
         }
     }
 
+    /**
+     * 강좌 폐강 (상태 변경 및 수강생 일괄 취소) -> 강좌 삭제(DeleteCourse) (Soft Delete)
+     * - 강좌 상태: CANCELED
+     * - 수강생 상태: FORCED_CANCELED
+     */
+    @Transactional
+    public void deleteCourse(Long courseId, String reason) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+
+        // 1. 강좌 상태 변경 (CANCELED)
+        course.changeStatus(CourseStatus.CANCELED);
+
+        // 2. 수강생 일괄 취소 (FORCED_CANCELED)
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseId(courseId);
+        for (Enrollment enrollment : enrollments) {
+            if (enrollment.getStatus() == Enrollment.EnrollmentStatus.APPLIED) {
+                enrollment.forceCancel("강좌 폐강(삭제): " + reason);
+            }
+        }
+    }
+
+    /**
+     * 학생 수강 강제 취소 (개별)
+     */
+    @Transactional
+    public void forceCancelStudent(Long courseId, Long studentId, String reason) {
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("취소 사유는 필수 입력 값입니다.");
+        }
+
+        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
+                .stream()
+                .filter(e -> e.getUserId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("해당 학생의 수강 신청 내역이 없습니다."));
+
+        enrollment.forceCancel(reason);
+    }
+
+    @Transactional(readOnly = true)
+    public StudentDetailResDTO getStudentDetail(Long courseId, Long studentId) {
+        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
+                .stream()
+                .filter(e -> e.getUserId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
+
+        long presentCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
+                Attendance.AttendanceStatus.PRESENT);
+        long lateCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
+                Attendance.AttendanceStatus.LATE);
+        long absentCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
+                Attendance.AttendanceStatus.ABSENT);
+
+        return StudentDetailResDTO.builder()
+                .studentId(studentId)
+                .studentName("Student_" + studentId)
+                .memo(enrollment.getMemo())
+                .attendancePresent(presentCount)
+                .attendanceLate(lateCount)
+                .attendanceAbsent(absentCount)
+                .assignmentTotal(0)
+                .assignmentSubmitted(0)
+                .build();
+    }
+
+    @Transactional
+    public void updateStudentMemo(Long courseId, Long studentId, String memo) {
+        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
+                .stream()
+                .filter(e -> e.getUserId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
+
+        enrollment.updateMemo(memo);
+    }
 }

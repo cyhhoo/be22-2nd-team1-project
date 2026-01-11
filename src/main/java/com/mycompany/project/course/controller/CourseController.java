@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.mycompany.project.course.dto.StudentDetailResDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -69,6 +70,31 @@ public class CourseController {
     @PostMapping("/{courseId}/change-teacher")
     public ResponseEntity<Void> changeTeacher(@PathVariable Long courseId, @RequestParam Long newTeacherId) {
         courseService.changeTeacher(courseId, newTeacherId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "강좌 삭제 (DeleteCourse)", description = "운영 중인 강좌를 폐강(삭제) 처리합니다. (상태: CANCELED, 수강생 일괄 취소)")
+    @PostMapping("/{courseId}/cancel")
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long courseId, @RequestParam String reason) {
+        courseService.deleteCourse(courseId, reason);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "수강생 상세 조회", description = "수강생의 출결 및 과제 현황, 메모를 조회합니다.")
+    @GetMapping("/{courseId}/students/{studentId}")
+    public ResponseEntity<StudentDetailResDTO> getStudentDetail(
+            @PathVariable Long courseId,
+            @PathVariable Long studentId) {
+        return ResponseEntity.ok(courseService.getStudentDetail(courseId, studentId));
+    }
+
+    @Operation(summary = "수강생 강제 취소", description = "특정 수강생의 수강 신청을 강제로 취소합니다. (사유 필수)")
+    @PostMapping("/{courseId}/students/{studentId}/force-cancel")
+    public ResponseEntity<Void> forceCancelStudent(
+            @PathVariable Long courseId,
+            @PathVariable Long studentId,
+            @RequestParam String reason) {
+        courseService.forceCancelStudent(courseId, studentId, reason);
         return ResponseEntity.ok().build();
     }
 

@@ -31,6 +31,9 @@ public class Enrollment {
     @Column(name = "created_at", nullable = false, updatable = false)
     private java.time.LocalDateTime createdAt;
 
+    @Column(name = "cancellation_reason")
+    private String cancellationReason; // 취소 사유 (강제 취소 시 필수)
+
     @Builder
     public Enrollment(Long userId, Long courseId) {
         this.userId = userId;
@@ -42,8 +45,9 @@ public class Enrollment {
         this.status = EnrollmentStatus.CANCELED;
     }
 
-    public void forceCancel() {
+    public void forceCancel(String reason) {
         this.status = EnrollmentStatus.FORCED_CANCELED;
+        this.cancellationReason = reason;
     }
 
     public enum EnrollmentStatus {
