@@ -1,25 +1,21 @@
 package com.mycompany.project.schedule.command.application.service;
 
 import com.mycompany.project.schedule.command.application.dto.AcademicYearDTO;
-import com.mycompany.project.schedule.command.application.dto.ScheduleRequest;
+import com.mycompany.project.schedule.command.application.dto.ScheduleCreateRequest;
 import com.mycompany.project.schedule.command.domain.aggregate.AcademicSchedule;
 import com.mycompany.project.schedule.command.domain.aggregate.AcademicYear;
 import com.mycompany.project.schedule.command.domain.repository.AcademicScheduleRepository;
 import com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class ScheduleCommandService {
 
   private final AcademicScheduleRepository academicScheduleRepository;
   private final AcademicYearRepository academicYearRepository;
-
-  public ScheduleCommandService(AcademicScheduleRepository academicScheduleRepository,
-      AcademicYearRepository academicYearRepository) {
-    this.academicScheduleRepository = academicScheduleRepository;
-    this.academicYearRepository = academicYearRepository;
-  }
 
   // 1. 학년도/학기 생성 (관리자용)
   @Transactional
@@ -36,7 +32,7 @@ public class ScheduleCommandService {
 
   // 2. 상세 일정 등록 (관리자용)
   @Transactional
-  public Long createSchedule(ScheduleRequest request) {
+  public Long createSchedule(ScheduleCreateRequest request) {
     AcademicYear academicYear = academicYearRepository.findById(request.getAcademicYearId())
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 학년도입니다."));
 
@@ -45,8 +41,34 @@ public class ScheduleCommandService {
         .scheduleDate(request.getScheduleDate())
         .scheduleType(request.getScheduleType())
         .content(request.getContent())
+        .targetGrade(request.getTargetGrade())
         .build();
 
     return academicScheduleRepository.save(schedule).getScheduleId();
+  }
+
+  // 3. 일정 수정
+  @Transactional
+  public void updateSchedule(Long scheduleId, ScheduleCreateRequest request) {
+
+    AcademicSchedule schedule = academicScheduleRepository.findById(scheduleId)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일정 입니다."));
+
+    schedule.update(
+        request.getScheduleDate(),
+        request.getScheduleType(),
+        request.getContent(),
+        request.getTargetGrade()
+    );
+  }
+
+  // 4. 일정 삭제 (Soft Delete)
+  @Transactional
+  public void deleteSchedule(Long scheduleId) {
+    AcademicSchedule schedule = academicScheduleRepository.findById(scheduleId)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일정입니다."));
+
+    // Soft Delete: 상태만 변경
+    schedule.delete();
   }
 }
