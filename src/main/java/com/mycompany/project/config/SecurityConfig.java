@@ -1,7 +1,6 @@
 package com.mycompany.project.config;
 
-import com.mycompany.project.jwtsecurity.JwtAuthenticationFilter;
-import com.mycompany.project.jwtsecurity.JwtTokenProvider;
+import com.mycompany.project.jwtsecurity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +20,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final JwtTokenProvider jwtTokenProvider;
+  private final RestAuthenticationEntryPoint authenticationEntryPoint;
+  private final RestAccessDeniedHandler accessDeniedHandler;
+  private final JwtExceptionFilter jwtExceptionFilter;
 
   // 비밀번호 암호화 도구 (BCrypt) 빈 등록
   @Bean
@@ -48,8 +50,14 @@ public class SecurityConfig {
             // 그 외 모든 요청은 인증 필요
             .anyRequest().authenticated())
 
+        // 예외 핸들러 추가
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint(authenticationEntryPoint)
+            .accessDeniedHandler(accessDeniedHandler))
+
         // 4. JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 끼워넣기
-        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
     return http.build();
   }

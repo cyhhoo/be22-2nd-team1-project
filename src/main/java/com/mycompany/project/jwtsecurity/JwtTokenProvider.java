@@ -101,4 +101,13 @@ public class JwtTokenProvider {
         .parseSignedClaims(token)
         .getPayload();
   }
+
+  public String getUserEmailFromJWT(String refreshToken) {
+    Claims claims = Jwts.parser()
+        .verifyWith(key)
+        .build()
+        .parseSignedClaims(refreshToken)
+        .getPayload();
+    return claims.getSubject();
+  }
 }
