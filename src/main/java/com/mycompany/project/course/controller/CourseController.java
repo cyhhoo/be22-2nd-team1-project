@@ -98,6 +98,31 @@ public class CourseController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "수강생 메모 수정", description = "수강생에 대한 특이사항 메모를 수정합니다.")
+    @PutMapping("/{courseId}/students/{studentId}/memo")
+    public ResponseEntity<Void> updateStudentMemo(
+            @PathVariable Long courseId,
+            @PathVariable Long studentId,
+            @RequestBody String memo) {
+        courseService.updateStudentMemo(courseId, studentId, memo);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "교사별 강좌 목록 조회", description = "특정 교사가 담당하는 강좌 목록을 페이징하여 조회합니다.")
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<org.springframework.data.domain.Page<com.mycompany.project.course.dto.CourseListResDTO>> getCourseList(
+            @PathVariable Long teacherId,
+            @org.springframework.data.web.PageableDefault(size = 10) org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(courseService.getCourseList(teacherId, pageable));
+    }
+
+    @Operation(summary = "전체 강좌 목록 조회 (관리자)", description = "전체 강좌 목록을 페이징하여 조회합니다. (관리자용)")
+    @GetMapping
+    public ResponseEntity<org.springframework.data.domain.Page<com.mycompany.project.course.dto.CourseListResDTO>> getAllCourses(
+            @org.springframework.data.web.PageableDefault(size = 10) org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(courseService.getAllCourses(pageable));
+    }
+
     @Operation(summary = "시간표 격자 조회", description = "지정된 학기/사용자의 시간표를 격자(Grid) 형태로 조회합니다. (미구현)")
     @GetMapping("/timetable")
     public void getTimetable(@RequestParam String semester, @RequestParam Long userId) {

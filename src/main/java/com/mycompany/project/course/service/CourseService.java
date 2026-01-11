@@ -17,6 +17,9 @@ import com.mycompany.project.attendance.repository.AttendanceRepository;
 import com.mycompany.project.attendance.entity.Attendance;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.course.dto.StudentDetailResDTO;
+import com.mycompany.project.course.dto.CourseListResDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -353,41 +356,33 @@ public class CourseService {
         enrollment.forceCancel(reason);
     }
 
+    /**
+     * 교사별 강좌 목록 조회 (Paging)
+     */
     @Transactional(readOnly = true)
-    public StudentDetailResDTO getStudentDetail(Long courseId, Long studentId) {
-        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
-                .stream()
-                .filter(e -> e.getUserId().equals(studentId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
-
-        long presentCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
-                Attendance.AttendanceStatus.PRESENT);
-        long lateCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
-                Attendance.AttendanceStatus.LATE);
-        long absentCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
-                Attendance.AttendanceStatus.ABSENT);
-
-        return StudentDetailResDTO.builder()
-                .studentId(studentId)
-                .studentName("Student_" + studentId)
-                .memo(enrollment.getMemo())
-                .attendancePresent(presentCount)
-                .attendanceLate(lateCount)
-                .attendanceAbsent(absentCount)
-                .assignmentTotal(0)
-                .assignmentSubmitted(0)
-                .build();
+    public Page<CourseListResDTO> getCourseList(Long teacherDetailId, Pageable pageable) {
+        return courseRepository.findByTeacherDetailId(teacherDetailId, pageable)
+                .map(this::convertToCourseListResDTO);
     }
 
-    @Transactional
-    public void updateStudentMemo(Long courseId, Long studentId, String memo) {
-        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
-                .stream()
-                .filter(e -> e.getUserId().equals(studentId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
+    /**
+     * 전체 강좌 목록 조회 (관리자용 - Paging)
+     */
+    @Transactional(readOnly = true)
+    public Page<CourseListResDTO> getAllCourses(Pageable pageable) {
+        return courseRepository.findAll(pageable)
+                .map(this::convertToCourseListResDTO);
+    }
 
-        enrollment.updateMemo(memo);
+    private CourseListResDTO convertToCourseListResDTO(Course course) {
+        return CourseListResDTO.builder()
+                .courseId(course.getId())
+                .name(course.getName())
+                .courseType(course.getCourseType())
+                .status(course.getStatus())
+                .currentCount(course.getCurrentCount())
+                .maxCapacity(course.getMaxCapacity())
+                .teacherName("Teacher_" + course.getTeacherDetailId()) // Placeholder: 실제 교사명 조회 필요
+                .build();
     }
 }

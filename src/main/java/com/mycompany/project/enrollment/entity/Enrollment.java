@@ -50,6 +50,14 @@ public class Enrollment {
         this.cancellationReason = reason;
     }
 
+    @Lob
+    @Column(name = "memo")
+    private String memo;
+
+    public void updateMemo(String memo) {
+        this.memo = memo;
+    }
+
     public enum EnrollmentStatus {
         APPLIED, CANCELED, FORCED_CANCELED
     }
