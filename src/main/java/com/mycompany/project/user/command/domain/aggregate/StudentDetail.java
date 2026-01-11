@@ -1,6 +1,7 @@
 package com.mycompany.project.user.command.domain.aggregate;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Entity
@@ -20,12 +21,17 @@ public class StudentDetail {
     @JoinColumn(name = "student_id")
     private User user;
 
+    @NotNull
+    @Min(1)
+    @Max(3)
     @Column(name = "student_grade")
     private Integer grade;
 
     @Column(name = "student_class_no")
     private String classNo;
 
+    @NotNull
+    @Positive
     @Column(name = "student_no")
     private Integer studentNo;
 }
