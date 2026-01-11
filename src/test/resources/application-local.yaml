@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: ${LOCAL_DB_URL:jdbc:mariadb://localhost:3306/mytest?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul}
+    username: ${LOCAL_DB_USERNAME:swcamp}
+    password: ${LOCAL_DB_PASSWORD:swcamp}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: "Azdtk9haATO9pZ7/9l6OfX8gvvBjBymAzWkPtml5WtCEDSj4jGx4UQNN6vPt1kJwO4d0fSpeHn+WGU7VEDsDnw=="

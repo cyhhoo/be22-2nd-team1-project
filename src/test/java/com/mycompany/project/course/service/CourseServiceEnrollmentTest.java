@@ -32,6 +32,9 @@ class CourseServiceEnrollmentTest {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager;
+
     @Test
     @Transactional
     @DisplayName("[Success] 정원 내 일괄 등록 성공 (개별 등록 포함)")
@@ -105,6 +108,8 @@ class CourseServiceEnrollmentTest {
         // 1. 기존 선택 과목 (MON 1교시)
         Course oldElective = createCourse("Old Elective", CourseType.ELECTIVE, 10, "MON", 1);
         enrollmentRepository.save(Enrollment.builder().userId(studentId).courseId(oldElective.getId()).build());
+        entityManager.flush();
+        entityManager.clear();
 
         // 2. 신규 과목 (MON 1교시)
         Course newCourse = createCourse("New Course", CourseType.MANDATORY, 10, "MON", 1);
@@ -130,6 +135,8 @@ class CourseServiceEnrollmentTest {
         // 1. 기존 필수 과목 (MON 1교시)
         Course oldMandatory = createCourse("Old Mandatory", CourseType.MANDATORY, 10, "MON", 1);
         enrollmentRepository.save(Enrollment.builder().userId(studentId).courseId(oldMandatory.getId()).build());
+        entityManager.flush();
+        entityManager.clear();
 
         // 2. 신규 과목 (MON 1교시)
         Course newCourse = createCourse("New Course", CourseType.ELECTIVE, 10, "MON", 1);

@@ -44,8 +44,10 @@ public class CourseService {
      */
     @Transactional
     public void createCourse(CourseCreateReqDTO dto) {
-        // 1. 유효성 검증 (DTO Validation으로 처리되지만, 비즈니스 로직 상 추가 검증 필요 시 여기에 작성)
-        // (기존의 if (maxCapacity <= 0) 등은 @Min 어노테이션으로 대체됨)
+        // 1. 유효성 검증
+        if (dto.getMaxCapacity() <= 0) {
+            throw new IllegalArgumentException("최대 수강 인원은 1명 이상이어야 합니다.");
+        }
 
         // 2. 강좌 엔티티 생성 (Status = PENDING)
         Course course = Course.builder()
@@ -96,7 +98,8 @@ public class CourseService {
                 course.addTimeSlot(timeSlot); // 연관관계 매핑
             }
         }
-        // Cascade.ALL로 인해 timeSlots도 자동 저장됨
+        // Cascade.ALL로 인해 timeSlots도 자동 저장됨 (확실한 저장을 위해 save 호출)
+        courseRepository.save(course);
     }
 
     /**
