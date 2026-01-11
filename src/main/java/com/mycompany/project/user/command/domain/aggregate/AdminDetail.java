@@ -1,6 +1,7 @@
 package com.mycompany.project.user.command.domain.aggregate;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
@@ -20,6 +21,7 @@ public class AdminDetail {
     @JoinColumn(name = "admin_id")
     private User user;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "ENUM('1', '5') DEFAULT '5'")
     private AdminLevel level; // Enum 필요 (LEVEL_1, LEVEL_5 등)
