@@ -2,20 +2,15 @@ package com.mycompany.project.enrollment.entity;
 
 import com.mycompany.project.common.entity.BaseEntity;
 import com.mycompany.project.course.entity.Course;
-import com.mycompany.project.user.entity.User;
+
+import com.mycompany.project.user.command.domain.aggregate.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(
-    name = "tbl_enrollment",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_enrollment_user_course",
-            columnNames = {"user_id", "course_id"}
-        )
-    }
-)
+@Table(name = "tbl_enrollment", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_enrollment_user_course", columnNames = { "user_id", "course_id" })
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -58,4 +53,4 @@ public class Enrollment extends BaseEntity {
 /*
  * Command는 JPA를 쓰고, **Query는 MyBatis(또는 QueryDSL)**를 쓴다.
  * Mapper가 query쪽, Command가 repository쪽
- * */
+ */

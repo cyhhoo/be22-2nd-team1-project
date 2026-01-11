@@ -1,6 +1,5 @@
 package com.mycompany.project.course.service;
 
-import com.mycompany.project.attendance.repository.AttendanceRepository;
 import com.mycompany.project.course.dto.StudentDetailResDTO;
 import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
@@ -13,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

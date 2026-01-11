@@ -1,5 +1,6 @@
 package com.mycompany.project.course.service;
 
+import com.mycompany.project.attendance.repository.AttendanceRepository;
 import com.mycompany.project.course.dto.TimeSlotDTO;
 import com.mycompany.project.course.entity.*;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,6 @@ import com.mycompany.project.course.dto.CourseUpdateReqDTO;
 import com.mycompany.project.course.dto.CourseCreateReqDTO;
 import com.mycompany.project.course.repository.CourseChangeRequestRepository;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
-import com.mycompany.project.attendance.repository.AttendanceRepository;
 import com.mycompany.project.attendance.entity.Attendance;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.course.dto.StudentDetailResDTO;
@@ -33,11 +33,10 @@ public class CourseService {
      * checks.
      */
     private final CourseRepository courseRepository;
-
+    private final AttendanceRepository attendanceRepository;
     private final CourseChangeRequestRepository courseChangeRequestRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseMapper courseMapper;
-    private final AttendanceRepository attendanceRepository;
 
     /**
      * 강좌 개설 신청 (상태: PENDING)

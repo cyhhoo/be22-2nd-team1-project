@@ -1,4 +1,4 @@
-package com.mycompany.project.reservation.query.mapper;
-
-public class Mapper {
-}
+//package com.mycompany.project.reservation.query.mapper;
+//
+//public class Mapper {
+//}

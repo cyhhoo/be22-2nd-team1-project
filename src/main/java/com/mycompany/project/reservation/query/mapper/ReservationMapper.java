@@ -10,16 +10,13 @@ import java.util.List;
 public interface ReservationMapper {
 
     List<FacilityDTO> selectAvailableFacilities(
-        @Param("startTime") LocalDateTime startTime
-    );
+            @Param("startTime") LocalDateTime startTime);
 
     List<ReservationDTO> selectMyReservations(
-        @Param("studentId") int studentId,
-        @Param("status") String status
-    );
+            @Param("studentId") int studentId,
+            @Param("status") String status);
 
     List<ReservationDTO> selectReservationList(
-        @Param("studentId") Integer studentId,
-        @Param("status") String status
-    );
+            @Param("studentId") Integer studentId,
+            @Param("status") String status);
 }
