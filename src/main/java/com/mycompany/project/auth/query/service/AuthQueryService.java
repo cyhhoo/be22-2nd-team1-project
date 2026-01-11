@@ -97,4 +97,14 @@ public class AuthQueryService {
         // 5. 새 토큰 발급 및 저장
         return generateAndSaveToken(user);
     }
+
+    @Transactional
+    public void logout(String refreshToken){
+
+      jwtTokenProvider.validateToken(refreshToken);
+
+      String email = jwtTokenProvider.getUserEmailFromJWT(refreshToken);
+
+      tokenRepository.deleteByEmail(email);
+    }
 }
