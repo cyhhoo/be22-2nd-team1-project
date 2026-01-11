@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class FacilityDTO {
-  private int facilityId;
+  private Long facilityId;
   private String name;
   private String status;
 }

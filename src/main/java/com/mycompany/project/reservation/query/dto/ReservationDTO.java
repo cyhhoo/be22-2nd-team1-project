@@ -2,7 +2,9 @@ package com.mycompany.project.reservation.query.dto;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 
 @Getter
@@ -11,9 +13,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 public class ReservationDTO {
-  private int reservationId;
-  private LocalDateTime startTime;
-  private LocalDateTime endTime;
+  private Long reservationId;
+  private Long facilityId;
+  private Long studentId;
+  private LocalDate reservationDate;
+  private LocalTime startTime;
+  private LocalTime endTime;
   private String status;
   private LocalDateTime createdAt;
   private String rejectionReason;
