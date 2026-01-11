@@ -27,9 +27,7 @@ public class ReservationCommandService {
     private final FacilityRepository facilityRepository;
     private final FacilityRestrictionRepository restrictionRepository;
 
-    /* =========================
-     * [RES-01] 시설 예약 신청
-     * ========================= */
+    /*  시설 예약 신청 */
     public ReservationCommandResponse create(Long studentId, ReservationCreateRequest req) {
 
         // 1) 시설 존재/상태 확인
@@ -66,9 +64,7 @@ public class ReservationCommandService {
         }
     }
 
-    /* =========================
-     * [RES-03] 시설 예약 취소
-     * ========================= */
+    /*  시설 예약 취소  */
     public void cancel(Long reservationId, Long studentId) {
         Reservation r = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalStateException("예약 없음"));
@@ -80,9 +76,7 @@ public class ReservationCommandService {
         r.cancel();
     }
 
-    /* =========================
-     * [RES-04] 시설 예약 변경
-     * ========================= */
+    /* [RES-04] 시설 예약 변경  */
     public void change(Long reservationId, Long studentId, ReservationChangeRequest req) {
         Reservation r = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalStateException("예약 없음"));
@@ -111,11 +105,7 @@ public class ReservationCommandService {
         r.change(req.getReservationDate(), req.getStartTime());
     }
 
-    /* =========================
-     * [RES-06/RES-09] 관리자 승인/거부
-     * - adminId는 컨트롤러에서 @RequestParam 으로 받는다고 가정
-     * - RES-09 승인 중복 방지 포함
-     * ========================= */
+    /*  관리자 승인/거부  */
     public void approve(Long adminId, Long reservationId, ReservationApproveRequest req) {
         Reservation r = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalStateException("예약 없음"));
@@ -145,9 +135,7 @@ public class ReservationCommandService {
         }
     }
 
-    /* =========================
-     * 검증 메서드들
-     * ========================= */
+    /*  검증 메서드들  */
 
     private void validateRestriction(Long facilityId, LocalDate date) {
         boolean restricted =
