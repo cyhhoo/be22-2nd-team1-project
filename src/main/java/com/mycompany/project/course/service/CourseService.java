@@ -1,6 +1,7 @@
 package com.mycompany.project.course.service;
 
 import com.mycompany.project.course.dto.TimeSlotDTO;
+import com.mycompany.project.course.entity.*;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import com.mycompany.project.course.repository.CourseRepository;
@@ -8,13 +9,18 @@ import com.mycompany.project.course.mapper.CourseMapper;
 
 import org.springframework.transaction.annotation.Transactional;
 import com.mycompany.project.course.dto.CourseUpdateReqDTO;
-import com.mycompany.project.course.entity.Course;
 
 import com.mycompany.project.course.dto.CourseCreateReqDTO;
-import com.mycompany.project.course.entity.CourseStatus;
-import com.mycompany.project.course.entity.CourseTimeSlot;
 import com.mycompany.project.course.repository.CourseChangeRequestRepository;
-import com.mycompany.project.course.entity.CourseChangeRequest;
+import com.mycompany.project.enrollment.repository.EnrollmentRepository;
+import com.mycompany.project.attendance.repository.AttendanceRepository;
+import com.mycompany.project.attendance.entity.Attendance;
+import com.mycompany.project.enrollment.entity.Enrollment;
+import com.mycompany.project.course.dto.StudentDetailResDTO;
+import com.mycompany.project.course.dto.CourseListResDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 @Service
@@ -29,7 +35,9 @@ public class CourseService {
     private final CourseRepository courseRepository;
 
     private final CourseChangeRequestRepository courseChangeRequestRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final CourseMapper courseMapper;
+    private final AttendanceRepository attendanceRepository;
 
     /**
      * 강좌 개설 신청 (상태: PENDING)
@@ -215,4 +223,247 @@ public class CourseService {
         request.reject(reason);
     }
 
+    /**
+     * 담당 교사 변경
+     * - 변경하려는 교사의 스케줄 중복 확인 후 변경
+     */
+    @Transactional
+    public void changeTeacher(Long courseId, Long newTeacherId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+
+        // 1. 유효성 검증: 새 담당 교사의 스케줄 중복 확인
+        List<CourseTimeSlot> timeSlots = course.getTimeSlots();
+        for (CourseTimeSlot slot : timeSlots) {
+            int conflictCount = courseMapper.countTeacherSchedule(
+                    course.getAcademicYearId(),
+                    newTeacherId,
+                    slot.getDayOfWeek(),
+                    slot.getPeriod());
+
+            if (conflictCount > 0) {
+                throw new IllegalStateException(
+                        String.format("해당 교사는 %s %d교시에 이미 수업이 있습니다.", slot.getDayOfWeek(), slot.getPeriod()));
+            }
+        }
+
+        // 2. 교사 변경 반영
+        course.updateCourseInfo(null, null, null, null, null, null, newTeacherId);
+
+        // 3. 알림 발송 (Simulated)
+        // notificationService.send(course.getEnrollments(), "담당 선생님이 변경되었습니다.");
+    }
+
+    /**
+     * 학생 수강 일괄/강제 등록
+     * - studentIds: 학생 ID 리스트 (1명이면 개별 등록, 여러 명이면 일괄 등록)
+     * - force: 정원 초과 무시 여부
+     * - 중복 시간표 체크:
+     * - 선택과목(ELECTIVE) 중복 시: 기존 내역 자동 취소 후 등록
+     * - 필수과목(MANDATORY) 중복 시: 예외 발생 (등록 불가)
+     */
+    @Transactional
+    public void enrollStudents(Long courseId, List<Long> studentIds, boolean force) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+
+        // 1. 정원 초과 체크 (force=true이면 무시)
+        if (!force) {
+            long currentCount = enrollmentRepository.findByCourseId(courseId).stream()
+                    .filter(e -> e
+                            .getStatus() == Enrollment.EnrollmentStatus.APPLIED)
+                    .count();
+            if (currentCount + studentIds.size() > course.getMaxCapacity()) {
+                throw new IllegalStateException("수강 정원이 초과되었습니다.");
+            }
+        }
+
+        // 2. 학생별 등록 프로세스
+        for (Long studentId : studentIds) {
+            // 2-1. 시간표 중복 검사
+            for (CourseTimeSlot slot : course.getTimeSlots()) {
+                List<java.util.Map<String, Object>> conflicts = courseMapper.findConflictingEnrollments(
+                        course.getAcademicYearId(),
+                        studentId,
+                        slot.getDayOfWeek(),
+                        slot.getPeriod());
+
+                for (java.util.Map<String, Object> conflict : conflicts) {
+                    String existingTypeStr = (String) conflict.get("courseType");
+                    CourseType existingType = CourseType.valueOf(existingTypeStr);
+                    Long existingEnrollmentId = (Long) conflict.get("enrollmentId");
+
+                    if (existingType == CourseType.MANDATORY) {
+                        throw new IllegalStateException(String.format(
+                                "학생(ID:%d)은 해당 시간에 이미 필수 과목[%s]이 있어 등록할 수 없습니다.",
+                                studentId, conflict.get("courseName")));
+                    } else {
+                        // 선택 과목이면 자동 취소
+                        Enrollment existingEnrollment = enrollmentRepository
+                                .findById(existingEnrollmentId).orElseThrow();
+                        existingEnrollment.cancel();
+                    }
+                }
+            }
+
+            // 2-2. 수강 등록
+            Enrollment enrollment = Enrollment
+                    .builder()
+                    .userId(studentId)
+                    .courseId(courseId)
+                    .build();
+            enrollmentRepository.save(enrollment);
+        }
+    }
+
+    /**
+     * 강좌 폐강 (상태 변경 및 수강생 일괄 취소) -> 강좌 삭제(DeleteCourse) (Soft Delete)
+     * - 강좌 상태: CANCELED
+     * - 수강생 상태: FORCED_CANCELED
+     */
+    @Transactional
+    public void deleteCourse(Long courseId, String reason) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+
+        // 1. 강좌 상태 변경 (CANCELED)
+        course.changeStatus(CourseStatus.CANCELED);
+
+        // 2. 수강생 일괄 취소 (FORCED_CANCELED)
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseId(courseId);
+        for (Enrollment enrollment : enrollments) {
+            if (enrollment.getStatus() == Enrollment.EnrollmentStatus.APPLIED) {
+                enrollment.forceCancel("강좌 폐강(삭제): " + reason);
+            }
+        }
+    }
+
+    /**
+     * 학생 수강 강제 취소 (개별)
+     */
+    @Transactional
+    public void forceCancelStudent(Long courseId, Long studentId, String reason) {
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("취소 사유는 필수 입력 값입니다.");
+        }
+
+        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
+                .stream()
+                .filter(e -> e.getUserId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("해당 학생의 수강 신청 내역이 없습니다."));
+
+        enrollment.forceCancel(reason);
+    }
+
+    @Transactional(readOnly = true)
+    public StudentDetailResDTO getStudentDetail(Long courseId, Long studentId) {
+        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
+                .stream()
+                .filter(e -> e.getUserId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
+
+        long presentCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
+                Attendance.AttendanceStatus.PRESENT);
+        long lateCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
+                Attendance.AttendanceStatus.LATE);
+        long absentCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
+                Attendance.AttendanceStatus.ABSENT);
+
+        return StudentDetailResDTO.builder()
+                .studentId(studentId)
+                .studentName("Student_" + studentId)
+                .memo(enrollment.getMemo())
+                .attendancePresent(presentCount)
+                .attendanceLate(lateCount)
+                .attendanceAbsent(absentCount)
+                .assignmentTotal(0)
+                .assignmentSubmitted(0)
+                .build();
+    }
+
+    @Transactional
+    public void updateStudentMemo(Long courseId, Long studentId, String memo) {
+        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
+                .stream()
+                .filter(e -> e.getUserId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
+
+        enrollment.updateMemo(memo);
+    }
+
+    /**
+     * 교사별 강좌 목록 조회 (Paging)
+     */
+    @Transactional(readOnly = true)
+    public Page<CourseListResDTO> getCourseList(Long teacherDetailId, Pageable pageable) {
+        return courseRepository.findByTeacherDetailId(teacherDetailId, pageable)
+                .map(this::convertToCourseListResDTO);
+    }
+
+    /**
+     * 전체 강좌 목록 조회 (관리자용 - Paging)
+     */
+    @Transactional(readOnly = true)
+    public Page<CourseListResDTO> getAllCourses(Pageable pageable) {
+        return courseRepository.findAll(pageable)
+                .map(this::convertToCourseListResDTO);
+    }
+
+    private CourseListResDTO convertToCourseListResDTO(Course course) {
+        return CourseListResDTO.builder()
+                .courseId(course.getId())
+                .name(course.getName())
+                .courseType(course.getCourseType())
+                .status(course.getStatus())
+                .currentCount(course.getCurrentCount())
+                .maxCapacity(course.getMaxCapacity())
+                .teacherName("Teacher_" + course.getTeacherDetailId()) // Placeholder: 실제 교사명 조회 필요
+                .build();
+    }
+
+    /**
+     * 강좌 상태 수동 변경 (조기 마감 / 재오픈)
+     * - OPEN <-> CLOSED 상태 전환만 허용 (기타 상태 변경은 별도 프로세스 따름)
+     */
+    @Transactional
+    public void changeCourseStatus(Long courseId, CourseStatus status) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+
+        // 유효성 검증: 수동 변경은 OPEN, CLOSED 만 가능하도록 제한
+        if (status != CourseStatus.OPEN && status != CourseStatus.CLOSED) {
+            throw new IllegalArgumentException("수동 상태 변경은 개설(OPEN) 또는 마감(CLOSED) 상태로만 가능합니다.");
+        }
+
+        course.changeStatus(status);
+    }
+
+    /**
+     * 교사 주간 시간표 조회
+     * Grid 형태이므로, 요일/교시별로 매핑된 리스트 반환
+     */
+    @Transactional(readOnly = true)
+    public com.mycompany.project.course.dto.TeacherTimetableResDTO getTeacherTimetable(Long teacherDetailId,
+            Long academicYearId) {
+        List<java.util.Map<String, Object>> timeSlotsMap = courseMapper.findTeacherTimetable(academicYearId,
+                teacherDetailId);
+
+        List<com.mycompany.project.course.dto.TeacherTimetableResDTO.TimeSlotInfo> timeSlots = timeSlotsMap.stream()
+                .map(m -> com.mycompany.project.course.dto.TeacherTimetableResDTO.TimeSlotInfo.builder()
+                        .dayOfWeek((String) m.get("dayOfWeek"))
+                        .period((Integer) m.get("period"))
+                        .courseId((Long) m.get("courseId"))
+                        .courseName((String) m.get("courseName"))
+                        .classroom((String) m.get("classroom"))
+                        .courseType(String.valueOf(m.get("courseType")))
+                        .build())
+                .collect(java.util.stream.Collectors.toList());
+
+        return com.mycompany.project.course.dto.TeacherTimetableResDTO.builder()
+                .timeSlots(timeSlots)
+                .build();
+    }
 }

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.mycompany.project.course.dto.StudentDetailResDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -65,9 +66,79 @@ public class CourseController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "시간표 격자 조회", description = "지정된 학기/사용자의 시간표를 격자(Grid) 형태로 조회합니다. (미구현)")
-    @GetMapping("/timetable")
-    public void getTimetable(@RequestParam String semester, @RequestParam Long userId) {
-        // ... (Existing placeholder)
+    @Operation(summary = "담당 교사 변경", description = "강좌의 담당 교사를 변경합니다. (시간표 중복 확인 포함)")
+    @PostMapping("/{courseId}/change-teacher")
+    public ResponseEntity<Void> changeTeacher(@PathVariable Long courseId, @RequestParam Long newTeacherId) {
+        courseService.changeTeacher(courseId, newTeacherId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "강좌 삭제 (DeleteCourse)", description = "운영 중인 강좌를 폐강(삭제) 처리합니다. (상태: CANCELED, 수강생 일괄 취소)")
+    @PostMapping("/{courseId}/cancel")
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long courseId, @RequestParam String reason) {
+        courseService.deleteCourse(courseId, reason);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "수강생 상세 조회", description = "수강생의 출결 및 과제 현황, 메모를 조회합니다.")
+    @GetMapping("/{courseId}/students/{studentId}")
+    public ResponseEntity<StudentDetailResDTO> getStudentDetail(
+            @PathVariable Long courseId,
+            @PathVariable Long studentId) {
+        return ResponseEntity.ok(courseService.getStudentDetail(courseId, studentId));
+    }
+
+    @Operation(summary = "수강생 강제 취소", description = "특정 수강생의 수강 신청을 강제로 취소합니다. (사유 필수)")
+    @PostMapping("/{courseId}/students/{studentId}/force-cancel")
+    public ResponseEntity<Void> forceCancelStudent(
+            @PathVariable Long courseId,
+            @PathVariable Long studentId,
+            @RequestParam String reason) {
+        courseService.forceCancelStudent(courseId, studentId, reason);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "수강생 메모 수정", description = "수강생에 대한 특이사항 메모를 수정합니다.")
+    @PutMapping("/{courseId}/students/{studentId}/memo")
+    public ResponseEntity<Void> updateStudentMemo(
+            @PathVariable Long courseId,
+            @PathVariable Long studentId,
+            @RequestBody String memo) {
+        courseService.updateStudentMemo(courseId, studentId, memo);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "교사별 강좌 목록 조회", description = "특정 교사가 담당하는 강좌 목록을 페이징하여 조회합니다.")
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<org.springframework.data.domain.Page<com.mycompany.project.course.dto.CourseListResDTO>> getCourseList(
+            @PathVariable Long teacherId,
+            @org.springframework.data.web.PageableDefault(size = 10) org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(courseService.getCourseList(teacherId, pageable));
+    }
+
+    @Operation(summary = "전체 강좌 목록 조회 (관리자)", description = "전체 강좌 목록을 페이징하여 조회합니다. (관리자용)")
+    @GetMapping
+    public ResponseEntity<org.springframework.data.domain.Page<com.mycompany.project.course.dto.CourseListResDTO>> getAllCourses(
+            @org.springframework.data.web.PageableDefault(size = 10) org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(courseService.getAllCourses(pageable));
+    }
+
+    @Operation(summary = "강좌 상태 변경", description = "강좌의 상태를 수동으로 변경합니다. (예: 조기 마감, 재오픈)")
+    @PutMapping("/{courseId}/status")
+    public ResponseEntity<Void> changeCourseStatus(
+            @PathVariable Long courseId,
+            @RequestParam com.mycompany.project.course.entity.CourseStatus status) {
+        courseService.changeCourseStatus(courseId, status);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "교사 주간 시간표 조회", description = "교사의 주간 수업 일정(요일/교시별)을 조회합니다.")
+    @GetMapping("/teacher/{teacherId}/timetable")
+    public ResponseEntity<com.mycompany.project.course.dto.TeacherTimetableResDTO> getTeacherTimetable(
+            @PathVariable Long teacherId,
+            @RequestParam(defaultValue = "1") Long semester) { // Default semester should be handled properly in real
+                                                               // app
+        // semester 파라미터는 academicYearId로 가정 (실제로는 학기 서비스에서 현재 학기 ID를 가져와야 함)
+        return ResponseEntity.ok(courseService.getTeacherTimetable(teacherId, semester));
     }
 }

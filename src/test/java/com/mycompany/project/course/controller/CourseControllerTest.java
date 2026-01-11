@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,7 +25,7 @@ class CourseControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private CourseService courseService;
 
     @Autowired
@@ -93,5 +93,32 @@ class CourseControllerTest {
                 .andExpect(status().isOk());
 
         verify(courseService).requestCourseUpdate(eq(courseId), any(CourseUpdateReqDTO.class), eq(reason));
+    }
+
+    @Test
+    @DisplayName("강좌 삭제 (DeleteCourse) 테스트")
+    void deleteCourseTest() throws Exception {
+        Long courseId = 1L;
+        String reason = "Enrollment under capacity";
+
+        mockMvc.perform(post("/api/courses/{courseId}/cancel", courseId)
+                .param("reason", reason))
+                .andExpect(status().isOk());
+
+        verify(courseService).deleteCourse(courseId, reason);
+    }
+
+    @Test
+    @DisplayName("수강생 강제 취소 테스트")
+    void forceCancelStudentTest() throws Exception {
+        Long courseId = 1L;
+        Long studentId = 100L;
+        String reason = "Violated code of conduct";
+
+        mockMvc.perform(post("/api/courses/{courseId}/students/{studentId}/force-cancel", courseId, studentId)
+                .param("reason", reason))
+                .andExpect(status().isOk());
+
+        verify(courseService).forceCancelStudent(courseId, studentId, reason);
     }
 }

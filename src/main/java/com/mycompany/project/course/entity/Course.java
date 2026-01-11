@@ -25,13 +25,13 @@ public class Course {
 
   // 다른 도메인(Teacher, Subject 등)은 ID로만 참조 (느슨한 결합)
   @Column(name = "teacher_detail_id")
-  private Long teacherDetailId;
+  private Long teacherDetailId; // FK: tbl_teacher_detail
 
   @Column(name = "academic_year_id")
-  private Long academicYearId;
+  private Long academicYearId; // FK: tbl_academic_year
 
   @Column(name = "subject_id")
-  private Long subjectId;
+  private Long subjectId; // FK: tbl_subject
 
   @Column(name = "name", nullable = false, length = 100)
   private String name;
