@@ -7,6 +7,8 @@ import lombok.*;
 @Table(name = "tbl_subject")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class Subject {
 
     @Id

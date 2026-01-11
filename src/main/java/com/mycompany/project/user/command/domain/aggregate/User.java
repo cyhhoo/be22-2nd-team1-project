@@ -2,6 +2,10 @@ package com.mycompany.project.user.command.domain.aggregate;
 
 import com.mycompany.project.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,23 +26,32 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
+    @Email
+    @NotBlank
+    @Size(max = 100)
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
+    @NotBlank
     @Column(nullable = false)
     private String password;
 
+    @NotBlank
+    @Size(max = 50)
     @Column(nullable = false, length = 50)
     private String name;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status;
 
+    @NotBlank
     @Column(nullable = false)
     private String birthDate;
 
@@ -96,11 +109,12 @@ public class User extends BaseEntity {
             this.birthDate = birthDate;
     }
 
-  /**
-   * 비밀번호 변경 메서드
-   * @param encodedPassword
-   */
-  public void setPassword(String encodedPassword) {
-      this.password = encodedPassword;
-  }
+    /**
+     * 비밀번호 변경 메서드
+     * 
+     * @param encodedPassword
+     */
+    public void setPassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }
