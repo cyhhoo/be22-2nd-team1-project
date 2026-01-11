@@ -1,0 +1,35 @@
+package com.mycompany.project.user.command.application.controller;
+
+import com.mycompany.project.common.response.ApiResponse;
+import com.mycompany.project.user.command.application.dto.ChangePasswordRequest;
+import com.mycompany.project.user.command.application.service.UserMyPageService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/users/mypage")
+public class UserMyPageController {
+
+  private final UserMyPageService userMyPageService;
+
+  @PostMapping("/password")
+  public ResponseEntity<ApiResponse<Void>> changePassword(
+      @AuthenticationPrincipal UserDetails userDetails,
+      @RequestBody ChangePasswordRequest request ){
+
+    String email = userDetails.getUsername();
+
+    userMyPageService.changePassword(email,request);
+
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
+
+}

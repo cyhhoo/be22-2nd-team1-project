@@ -1,9 +1,8 @@
 package com.mycompany.project.schedule.query.controller;
 
-import com.mycompany.project.common.dto.ApiDTO;
+import com.mycompany.project.common.response.ApiResponse;
 import com.mycompany.project.schedule.query.dto.ScheduleResponse;
 import com.mycompany.project.schedule.query.service.ScheduleQueryService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +19,9 @@ public class ScheduleQueryController {
 
   // 3. 월별 일정 조회
   @GetMapping("/events")
-  public ApiDTO<List<ScheduleResponse>> getMonthlySchedules(
+  public ApiResponse<List<ScheduleResponse>> getMonthlySchedules(
           @RequestParam int year,
           @RequestParam int month) {
-      return ApiDTO.success(scheduleQueryService.getMonthlySchedules(year, month));
+      return ApiResponse.success(scheduleQueryService.getMonthlySchedules(year, month));
   }
 }

@@ -1,64 +1,61 @@
 package com.mycompany.project.enrollment.entity;
 
+import com.mycompany.project.common.entity.BaseEntity;
+import com.mycompany.project.course.entity.Course;
+import com.mycompany.project.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Table(name = "tbl_enrollment", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_enrollment", columnNames = { "course_id", "user_id" })
-})
+@Table(
+    name = "tbl_enrollment",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_enrollment_user_course",
+            columnNames = {"user_id", "course_id"}
+        )
+    }
+)
 @Getter
-@NoArgsConstructor
-@EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener.class)
-public class Enrollment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long enrollmentId;
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+public class Enrollment extends BaseEntity {
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long enrollmentId;
 
-    @Column(name = "course_id", nullable = false)
-    private Long courseId;
+  // Command 쪽은 객체 그래프 탐색과 무결성을 위해 연관관계 매핑 유지
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User student;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20)
-    private EnrollmentStatus status = EnrollmentStatus.APPLIED;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "course_id", nullable = false)
+  private Course course;
 
-    @org.springframework.data.annotation.CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private java.time.LocalDateTime createdAt;
+  @Enumerated(EnumType.STRING)
+  private EnrollmentStatus status;
 
-    @Column(name = "cancellation_reason")
-    private String cancellationReason; // 취소 사유 (강제 취소 시 필수)
+  @Builder
+  public Enrollment(User student, Course course) {
+    this.student = student;
+    this.course = course;
+    this.status = EnrollmentStatus.APPLIED;
+  }
 
-    @Builder
-    public Enrollment(Long userId, Long courseId) {
-        this.userId = userId;
-        this.courseId = courseId;
-        this.status = EnrollmentStatus.APPLIED;
+  // --- [핵심] 비즈니스 로직 (Command) ---
+  // Setter 대신 메서드로 상태를 변경합니다.
+  public void cancel() {
+    if (this.status == EnrollmentStatus.FORCED_CANCELED) {
+      throw new IllegalStateException("이미 강제 취소된 내역입니다.");
     }
-
-    public void cancel() {
-        this.status = EnrollmentStatus.CANCELED;
-    }
-
-    public void forceCancel(String reason) {
-        this.status = EnrollmentStatus.FORCED_CANCELED;
-        this.cancellationReason = reason;
-    }
-
-    @Lob
-    @Column(name = "memo")
-    private String memo;
-
-    public void updateMemo(String memo) {
-        this.memo = memo;
-    }
-
-    public enum EnrollmentStatus {
-        APPLIED, CANCELED, FORCED_CANCELED
-    }
+    this.status = EnrollmentStatus.CANCELED;
+  }
 }
+
+/*
+ * Command는 JPA를 쓰고, **Query는 MyBatis(또는 QueryDSL)**를 쓴다.
+ * Mapper가 query쪽, Command가 repository쪽
+ * */
