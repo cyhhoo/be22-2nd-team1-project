@@ -44,4 +44,29 @@
           AND c.status NOT IN ('CANCELED', 'REFUSE')
     </select>
 
+    <!-- 교사 주간 시간표 조회 (폐강/반려 제외) -->
+    <select id="findTeacherTimetable" resultType="java.util.Map">
+        SELECT
+            cts.day_of_week AS dayOfWeek,
+            cts.period AS period,
+            c.course_id AS courseId,
+            c.name AS courseName,
+            cts.classroom AS classroom,
+            c.course_type AS courseType
+        FROM tbl_course c
+        JOIN tbl_course_time_slot cts ON c.course_id = cts.course_id
+        WHERE c.academic_year_id = #{academicYearId}
+          AND c.teacher_detail_id = #{teacherDetailId}
+          AND c.status NOT IN ('CANCELED', 'REFUSE')
+        ORDER BY
+            CASE cts.day_of_week
+                WHEN 'MON' THEN 1
+                WHEN 'TUE' THEN 2
+                WHEN 'WED' THEN 3
+                WHEN 'THU' THEN 4
+                WHEN 'FRI' THEN 5
+                ELSE 6 END,
+            cts.period
+    </select>
+
 </mapper>

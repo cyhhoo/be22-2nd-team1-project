@@ -132,9 +132,13 @@ public class CourseController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "시간표 격자 조회", description = "지정된 학기/사용자의 시간표를 격자(Grid) 형태로 조회합니다. (미구현)")
-    @GetMapping("/timetable")
-    public void getTimetable(@RequestParam String semester, @RequestParam Long userId) {
-        // ... (Existing placeholder)
+    @Operation(summary = "교사 주간 시간표 조회", description = "교사의 주간 수업 일정(요일/교시별)을 조회합니다.")
+    @GetMapping("/teacher/{teacherId}/timetable")
+    public ResponseEntity<com.mycompany.project.course.dto.TeacherTimetableResDTO> getTeacherTimetable(
+            @PathVariable Long teacherId,
+            @RequestParam(defaultValue = "1") Long semester) { // Default semester should be handled properly in real
+                                                               // app
+        // semester 파라미터는 academicYearId로 가정 (실제로는 학기 서비스에서 현재 학기 ID를 가져와야 함)
+        return ResponseEntity.ok(courseService.getTeacherTimetable(teacherId, semester));
     }
 }

@@ -440,4 +440,30 @@ public class CourseService {
 
         course.changeStatus(status);
     }
+
+    /**
+     * 교사 주간 시간표 조회
+     * Grid 형태이므로, 요일/교시별로 매핑된 리스트 반환
+     */
+    @Transactional(readOnly = true)
+    public com.mycompany.project.course.dto.TeacherTimetableResDTO getTeacherTimetable(Long teacherDetailId,
+            Long academicYearId) {
+        List<java.util.Map<String, Object>> timeSlotsMap = courseMapper.findTeacherTimetable(academicYearId,
+                teacherDetailId);
+
+        List<com.mycompany.project.course.dto.TeacherTimetableResDTO.TimeSlotInfo> timeSlots = timeSlotsMap.stream()
+                .map(m -> com.mycompany.project.course.dto.TeacherTimetableResDTO.TimeSlotInfo.builder()
+                        .dayOfWeek((String) m.get("dayOfWeek"))
+                        .period((Integer) m.get("period"))
+                        .courseId((Long) m.get("courseId"))
+                        .courseName((String) m.get("courseName"))
+                        .classroom((String) m.get("classroom"))
+                        .courseType(String.valueOf(m.get("courseType")))
+                        .build())
+                .collect(java.util.stream.Collectors.toList());
+
+        return com.mycompany.project.course.dto.TeacherTimetableResDTO.builder()
+                .timeSlots(timeSlots)
+                .build();
+    }
 }
