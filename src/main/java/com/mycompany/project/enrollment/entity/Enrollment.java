@@ -2,7 +2,7 @@ package com.mycompany.project.enrollment.entity;
 
 import com.mycompany.project.common.entity.BaseEntity;
 import com.mycompany.project.course.entity.Course;
-import com.mycompany.project.user.entity.User;
+import com.mycompany.project.user.command.domain.aggregate.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,8 +11,8 @@ import lombok.*;
     name = "tbl_enrollment",
     uniqueConstraints = {
         @UniqueConstraint(
-            name = "uk_enrollment_user_course",
-            columnNames = {"user_id", "course_id"}
+            name = "uk_enrollment_student_course",
+            columnNames = {"student_id", "course_id"}
         )
     }
 )
@@ -28,7 +28,7 @@ public class Enrollment extends BaseEntity {
 
   // Command 쪽은 객체 그래프 탐색과 무결성을 위해 연관관계 매핑 유지
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
+  @JoinColumn(name = "student_id", nullable = false)
   private User student;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -43,6 +43,14 @@ public class Enrollment extends BaseEntity {
     this.student = student;
     this.course = course;
     this.status = EnrollmentStatus.APPLIED;
+  }
+
+  public Long getStudentId() {
+    return student != null ? student.getUserId() : null;
+  }
+
+  public Long getCourseId() {
+    return course != null ? course.getId() : null;
   }
 
   // --- [핵심] 비즈니스 로직 (Command) ---

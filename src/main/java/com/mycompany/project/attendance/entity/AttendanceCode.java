@@ -1,9 +1,7 @@
 package com.mycompany.project.attendance.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +13,8 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA 스펙 + 외부에서 무분별한 생성 방지
 @Entity
+@AllArgsConstructor
+@Builder
 @Table(name = "tbl_attendance_code")
 public class AttendanceCode {
 

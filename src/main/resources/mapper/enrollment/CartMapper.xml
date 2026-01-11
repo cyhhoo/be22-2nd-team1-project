@@ -5,7 +5,7 @@
 <mapper namespace="com.mycompany.project.enrollment.repository.CartMapper">
 
 
-    <select id="selectCartListByUserId" resultType="com.mycompany.project.enrollment.query.dto.CartListResponse">
+    <select id="selectCartListByStudentId" resultType="com.mycompany.project.enrollment.query.dto.CartListResponse">
         SELECT
             c.cart_id AS cartId,
             co.name AS courseName,
@@ -21,7 +21,7 @@
         JOIN
             tbl_user u ON td.user_id = u.user_id
         WHERE
-            c.user_id = #{userId}
+            c.student_id = #{studentId}
         ORDER BY
             c.created_at DESC
     </select>

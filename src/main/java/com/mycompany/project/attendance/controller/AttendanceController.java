@@ -1,52 +1,107 @@
 package com.mycompany.project.attendance.controller;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+// ====== 요청(Request) DTO ======
+import com.mycompany.project.attendance.dto.request.AttendanceConfirmRequest;   // 확정 요청 바디(JSON) DTO
+import com.mycompany.project.attendance.dto.request.AttendanceCreateRequest;    // 출석부 생성 요청 바디(JSON) DTO
+import com.mycompany.project.attendance.dto.request.AttendanceSearchRequest;    // 조회 조건(쿼리스트링) DTO
+import com.mycompany.project.attendance.dto.request.AttendanceUpdateRequest;    // 출결 저장(여러 학생) 요청 바디 DTO
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+// ====== 응답(Response) DTO ======
+import com.mycompany.project.attendance.dto.response.AttendanceListResponse;    // 목록/행 단위 응답 DTO
+import com.mycompany.project.attendance.dto.response.AttendanceResponse;        // 상세(단건) 응답 DTO
 
-@Tag(name = "출결 관리 (Attendance)", description = "출석부 생성 및 마감 관리 API")
+// ====== 서비스(비즈니스 로직) ======
+import com.mycompany.project.attendance.service.AttendanceCommandService;       // CUD(쓰기) 담당: 생성/저장/확정
+import com.mycompany.project.attendance.service.AttendanceQueryService;         // Read(조회) 담당: 상세/목록 조회
+
+// ====== 롬복/스프링 MVC ======
+import lombok.RequiredArgsConstructor;                                          // final 필드 생성자 자동 생성
+import org.springframework.web.bind.annotation.GetMapping;                      // GET 요청 매핑
+import org.springframework.web.bind.annotation.ModelAttribute;                  // 쿼리스트링 → DTO 바인딩
+import org.springframework.web.bind.annotation.PathVariable;                    // URL 경로 변수 바인딩
+import org.springframework.web.bind.annotation.PostMapping;                     // POST 요청 매핑
+import org.springframework.web.bind.annotation.RequestBody;                     // JSON 바디 → DTO 바인딩
+import org.springframework.web.bind.annotation.RequestMapping;                  // 클래스 공통 URL 매핑
+import org.springframework.web.bind.annotation.RestController;                  // JSON 응답 컨트롤러(Controller + ResponseBody)
+
+// ====== 스웨거(OpenAPI) ======
+import io.swagger.v3.oas.annotations.Operation;                                 // API 문서: 메서드 설명
+import io.swagger.v3.oas.annotations.tags.Tag;                                  // API 문서: 컨트롤러 그룹
+
+@Tag(
+        name = "출결 관리 (Attendance)",
+        description = "출석부 생성 및 마감 관리 API"
+) // Swagger에서 이 컨트롤러를 하나의 그룹으로 묶어준다.
 @RestController
-@RequestMapping("/api/attendance")
+@RequiredArgsConstructor // final 필드(서비스)들을 생성자로 주입하기 위해 사용
+@RequestMapping("/api/attendance") // 이 컨트롤러의 기본 주소(공통 prefix)
 public class AttendanceController {
 
-    /*
-     * [구현 가이드: Service 의존성 주입]
-     * private final AttendanceService attendanceService;
-     */
+    // "쓰기" 로직 담당 서비스(JPA 기반 Command).
+    private final AttendanceCommandService attendanceCommandService;
 
-    @Operation(summary = "출석부 자동 생성 (조회 겸 생성)", description = "특정 강좌의 해당 날짜/교시 출석 데이터를 조회하거나 없으면 자동 생성합니다.")
-    @PostMapping("/generate/{courseId}")
-    public void generateAttendanceSheet(@PathVariable Long courseId) {
-        /*
-         * [구현 가이드: 출석부 생성 로직 순서]
-         * 1. 요청받은 courseId와 날짜(오늘 등), 교시 정보를 확인합니다.
-         * 2. DB 조회: 해당 날짜/교시에 이미 생성된 출결 데이터가 있는지 확인합니다.
-         * 3. 데이터가 존재한다면:
-         * - 이미 생성된 리스트를 반환합니다.
-         * 4. 데이터가 없다면 (최초 조회 시):
-         * - 해당 강좌를 수강하는 모든 학생 목록을 조회합니다 (Enrollment 테이블 활용).
-         * - 각 학생에 대해 기본 상태값(예: PRESENT-출석)을 가진 Attendance 객체를 메모리에 생성합니다.
-         * - JPA saveAll() 또는 MyBatis Bulk Insert를 사용하여 DB에 일괄 저장합니다. (성능 고려)
-         * - 저장된 데이터를 반환합니다.
-         */
+    // "조회" 로직 담당 서비스(MyBatis 기반 Query).
+    private final AttendanceQueryService attendanceQueryService;
+
+    @Operation(
+            summary = "출석부 자동 생성 (조회 겸 생성)",
+            description = "특정 강좌의 해당 날짜/교시 출석 데이터를 조회하거나 없으면 자동 생성합니다."
+    )
+    @PostMapping("/generate") // POST /api/attendance/generate
+    public java.util.List<AttendanceListResponse> generateAttendanceSheet(
+            @RequestBody AttendanceCreateRequest request
+    ) {
+        // request: courseId, classDate, period, userId(교사) 등이 들어온다.
+        // 흐름:
+        // 1) 이미 출결이 있으면 그대로 조회 결과를 반환
+        // 2) 없으면 enrollment(수강신청) 기준으로 출결을 생성한 뒤 조회 결과를 반환
+        return attendanceCommandService.generateAttendances(request);
     }
 
-    @Operation(summary = "출결 마감", description = "교사가 해당 수업의 출결 상태를 '마감' 처리합니다.")
-    @PostMapping("/close/{attendanceLogId}")
-    public void closeAttendance(@PathVariable Long attendanceLogId) {
-        /*
-         * [구현 가이드: 출결 마감 로직 (상태 머신)]
-         * 1. 해당 수업의 출결 로그 또는 관리 데이터(AttendanceLog)를 조회합니다.
-         * 2. 권한 체크: 요청자가 해당 강좌의 담당 교사인지 확인합니다.
-         * 3. 상태 변경:
-         * - 현재 상태를 확인하고, '마감(CLOSED)' 상태로 업데이트합니다.
-         * 4. 마감 이후 정책:
-         * - 마감 상태가 된 이후에는 일반 교사가 출결을 수정할 수 없도록, 수정 API 등에서 상태 체크 로직이 필요합니다.
-         * - 관리자(ADMIN) 권한으로만 수정 가능하도록 제한합니다.
-         */
+    @Operation(
+            summary = "출결 저장(등록/수정)",
+            description = "교사가 출결 정보를 저장하거나 수정합니다."
+    )
+    @PostMapping("/save") // POST /api/attendance/save
+    public void saveAttendance(@RequestBody AttendanceUpdateRequest request) {
+        // request.items에 여러 학생(enrollment) 출결이 들어올 수 있다.
+        // 중요한 규칙:
+        // - CONFIRMED(확정) / CLOSED(마감) 상태는 수정이 막혀야 한다.
+        // - 저장은 SAVED 상태로 남긴다(담임 확정 전 단계).
+        attendanceCommandService.saveAttendances(request);
+    }
+
+    @Operation(
+            summary = "출결 확정",
+            description = "담임/책임교사가 출결을 확정합니다."
+    )
+    @PostMapping("/confirm") // POST /api/attendance/confirm
+    public void confirmAttendance(@RequestBody AttendanceConfirmRequest request) {
+        // 확정은 "담임" 또는 정책상 허용된 권한만 가능해야 한다.
+        // 또, 미입력 출결(해당 날짜/교시에 attendance가 없는 학생)이 있으면 확정이 막혀야 한다.
+        attendanceCommandService.confirmAttendances(request);
+    }
+
+    @Operation(
+            summary = "출결 상세 조회",
+            description = "출결 단건 상세를 조회합니다."
+    )
+    @GetMapping("/{attendanceId}") // GET /api/attendance/{attendanceId}
+    public AttendanceResponse getAttendance(@PathVariable Long attendanceId) {
+        // 경로로 들어온 attendanceId로 단건 조회한다.
+        // (QueryService 쪽에서 MyBatis로 join해서 상세 응답을 만들 가능성이 높음)
+        return attendanceQueryService.findById(attendanceId);
+    }
+
+    @Operation(
+            summary = "출결 목록 조회",
+            description = "조건에 따라 출결 목록을 조회합니다."
+    )
+    @GetMapping // GET /api/attendance?courseId=...&fromDate=...&toDate=...&period=...
+    public java.util.List<AttendanceListResponse> search(@ModelAttribute AttendanceSearchRequest request) {
+        // @ModelAttribute:
+        // - GET 쿼리스트링 값을 AttendanceSearchRequest 필드에 자동으로 채워준다.
+        // - 예: ?courseId=1&period=2&fromDate=2026-01-01&toDate=2026-01-31
+        return attendanceQueryService.search(request);
     }
 }

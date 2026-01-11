@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:testdb;MODE=MariaDB;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=YEAR
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -12,6 +12,13 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.mycompany.project
+  configuration:
+    map-underscore-to-camel-case: true
+
 
 jwt:
   secret: testSecretKeyForTestingPurposesMustBeLongEnoughToSatisfyReviewRequirements2026!

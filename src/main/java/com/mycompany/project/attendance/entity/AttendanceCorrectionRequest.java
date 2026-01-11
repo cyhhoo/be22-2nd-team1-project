@@ -2,9 +2,7 @@ package com.mycompany.project.attendance.entity;
 
 import com.mycompany.project.attendance.entity.enums.CorrectionStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +14,8 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@AllArgsConstructor
+@Builder
 @Table(name = "tbl_attendance_correction_request")
 public class AttendanceCorrectionRequest {
 
@@ -40,7 +40,7 @@ public class AttendanceCorrectionRequest {
 
     /** 처리 상태 */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "ENUM('PENDING','APPROVED','REJECTED')")
+    @Column(nullable = false, length = 20)
     private CorrectionStatus status;
 
     /** 요청자(교사) */

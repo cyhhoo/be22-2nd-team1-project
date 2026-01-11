@@ -2,7 +2,7 @@ package com.mycompany.project.enrollment.repository;
 
 import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.enrollment.entity.Cart;
-import com.mycompany.project.user.entity.User;
+import com.mycompany.project.user.command.domain.aggregate.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
