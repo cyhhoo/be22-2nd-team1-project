@@ -1,28 +1,170 @@
-  ### 출결 저장
-  POST http://localhost:8080/api/attendance/save
-    Content-Type: application/json
+@baseUrl = http://localhost:8080
+@email = test@example.com
+@password = Password123!
+@name = Test User
+@birthDate = 2005-01-01
+@role = STUDENT
+# registerUser() uses birthDate.substring(2), so 2005-01-01 -> 05-01-01
+@authCode = 05-01-01
+@accessToken =
+@refreshToken =
+@teacherEmail = teacher@schoolmate.test
+@teacherPassword = Password123!
+@teacherUserId = 10
+@teacherAccessToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNzY4MTM2ODIxLCJleHAiOjE3NjgxMzg2MjEsImF1dGgiOiJTVFVERU5UIn0.pK21IhEeBd_6QcI6pkZHQwaV3_mHYqJcfAlHxvTz0_d975X9Dn7OqfeMq8iKSXu8ewNwlaFT_hYEGQHEMrwAdg
+@adminEmail = admin@schoolmate.test
+@adminPassword = Password123!
+@adminUserId = 1
+@adminAccessToken =
+
+### 회원가입
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "name": "{{name}}",
+  "birthDate": "{{birthDate}}",
+  "role": "{{role}}"
+}
+
+### 계정 활성화
+POST {{baseUrl}}/api/auth/activate
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "name": "{{name}}",
+  "birthDate": "{{birthDate}}",
+  "authCode": "{{authCode}}",
+  "newPassword": "{{password}}"
+}
+
+### 로그인
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### 교사 로그인 (샘플 데이터)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### 관리자 로그인 (샘플 데이터)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+### 토큰 재발급 (RefreshToken 쿠키 필요)
+POST {{baseUrl}}/api/auth/reissue
+Cookie: RefreshToken={{refreshToken}}
+
+### 비밀번호 변경 (로그인 후 accessToken 필요)
+POST {{baseUrl}}/api/users/mypage/password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "{{password}}",
+  "newPassword": "NewPassword123!"
+}
+
+### 출결 자동 생성 (인증 필요)
+POST {{baseUrl}}/api/attendance/generate
+Authorization: Bearer {{teacherAccessToken}}
+Content-Type: application/json
+
+{
+  "courseId": 2001,
+  "classDate": "2025-03-01",
+  "period": 1,
+  "userId": {{teacherUserId}}
+}
+
+### 출결 저장 (임시로 인증 없이 허용됨)
+POST {{baseUrl}}/api/attendance/save
+Content-Type: application/json
 
   {
     "courseId": 2001,
     "classDate": "2025-03-01",
     "period": 1,
-    "userId": 10,
+    "userId": {{teacherUserId}},
     "items": [
       { "enrollmentId": 3001, "attendanceCodeId": 2, "reason": "지각" },
       { "enrollmentId": 3002, "attendanceCodeId": 1, "reason": null }
     ]
   }
 
-  ### 출결 확정
-  POST http://localhost:8080/api/attendance/confirm
-  Content-Type: application/json
+### 출결 코드 목록 조회
+GET {{baseUrl}}/api/attendance/codes?activeOnly=true
+
+### 출결 확정 (인증 필요)
+POST {{baseUrl}}/api/attendance/confirm
+Authorization: Bearer {{teacherAccessToken}}
+Content-Type: application/json
 
   {
     "courseId": 2001,
     "classDate": "2025-03-01",
     "period": 1,
-    "userId": 10
+    "userId": {{teacherUserId}}
   }
 
-  ### 출결 조회
-  GET http://localhost:8080/api/attendance?fromDate=2025-03-01&toDate=2025-03-01&courseId=2001&period=1
+### 출결 마감 (인증 필요)
+POST {{baseUrl}}/api/attendance/closures
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+
+  {
+    "academicYearId": 1,
+    "scopeType": "MONTH",
+    "scopeValue": "2025-03",
+    "courseId": 2001,
+    "userId": {{adminUserId}}
+  }
+
+### 출결 정정 요청 (인증 필요, 확정 후 테스트 권장)
+POST {{baseUrl}}/api/attendance/corrections
+Authorization: Bearer {{teacherAccessToken}}
+Content-Type: application/json
+
+  {
+    "attendanceId": 4001,
+    "requestedAttendanceCodeId": 1,
+    "requestReason": "지각이 아니라 출석",
+    "requestedBy": {{teacherUserId}}
+  }
+
+### 출결 정정 승인 (인증 필요)
+POST {{baseUrl}}/api/attendance/corrections/decide
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+
+  {
+    "requestId": 1,
+    "approved": true,
+    "adminId": {{adminUserId}}
+  }
+
+### 출결 조회 (인증 필요)
+GET {{baseUrl}}/api/attendance?fromDate=2025-03-01&toDate=2025-03-01&courseId=2001&period=1
+Authorization: Bearer {{teacherAccessToken}}
+
+### 출결 단건 조회 (인증 필요)
+GET {{baseUrl}}/api/attendance/1
+Authorization: Bearer {{teacherAccessToken}}
+GET {{baseUrl}}/api/attendance?fromDate=2025-03-01&toDate=2025-03-01&courseId=2001&period=1

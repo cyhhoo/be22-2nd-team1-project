@@ -1,12 +1,13 @@
 -- Minimal sample data for attendance HTTP tests (schoolmate DB)
 -- Assumes schema aligned with current entities (student_id/teacher_id columns)
 
+-- Password123! (BCrypt, cost 10)
 INSERT INTO tbl_user (user_id, email, password, name, role, status, birth_date, auth_code, login_fail_count, last_login_at, created_at, updated_at)
 VALUES
-  (1, 'admin@schoolmate.test', 'password', 'Admin', 'ADMIN', 'ACTIVE', '1980-01-01', NULL, 0, NULL, NOW(), NOW()),
-  (10, 'teacher@schoolmate.test', 'password', 'Teacher', 'TEACHER', 'ACTIVE', '1985-03-01', NULL, 0, NULL, NOW(), NOW()),
-  (1001, 'student1@schoolmate.test', 'password', 'Student One', 'STUDENT', 'ACTIVE', '2007-03-01', NULL, 0, NULL, NOW(), NOW()),
-  (1002, 'student2@schoolmate.test', 'password', 'Student Two', 'STUDENT', 'ACTIVE', '2007-03-02', NULL, 0, NULL, NOW(), NOW())
+  (1, 'admin@schoolmate.test', '$2y$10$mMjh4c03VZZxgMT/CW/qXOfEbOAws6xaygO/CWaNQ3NagUE4xiucG', 'Admin', 'ADMIN', 'ACTIVE', '1980-01-01', NULL, 0, NULL, NOW(), NOW()),
+  (10, 'teacher@schoolmate.test', '$2y$10$mMjh4c03VZZxgMT/CW/qXOfEbOAws6xaygO/CWaNQ3NagUE4xiucG', 'Teacher', 'TEACHER', 'ACTIVE', '1985-03-01', NULL, 0, NULL, NOW(), NOW()),
+  (1001, 'student1@schoolmate.test', '$2y$10$mMjh4c03VZZxgMT/CW/qXOfEbOAws6xaygO/CWaNQ3NagUE4xiucG', 'Student One', 'STUDENT', 'ACTIVE', '2007-03-01', NULL, 0, NULL, NOW(), NOW()),
+  (1002, 'student2@schoolmate.test', '$2y$10$mMjh4c03VZZxgMT/CW/qXOfEbOAws6xaygO/CWaNQ3NagUE4xiucG', 'Student Two', 'STUDENT', 'ACTIVE', '2007-03-02', NULL, 0, NULL, NOW(), NOW())
 ON DUPLICATE KEY UPDATE
   email = VALUES(email),
   name = VALUES(name),
@@ -77,3 +78,25 @@ ON DUPLICATE KEY UPDATE
   is_excused = VALUES(is_excused),
   is_active = VALUES(is_active),
   updated_at = VALUES(updated_at);
+
+INSERT INTO tbl_attendance (
+  attendance_id, class_date, period, reason, state, saved_by, saved_at,
+  confirmed_by, confirmed_at, closed_at, created_at, updated_at,
+  attendance_code_id, enrollment_id
+)
+VALUES
+  (4001, '2025-03-01', 1, '지각', 'SAVED', 10, NOW(), NULL, NULL, NULL, NOW(), NOW(), 2, 3001),
+  (4002, '2025-03-01', 1, NULL, 'SAVED', 10, NOW(), NULL, NULL, NULL, NOW(), NOW(), 1, 3002)
+ON DUPLICATE KEY UPDATE
+  class_date = VALUES(class_date),
+  period = VALUES(period),
+  reason = VALUES(reason),
+  state = VALUES(state),
+  saved_by = VALUES(saved_by),
+  saved_at = VALUES(saved_at),
+  confirmed_by = VALUES(confirmed_by),
+  confirmed_at = VALUES(confirmed_at),
+  closed_at = VALUES(closed_at),
+  updated_at = VALUES(updated_at),
+  attendance_code_id = VALUES(attendance_code_id),
+  enrollment_id = VALUES(enrollment_id);

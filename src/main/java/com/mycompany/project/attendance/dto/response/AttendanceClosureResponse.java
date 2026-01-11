@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+
+// 출결 마감 이력
 public class AttendanceClosureResponse {
 
     // 마감자

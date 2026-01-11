@@ -37,16 +37,27 @@ public class SecurityConfig {
         // 2. 세션 미사용 (Stateless 설정)
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        // 3. URL별 접근 권한 설정
-        .authorizeHttpRequests(auth -> auth
-            // Swagger UI는 누구나 접근 가능
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            // 로그인/회원가입 API는 누구나 접근 가능
-            .requestMatchers("/api/auth/**").permitAll()
-            // 업로드된 파일 접근 허용
-            .requestMatchers("/uploads/**").permitAll()
-            // 그 외 모든 요청은 인증 필요
-            .anyRequest().authenticated())
+//        // 3. URL별 접근 권한 설정
+//        .authorizeHttpRequests(auth -> auth
+//            // Swagger UI는 누구나 접근 가능
+//            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+//            // 로그인/회원가입 API는 누구나 접근 가능
+//            .requestMatchers("/api/auth/**").permitAll()
+//            // 업로드된 파일 접근 허용
+//            .requestMatchers("/uploads/**").permitAll()
+//            // 그 외 모든 요청은 인증 필요
+//            .anyRequest().authenticated())
+
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/uploads/**").permitAll()
+
+                    // ✅ 임시로 출결 저장만 열기
+                    .requestMatchers(HttpMethod.POST, "/api/attendance/save").permitAll()
+
+                    .anyRequest().authenticated()
+            )
 
         // 4. JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 끼워넣기
         .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

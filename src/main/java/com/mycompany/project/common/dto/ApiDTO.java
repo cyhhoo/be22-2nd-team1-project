@@ -27,4 +27,5 @@ public class ApiDTO<T> {
     public static <T> ApiDTO<T> error(String message) {
         return new ApiDTO<>("ERROR", message, null);
     }
+
 }

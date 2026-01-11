@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    // 출결 코드 (출석, 지각, 결석 같은 코드 목록 상세
     public class AttendanceCodeResponse {
 
         // PK

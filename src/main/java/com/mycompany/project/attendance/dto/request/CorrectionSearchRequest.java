@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+// 정정요청 목록/ 검색
 public class CorrectionSearchRequest {
 
     // 특정 출결(attendance) 기준으로 정정요청 보기 (선택)

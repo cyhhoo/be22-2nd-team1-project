@@ -1,11 +1,9 @@
 package com.mycompany.project.attendance.mapper;
 
 import com.mycompany.project.attendance.dto.response.AttendanceCodeResponse;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,9 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 class AttendanceCodeQueryMapperTest {
-
-//    @Value("${jwt.secret")
-//    private String secret;
 
     @Autowired
     private AttendanceCodeQueryMapper attendanceCodeQueryMapper;

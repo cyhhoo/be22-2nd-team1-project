@@ -1,8 +1,8 @@
 package com.mycompany.project.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mycompany.project.user.command.dto.SignupRequest;
-import com.mycompany.project.user.entity.Role;
+import com.mycompany.project.auth.command.dto.UserRegisterRequest;
+import com.mycompany.project.user.command.domain.aggregate.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,14 +26,14 @@ public class SignupIntegrationTest {
 
     @Test
     void testSignup() throws Exception {
-        SignupRequest request = new SignupRequest();
+        UserRegisterRequest request = new UserRegisterRequest();
         request.setEmail("debug_student@test.com");
         request.setPassword("password123");
         request.setName("DebugUser");
         request.setBirthDate("2005-01-01");
         request.setRole(Role.STUDENT);
 
-        mockMvc.perform(post("/api/auth/signup")
+        mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
