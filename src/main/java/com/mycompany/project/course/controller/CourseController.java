@@ -123,6 +123,15 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getAllCourses(pageable));
     }
 
+    @Operation(summary = "강좌 상태 변경", description = "강좌의 상태를 수동으로 변경합니다. (예: 조기 마감, 재오픈)")
+    @PutMapping("/{courseId}/status")
+    public ResponseEntity<Void> changeCourseStatus(
+            @PathVariable Long courseId,
+            @RequestParam com.mycompany.project.course.entity.CourseStatus status) {
+        courseService.changeCourseStatus(courseId, status);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "시간표 격자 조회", description = "지정된 학기/사용자의 시간표를 격자(Grid) 형태로 조회합니다. (미구현)")
     @GetMapping("/timetable")
     public void getTimetable(@RequestParam String semester, @RequestParam Long userId) {

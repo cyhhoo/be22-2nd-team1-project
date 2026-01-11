@@ -27,7 +27,7 @@
     </select>
 
     <!-- 수강생 중복 수강 내역 조회 (폐강/반려 제외) -->
-    <select id="findConflictingEnrollments" resultType="map">
+    <select id="findConflictingEnrollments" resultType="java.util.Map">
         SELECT
             e.enrollment_id AS enrollmentId,
             c.course_id AS courseId,

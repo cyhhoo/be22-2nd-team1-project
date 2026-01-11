@@ -356,6 +356,44 @@ public class CourseService {
         enrollment.forceCancel(reason);
     }
 
+    @Transactional(readOnly = true)
+    public StudentDetailResDTO getStudentDetail(Long courseId, Long studentId) {
+        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
+                .stream()
+                .filter(e -> e.getUserId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
+
+        long presentCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
+                Attendance.AttendanceStatus.PRESENT);
+        long lateCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
+                Attendance.AttendanceStatus.LATE);
+        long absentCount = attendanceRepository.countByEnrollmentIdAndStatus(enrollment.getEnrollmentId(),
+                Attendance.AttendanceStatus.ABSENT);
+
+        return StudentDetailResDTO.builder()
+                .studentId(studentId)
+                .studentName("Student_" + studentId)
+                .memo(enrollment.getMemo())
+                .attendancePresent(presentCount)
+                .attendanceLate(lateCount)
+                .attendanceAbsent(absentCount)
+                .assignmentTotal(0)
+                .assignmentSubmitted(0)
+                .build();
+    }
+
+    @Transactional
+    public void updateStudentMemo(Long courseId, Long studentId, String memo) {
+        Enrollment enrollment = enrollmentRepository.findByCourseId(courseId)
+                .stream()
+                .filter(e -> e.getUserId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
+
+        enrollment.updateMemo(memo);
+    }
+
     /**
      * 교사별 강좌 목록 조회 (Paging)
      */
@@ -384,5 +422,22 @@ public class CourseService {
                 .maxCapacity(course.getMaxCapacity())
                 .teacherName("Teacher_" + course.getTeacherDetailId()) // Placeholder: 실제 교사명 조회 필요
                 .build();
+    }
+
+    /**
+     * 강좌 상태 수동 변경 (조기 마감 / 재오픈)
+     * - OPEN <-> CLOSED 상태 전환만 허용 (기타 상태 변경은 별도 프로세스 따름)
+     */
+    @Transactional
+    public void changeCourseStatus(Long courseId, CourseStatus status) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+
+        // 유효성 검증: 수동 변경은 OPEN, CLOSED 만 가능하도록 제한
+        if (status != CourseStatus.OPEN && status != CourseStatus.CLOSED) {
+            throw new IllegalArgumentException("수동 상태 변경은 개설(OPEN) 또는 마감(CLOSED) 상태로만 가능합니다.");
+        }
+
+        course.changeStatus(status);
     }
 }

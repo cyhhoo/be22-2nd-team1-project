@@ -17,6 +17,14 @@ public class Attendance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long attendanceId;
 
-    // private Long enrollmentId;
-    // private String status; // PRESENT, ABSENT, LATE
+    @jakarta.persistence.Column(name = "enrollment_id")
+    private Long enrollmentId;
+
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @jakarta.persistence.Column(name = "status")
+    private AttendanceStatus status;
+
+    public enum AttendanceStatus {
+        PRESENT, LATE, ABSENT
+    }
 }
