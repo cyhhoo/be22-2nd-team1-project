@@ -1,10 +1,8 @@
 package com.mycompany.project.course.entity;
 
+import com.mycompany.project.user.command.domain.aggregate.TeacherDetail;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -17,16 +15,19 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA는 기본 생성자가 필수 (protected 권장)
 @EntityListeners(AuditingEntityListener.class) // 생성일 자동 주입
+@AllArgsConstructor // [핵심] 빌더가 모든 필드를 다룰 수 있게 함
+@Builder
 public class Course {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "course_id")
-  private Long id;
+  private Long courseId;
 
   // 다른 도메인(Teacher, Subject 등)은 ID로만 참조 (느슨한 결합)
-  @Column(name = "teacher_detail_id")
-  private Long teacherDetailId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "teacher_detail_id", nullable = false)
+  private TeacherDetail teacherDetail;
 
   @Column(name = "academic_year_id")
   private Long academicYearId;
@@ -44,15 +45,19 @@ public class Course {
   @Column(name = "max_capacity", nullable = false)
   private Integer maxCapacity;
 
-  @Column(name = "current_count")
+  @Builder.Default
+  @Column(name = "current_count", nullable = false)
   private Integer currentCount = 0; // 기본값 0
 
-  @Column(name = "tuition")
-  private Integer tuition = 0; // 기본값 0
+  @Builder.Default
+  @Column(nullable = false)
+  private Integer tuition = 0;
 
-  @Enumerated(EnumType.STRING)
+  // [수정] 기본값 OPEN 적용
+  @Builder.Default
+  @Enumerated(EnumType.STRING) // Enum은 DB 저장 시 String 권장
   @Column(name = "status", length = 20)
-  private CourseStatus status = CourseStatus.OPEN; // 기본값 OPEN
+  private CourseStatus status = CourseStatus.OPEN;
 
   @CreatedDate
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -61,13 +66,14 @@ public class Course {
   // 양방향 연관관계 (Course -> CourseTimeSlot)
   // cascade = ALL: 강좌가 삭제되면 시간표도 같이 삭제
   // orphanRemoval = true: 리스트에서 제거되면 DB에서도 삭제
+  @Builder.Default
   @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CourseTimeSlot> timeSlots = new ArrayList<>();
 
   @Builder
-  public Course(Long teacherDetailId, Long academicYearId, Long subjectId, String name,
+  public Course(TeacherDetail teacherDetail, Long academicYearId, Long subjectId, String name,
                 CourseType courseType, Integer maxCapacity, Integer tuition) {
-    this.teacherDetailId = teacherDetailId;
+    this.teacherDetail = teacherDetail;
     this.academicYearId = academicYearId;
     this.subjectId = subjectId;
     this.name = name;
@@ -80,5 +86,28 @@ public class Course {
   public void addTimeSlot(CourseTimeSlot timeSlot) {
     this.timeSlots.add(timeSlot);
     timeSlot.assignCourse(this);
+  }
+
+  /**
+   * 수강 신청 시 호출: 인원 증가
+   * 정원이 꽉 찼다면 예외를 터뜨려서 신청을 막습니다.
+   */
+  public void increaseCurrentCount() {
+    // 1. 방어 로직: 이미 꽉 찼는지 확인
+    if (this.currentCount >= this.maxCapacity) {
+      throw new IllegalStateException("수강 정원이 초과되었습니다.");
+    }
+    // 2. 상태 변경
+    this.currentCount++;
+  }
+
+  /**
+   * 수강 취소 시 호출: 인원 감소
+   * 0명 미만으로 내려가지 않도록 보호합니다.
+   */
+  public void decreaseCurrentCount() {
+    if (this.currentCount > 0) {
+      this.currentCount--;
+    }
   }
 }

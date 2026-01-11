@@ -6,8 +6,11 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @ToString
 public class TimetableResponse {
+
+  private Long courseId; // 강좌 상세 조회를 위해 필요
 
   private String courseName;   // 과목명
   private String dayOfWeek;    // 요일 (MON, TUE...)

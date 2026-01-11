@@ -1,16 +1,15 @@
 package com.mycompany.project.course.entity;
 
 import  jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 
 @Entity
 @Table(name = "tbl_course_time_slot")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Slf4j
 public class CourseTimeSlot {

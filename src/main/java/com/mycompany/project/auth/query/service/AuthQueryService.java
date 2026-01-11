@@ -2,7 +2,7 @@ package com.mycompany.project.auth.query.service;
 
 import com.mycompany.project.auth.query.dto.LoginRequest;
 import com.mycompany.project.auth.query.dto.TokenResponse;
-import com.mycompany.project.common.exception.AccountInactiveException;
+import com.mycompany.project.exception.AccountInactiveException;
 import com.mycompany.project.jwtsecurity.JwtTokenProvider;
 import com.mycompany.project.user.command.domain.aggregate.Token;
 import com.mycompany.project.user.command.domain.aggregate.User;
