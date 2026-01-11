@@ -22,3 +22,9 @@ mybatis:
 
 jwt:
   secret: testSecretKeyForTestingPurposesMustBeLongEnoughToSatisfyReviewRequirements2026!
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.mycompany.project
+  configuration:
+    map-underscore-to-camel-case: true
