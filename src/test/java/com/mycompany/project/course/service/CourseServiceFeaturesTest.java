@@ -1,6 +1,5 @@
 package com.mycompany.project.course.service;
 
-import com.mycompany.project.course.dto.CourseCreateReqDTO;
 import com.mycompany.project.course.dto.CourseUpdateReqDTO;
 import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.course.entity.CourseChangeRequest;

@@ -65,6 +65,13 @@ public class CourseController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "담당 교사 변경", description = "강좌의 담당 교사를 변경합니다. (시간표 중복 확인 포함)")
+    @PostMapping("/{courseId}/change-teacher")
+    public ResponseEntity<Void> changeTeacher(@PathVariable Long courseId, @RequestParam Long newTeacherId) {
+        courseService.changeTeacher(courseId, newTeacherId);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "시간표 격자 조회", description = "지정된 학기/사용자의 시간표를 격자(Grid) 형태로 조회합니다. (미구현)")
     @GetMapping("/timetable")
     public void getTimetable(@RequestParam String semester, @RequestParam Long userId) {

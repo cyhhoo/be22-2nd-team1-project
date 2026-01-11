@@ -29,6 +29,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
 
     private final CourseChangeRequestRepository courseChangeRequestRepository;
+    private final com.mycompany.project.enrollment.repository.EnrollmentRepository enrollmentRepository;
     private final CourseMapper courseMapper;
 
     /**
@@ -213,6 +214,37 @@ public class CourseService {
         }
 
         request.reject(reason);
+    }
+
+    /**
+     * 담당 교사 변경
+     * - 변경하려는 교사의 스케줄 중복 확인 후 변경
+     */
+    @Transactional
+    public void changeTeacher(Long courseId, Long newTeacherId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+
+        // 1. 유효성 검증: 새 담당 교사의 스케줄 중복 확인
+        List<CourseTimeSlot> timeSlots = course.getTimeSlots();
+        for (CourseTimeSlot slot : timeSlots) {
+            int conflictCount = courseMapper.countTeacherSchedule(
+                    course.getAcademicYearId(),
+                    newTeacherId,
+                    slot.getDayOfWeek(),
+                    slot.getPeriod());
+
+            if (conflictCount > 0) {
+                throw new IllegalStateException(
+                        String.format("해당 교사는 %s %d교시에 이미 수업이 있습니다.", slot.getDayOfWeek(), slot.getPeriod()));
+            }
+        }
+
+        // 2. 교사 변경 반영
+        course.updateCourseInfo(null, null, null, null, null, null, newTeacherId);
+
+        // 3. 알림 발송 (Simulated)
+        // notificationService.send(course.getEnrollments(), "담당 선생님이 변경되었습니다.");
     }
 
 }
