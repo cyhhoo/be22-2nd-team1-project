@@ -1,4 +1,4 @@
-package com.mycompany.project.reservation.command.entity;
+package com.mycompany.project.reservation.command.domain.aggregate;
 
 import jakarta.persistence.*;
 import lombok.Getter;

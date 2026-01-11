@@ -16,8 +16,8 @@ public class ReservationService {
     this.sqlSessionTemplate = sqlSessionTemplate;
   }
 
-  public List<ReservationDTO> selectAvailableFacilities()
+//  public List<ReservationDTO> selectAvailableFacilities()
 
-  public List<ReservationDTO> reservation = sqlSessionTemplate.getMapper(ReservationMapper.class).selectAvailableFacilities
+//  public List<ReservationDTO> reservation = sqlSessionTemplate.getMapper(ReservationMapper.class).selectAvailableFacilities
 
 }
