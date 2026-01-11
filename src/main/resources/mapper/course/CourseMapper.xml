@@ -26,4 +26,22 @@
           AND c.status NOT IN ('CANCELED', 'REFUSE')
     </select>
 
+    <!-- 수강생 중복 수강 내역 조회 (폐강/반려 제외) -->
+    <select id="findConflictingEnrollments" resultType="map">
+        SELECT
+            e.enrollment_id AS enrollmentId,
+            c.course_id AS courseId,
+            c.name AS courseName,
+            c.course_type AS courseType
+        FROM tbl_enrollment e
+        JOIN tbl_course c ON e.course_id = c.course_id
+        JOIN tbl_course_time_slot cts ON c.course_id = cts.course_id
+        WHERE c.academic_year_id = #{academicYearId}
+          AND e.user_id = #{studentId}
+          AND cts.day_of_week = #{dayOfWeek}
+          AND cts.period = #{period}
+          AND e.status = 'APPLIED'
+          AND c.status NOT IN ('CANCELED', 'REFUSE')
+    </select>
+
 </mapper>

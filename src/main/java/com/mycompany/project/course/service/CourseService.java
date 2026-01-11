@@ -1,6 +1,7 @@
 package com.mycompany.project.course.service;
 
 import com.mycompany.project.course.dto.TimeSlotDTO;
+import com.mycompany.project.course.entity.*;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import com.mycompany.project.course.repository.CourseRepository;
@@ -8,13 +9,10 @@ import com.mycompany.project.course.mapper.CourseMapper;
 
 import org.springframework.transaction.annotation.Transactional;
 import com.mycompany.project.course.dto.CourseUpdateReqDTO;
-import com.mycompany.project.course.entity.Course;
 
 import com.mycompany.project.course.dto.CourseCreateReqDTO;
-import com.mycompany.project.course.entity.CourseStatus;
-import com.mycompany.project.course.entity.CourseTimeSlot;
 import com.mycompany.project.course.repository.CourseChangeRequestRepository;
-import com.mycompany.project.course.entity.CourseChangeRequest;
+
 import java.util.List;
 
 @Service
@@ -245,6 +243,68 @@ public class CourseService {
 
         // 3. 알림 발송 (Simulated)
         // notificationService.send(course.getEnrollments(), "담당 선생님이 변경되었습니다.");
+    }
+
+    /**
+     * 학생 수강 일괄/강제 등록
+     * - studentIds: 학생 ID 리스트 (1명이면 개별 등록, 여러 명이면 일괄 등록)
+     * - force: 정원 초과 무시 여부
+     * - 중복 시간표 체크:
+     * - 선택과목(ELECTIVE) 중복 시: 기존 내역 자동 취소 후 등록
+     * - 필수과목(MANDATORY) 중복 시: 예외 발생 (등록 불가)
+     */
+    @Transactional
+    public void enrollStudents(Long courseId, List<Long> studentIds, boolean force) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+
+        // 1. 정원 초과 체크 (force=true이면 무시)
+        if (!force) {
+            long currentCount = enrollmentRepository.findByCourseId(courseId).stream()
+                    .filter(e -> e
+                            .getStatus() == com.mycompany.project.enrollment.entity.Enrollment.EnrollmentStatus.APPLIED)
+                    .count();
+            if (currentCount + studentIds.size() > course.getMaxCapacity()) {
+                throw new IllegalStateException("수강 정원이 초과되었습니다.");
+            }
+        }
+
+        // 2. 학생별 등록 프로세스
+        for (Long studentId : studentIds) {
+            // 2-1. 시간표 중복 검사
+            for (CourseTimeSlot slot : course.getTimeSlots()) {
+                List<java.util.Map<String, Object>> conflicts = courseMapper.findConflictingEnrollments(
+                        course.getAcademicYearId(),
+                        studentId,
+                        slot.getDayOfWeek(),
+                        slot.getPeriod());
+
+                for (java.util.Map<String, Object> conflict : conflicts) {
+                    String existingTypeStr = (String) conflict.get("courseType");
+                    CourseType existingType = CourseType.valueOf(existingTypeStr);
+                    Long existingEnrollmentId = (Long) conflict.get("enrollmentId");
+
+                    if (existingType == CourseType.MANDATORY) {
+                        throw new IllegalStateException(String.format(
+                                "학생(ID:%d)은 해당 시간에 이미 필수 과목[%s]이 있어 등록할 수 없습니다.",
+                                studentId, conflict.get("courseName")));
+                    } else {
+                        // 선택 과목이면 자동 취소
+                        com.mycompany.project.enrollment.entity.Enrollment existingEnrollment = enrollmentRepository
+                                .findById(existingEnrollmentId).orElseThrow();
+                        existingEnrollment.cancel();
+                    }
+                }
+            }
+
+            // 2-2. 수강 등록
+            com.mycompany.project.enrollment.entity.Enrollment enrollment = com.mycompany.project.enrollment.entity.Enrollment
+                    .builder()
+                    .userId(studentId)
+                    .courseId(courseId)
+                    .build();
+            enrollmentRepository.save(enrollment);
+        }
     }
 
 }

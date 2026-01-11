@@ -6,9 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "tbl_enrollment")
+@Table(name = "tbl_enrollment", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_enrollment", columnNames = { "course_id", "user_id" })
+})
 @Getter
 @NoArgsConstructor
+@EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener.class)
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,20 +25,28 @@ public class Enrollment {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private EnrollmentStatus status = EnrollmentStatus.ACTIVE;
+    private EnrollmentStatus status = EnrollmentStatus.APPLIED;
+
+    @org.springframework.data.annotation.CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
 
     @Builder
     public Enrollment(Long userId, Long courseId) {
         this.userId = userId;
         this.courseId = courseId;
-        this.status = EnrollmentStatus.ACTIVE;
+        this.status = EnrollmentStatus.APPLIED;
     }
 
     public void cancel() {
         this.status = EnrollmentStatus.CANCELED;
     }
 
+    public void forceCancel() {
+        this.status = EnrollmentStatus.FORCED_CANCELED;
+    }
+
     public enum EnrollmentStatus {
-        ACTIVE, CANCELED
+        APPLIED, CANCELED, FORCED_CANCELED
     }
 }
