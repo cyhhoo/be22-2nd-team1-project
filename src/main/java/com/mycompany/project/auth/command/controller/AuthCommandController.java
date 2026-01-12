@@ -3,6 +3,7 @@ package com.mycompany.project.auth.command.controller;
 import com.mycompany.project.auth.command.dto.AccountActivationRequest;
 import com.mycompany.project.auth.command.dto.UserRegisterRequest;
 import com.mycompany.project.auth.command.service.AuthCommandService; // Refactored dependency
+import com.mycompany.project.auth.query.dto.TokenResponse;
 import com.mycompany.project.common.response.ApiResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,8 +26,8 @@ public class AuthCommandController {
     }
 
     @PostMapping("/activate")
-    public ApiResponse<Void> activate(@RequestBody AccountActivationRequest request) {
-        authCommandService.activateAccount(request);
-        return ApiResponse.success(null);
+    public ApiResponse<TokenResponse> activate(@RequestBody AccountActivationRequest request) {
+        TokenResponse tokens = authCommandService.activateAccount(request);
+        return ApiResponse.success(tokens);
     }
 }

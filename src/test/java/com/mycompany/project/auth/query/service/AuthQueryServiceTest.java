@@ -74,7 +74,7 @@ class AuthQueryServiceTest {
         LoginRequest request = new LoginRequest("test@example.com", "password");
         given(userRepository.findByEmail(request.getEmail())).willReturn(Optional.of(activeUser));
         given(passwordEncoder.matches(request.getPassword(), activeUser.getPassword())).willReturn(true);
-        given(jwtTokenProvider.createAccessToken(any(), any())).willReturn("access-token");
+        given(jwtTokenProvider.createAccessToken(any(), any(), any())).willReturn("access-token");
         given(jwtTokenProvider.createRefreshToken(any())).willReturn("refresh-token");
 
         // When
@@ -121,7 +121,7 @@ class AuthQueryServiceTest {
         given(jwtTokenProvider.validateToken(oldRefreshToken)).willReturn(true);
         given(tokenRepository.findByToken(oldRefreshToken)).willReturn(Optional.of(storedToken));
         given(userRepository.findByEmail(storedToken.getEmail())).willReturn(Optional.of(activeUser));
-        given(jwtTokenProvider.createAccessToken(any(), any())).willReturn("new-access-token");
+        given(jwtTokenProvider.createAccessToken(any(), any(), any())).willReturn("new-access-token");
         given(jwtTokenProvider.createRefreshToken(any())).willReturn("new-refresh-token");
 
         // When
