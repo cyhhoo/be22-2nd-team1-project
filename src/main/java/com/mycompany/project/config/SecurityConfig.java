@@ -43,8 +43,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             // Swagger UI는 누구나 접근 가능
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            // 로그인/회원가입 API는 누구나 접근 가능
-            .requestMatchers("/api/auth/**").permitAll()
+            // 로그인/회원가입,활성화 API는 누구나 접근 가능
+            .requestMatchers("/api/auth/**","/api/auth/activate").permitAll()
             // 업로드된 파일 접근 허용
             .requestMatchers("/uploads/**").permitAll()
             // 그 외 모든 요청은 인증 필요
