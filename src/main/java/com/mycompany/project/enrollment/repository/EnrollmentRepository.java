@@ -2,6 +2,7 @@ package com.mycompany.project.enrollment.repository;
 
 import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.enrollment.entity.Enrollment;
+import com.mycompany.project.user.command.domain.aggregate.User;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
   // 필드명이 studentDetail이므로 ByStudentDetail로 해야 함
   boolean existsByStudentDetailAndCourse(StudentDetail studentDetail, Course course);
 
+  // (필요시) 특정 학생의 신청 취소를 위해 조회
+  Optional<Enrollment> findByStudentAndCourse(User student, Course course);
+}
   // [수정 2] 메서드 이름 변경 (Student -> StudentDetail)
   Optional<Enrollment> findByStudentDetailAndCourse(StudentDetail studentDetail, Course course);
 
