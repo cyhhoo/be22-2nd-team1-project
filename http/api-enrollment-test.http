@@ -1,0 +1,141 @@
+### 전역 변수 설정 (환경에 맞게 변경하세요)
+@host = http://localhost:8080
+@contentType = application/json
+@studentId = 20
+
+# ==========================================
+# 1. [Happy Path] 전체 성공 시나리오
+# ==========================================
+
+### 1-1. 장바구니 담기 (과목 101)
+POST {{host}}/api/carts
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+{
+  "studentId": {{studentId}},
+  "courseId": 101
+}
+
+### 1-0. 일반 수강 신청 (과목 101)
+POST {{host}}/api/enrollments
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+{
+  "studentId": {{studentId}},
+  "courseId": 101
+}
+
+### 1-2. 장바구니 담기 (과목 102)
+POST {{host}}/api/carts
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+{
+  "studentId": {{studentId}},
+  "courseId": 102
+}
+
+### 1-3. 수강 신청 (일괄 신청)
+# 기대 결과: 200 OK (성공 2건), 장바구니 비워짐
+POST {{host}}/api/enrollments/bulk
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+{
+  "studentId": {{studentId}}
+  "courseIds": {{}}
+}
+
+
+# ==========================================
+# 2. [Mixed Case] 일부 성공, 일부 실패 (정원 초과)
+# ==========================================
+
+### 2-1. 장바구니 담기 (과목 201 - 만석)
+POST {{host}}/api/carts
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+{
+  "studentId": {{studentId}},
+  "courseId": 201
+}
+
+### 2-2. 장바구니 담기 (과목 202 - 여유)
+POST {{host}}/api/carts
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+{
+  "studentId": {{studentId}},
+  "courseId": 202
+}
+
+### 2-3. 수강 신청 (일괄 신청)
+# 기대 결과: 부분 성공 (202번 성공, 201번 실패 메시지 포함)
+# 202번은 장바구니에서 삭제, 201번은 유지되어야 함
+POST {{host}}/api/enrollments/bulk
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+
+# ==========================================
+# 3. [Fail Case] 중복 신청
+# ==========================================
+
+### 3-1. 장바구니 담기 (과목 301 - 이미 수강중)
+POST {{host}}/api/carts
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+{
+  "studentId": {{studentId}},
+  "courseId": 301
+}
+
+### 3-2. 수강 신청 (일괄 신청)
+# 기대 결과: 전체 실패 또는 해당 과목 실패 메시지 반환
+POST {{host}}/api/enrollments/bulk
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+
+# ==========================================
+# 4. 조회 기능 테스트
+# ==========================================
+
+### 4-1. 수강 신청 내역 조회 (History)
+# 기대 결과: 신청 성공한 과목들(101, 102, 202, 301) 리스트 반환
+GET {{host}}/api/enrollments/history?userId={{studentId}}
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+### 4-2. 내 시간표 조회 (Timetable)
+# 기대 결과: 요일/교시 정보가 포함된 시간표 데이터 반환
+GET {{host}}/api/enrollments/timetable?userId={{studentId}}
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+### 4-3. 장바구니 내역 조회
+# 기대 결과: 장바구니 리스트 반환
+GET {{host}}/api/carts
+Content-Type: {{contentType}}
+X-USER-ID: {{studentId}}
+
+### 6-2. 장바구니 삭제 요청
+# 주의: 지우고 싶은 'courseId'(과목ID)를 URL 경로에 넣어야 합니다. (예: 101)
+# 기대 결과: 200 OK -> DB 확인 시 데이터 아예 사라짐
+DELETE {{host}}/api/carts/courses/301
+X-USER-ID: {{studentId}}
+
+
+### 5-2. 수강 취소 요청
+# 주의: 위 조회 결과에서 나온 'enrollmentId'를 URL 경로에 넣어야 합니다. (예: 1)
+# 기대 결과: 200 OK -> DB 확인 시 데이터는 남아있고 status='CANCELLED'로 변경됨
+DELETE {{host}}/api/enrollments/5
+X-USER-ID: {{studentId}}
+
+
+

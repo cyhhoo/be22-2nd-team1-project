@@ -18,13 +18,12 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationRepository reservationRepository;
 
+    public ReservationController(ReservationService reservationService, ReservationRepository reservationRepository) {
+        this.reservationService = reservationService;
+        this.reservationRepository = reservationRepository;
+    }
 
-  public ReservationController(ReservationService reservationService, ReservationRepository reservationRepository) {
-    this.reservationService = reservationService;
-    this.reservationRepository = reservationRepository;
-  }
-
-  /*
+    /*
      * [구현 가이드: Service 의존성 주입]
      * private final ReservationService reservationService;
      */

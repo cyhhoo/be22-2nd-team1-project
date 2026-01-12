@@ -73,4 +73,18 @@ class CourseServiceTest {
     assertEquals(CourseStatus.CLOSED, updatedCourse.getStatus());
   }
 
+  @Test
+  @DisplayName("강좌 정보 수정 실패 - 존재하지 않는 강좌 ID")
+  void updateTest_Fail_NotFound() {
+    // 1. 존재하지 않는 ID와 DTO 준비
+    Long invalidId = 9999L;
+    CourseUpdateReqDTO dto = new CourseUpdateReqDTO();
+    dto.setName("New Name");
+
+    // 2. 서비스 호출 및 예외 검증
+    assertThrows(IllegalArgumentException.class, () -> {
+      courseService.updateCourse(invalidId, dto);
+    });
+  }
+
 }

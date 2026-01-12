@@ -79,11 +79,23 @@ class CourseServiceCancellationTest {
         // PENDING -> OPEN (for simplified setup)
         Course course = courseRepository.findAll().stream()
                 .filter(c -> c.getName().equals(name))
-                .findFirst() // Use findFirst instead of reduce for clarity if names are unique enough in
-                             // test
+                .findFirst()
                 .orElseThrow();
 
         course.changeStatus(CourseStatus.OPEN);
         return courseRepository.save(course);
+    }
+
+    @Test
+    @DisplayName("[Failure] 존재하지 않는 강좌 폐강 시 예외 발생")
+    void cancelCourseFail_NotFound() {
+        // Given
+        Long invalidId = 9999L;
+        String reason = "Admin Cancel";
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            courseService.deleteCourse(invalidId, reason);
+        });
     }
 }

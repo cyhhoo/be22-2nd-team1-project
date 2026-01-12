@@ -69,8 +69,18 @@ class CourseServiceCourseListTest {
         // Given
         Pageable pageable = PageRequest.of(0, 10);
 
-        Course course1 = Course.builder().name("Math").teacherDetailId(10L).build();
-        Course course2 = Course.builder().name("Science").teacherDetailId(11L).build();
+        Course course1 = Course.builder()
+                .id(1L)
+                .name("Math")
+                .teacherDetailId(10L)
+                .maxCapacity(30)
+                .build();
+        Course course2 = Course.builder()
+                .id(2L)
+                .name("Science")
+                .teacherDetailId(11L)
+                .maxCapacity(30)
+                .build();
 
         Page<Course> coursePage = new PageImpl<>(List.of(course1, course2));
 

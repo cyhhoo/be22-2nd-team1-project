@@ -26,6 +26,9 @@ class CourseServiceCreationTest {
     @Autowired
     private CourseService courseService;
 
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager;
+
     @Test
     @Transactional
     @DisplayName("강좌 개설 신청 성공 테스트 (초기 상태: PENDING)")
@@ -83,6 +86,9 @@ class CourseServiceCreationTest {
         dto1.setTimeSlots(Collections.singletonList(slot1));
 
         courseService.createCourse(dto1);
+        entityManager.flush();
+        entityManager.clear();
+        System.out.println("Step 1 Complete: DTO1 saved and flushed.");
 
         // 2. 중복 강좌 신청 (선생님 200번, MON 1교시, 다른 강의실)
         CourseCreateReqDTO dto2 = new CourseCreateReqDTO();
@@ -101,7 +107,9 @@ class CourseServiceCreationTest {
         dto2.setTimeSlots(Collections.singletonList(slot2));
 
         // 3. 예외 검증
+        System.out.println("Step 2 Starting: Attempting to save conflicting DTO2...");
         assertThrows(IllegalStateException.class, () -> courseService.createCourse(dto2));
+        System.out.println("Step 3 Complete: Exception thrown as expected.");
     }
 
     @Test
@@ -125,6 +133,8 @@ class CourseServiceCreationTest {
         dto1.setTimeSlots(Collections.singletonList(slot1));
 
         courseService.createCourse(dto1);
+        entityManager.flush();
+        entityManager.clear();
 
         // 2. 중복 강의실 신청 (다른 선생님, 같은 강의실, 같은 시간)
         CourseCreateReqDTO dto2 = new CourseCreateReqDTO();
@@ -169,14 +179,23 @@ class CourseServiceCreationTest {
 
         // 2. 승인
         courseService.approveCourse(courseId);
+        entityManager.flush();
+        entityManager.clear();
+
         Course approvedCourse = courseRepository.findById(courseId).orElseThrow();
         assertEquals(CourseStatus.OPEN, approvedCourse.getStatus());
 
         // 3. 다시 PENDING으로 돌리고 반려 테스트 (Test용)
         approvedCourse.update(null, null, null, null, null, null, null, CourseStatus.PENDING);
+        courseRepository.save(approvedCourse);
+        entityManager.flush();
+        entityManager.clear();
 
         // 4. 반려
         courseService.refuseCourse(courseId, "Test Refuse Reason");
+        entityManager.flush();
+        entityManager.clear();
+
         Course refusedCourse = courseRepository.findById(courseId).orElseThrow();
         assertEquals(CourseStatus.REFUSE, refusedCourse.getStatus());
     }
