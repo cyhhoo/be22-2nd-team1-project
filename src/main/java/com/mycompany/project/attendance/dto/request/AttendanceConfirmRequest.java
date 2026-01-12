@@ -6,26 +6,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AttendanceUpdateRequest {
+public class AttendanceConfirmRequest {
 
-    // 저장(등록/수정) 대상 강좌 ID
+    // 확정 대상 강좌 ID
     private Long courseId;
 
-    // 저장할 수업 날짜
+    // 확정할 수업 날짜
     private LocalDate classDate;
 
-    // 저장할 교시(1~8)
+    // 확정할 교시 (1~8)
     private Integer period;
 
-    // 저장 처리자 ID(과목 담당교사 userId)
+    // 확정 처리자 ID (담임 또는 권한 있는 교사)
     private Long userId;
-
-    // 학생별 출결 저장 항목 목록
-    private List<AttendanceUpdateItemRequest> items;
 }

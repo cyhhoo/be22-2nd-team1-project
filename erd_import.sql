@@ -184,7 +184,7 @@ DROP TABLE IF EXISTS `tbl_enrollment`;
 CREATE TABLE `tbl_enrollment` (
 	`enrollment_id`	BIGINT	NOT NULL	COMMENT '수강 신청 PK',
 	`course_id`	BIGINT	NOT NULL	COMMENT '수업 코드 FK',
-	`student_detail_id`	BIGINT	NOT NULL	COMMENT '학생 코드 FK',
+	`student_id`	BIGINT	NOT NULL	COMMENT '학생 user_id FK',
 	`status`	ENUM('APPLIED', 'CANCELED', 'FORCED_CANCELED')	NULL	DEFAULT 'APPLIED'	COMMENT 'ENUM: APPLIED, CANCELED, FORCED_CANCELED',
 	`created_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP	COMMENT '수강 신청 날짜',
 	CONSTRAINT `PK_TBL_ENROLLMENT` PRIMARY KEY (`enrollment_id`)
@@ -195,7 +195,7 @@ DROP TABLE IF EXISTS `tbl_cart`;
 CREATE TABLE `tbl_cart` (
 	`cart_id`	BIGINT	NOT NULL	COMMENT '장바구니 PK',
 	`course_id`	BIGINT	NOT NULL	COMMENT '수업 코드 FK',
-	`student_detail_id`	BIGINT	NOT NULL	COMMENT '학생 코드 FK',
+	`student_id`	BIGINT	NOT NULL	COMMENT '학생 user_id FK',
 	`created_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP	COMMENT '장바구니 담은 날짜',
 	CONSTRAINT `PK_TBL_CART` PRIMARY KEY (`cart_id`)
 );
@@ -246,7 +246,8 @@ CREATE TABLE `tbl_attendance` (
 	`updated_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP	COMMENT '수정일시',
 	`attendance_code_id`	BIGINT	NOT NULL	COMMENT '출결코드 FK',
 	`enrollment_id`	BIGINT	NOT NULL	COMMENT '수강신청 FK',
-	CONSTRAINT `PK_TBL_ATTENDANCE` PRIMARY KEY (`attendance_id`)
+	CONSTRAINT `PK_TBL_ATTENDANCE` PRIMARY KEY (`attendance_id`),
+	CONSTRAINT `UK_TBL_ATTENDANCE_ENROLLMENT_DATE_PERIOD` UNIQUE (`enrollment_id`, `class_date`, `period`)
 );
 
 -- ### 4-1-2. 출결 코드
@@ -280,7 +281,7 @@ CREATE TABLE `tbl_attendance_closure` (
 -- ### 4-1-4. 출결 정정 요청
 DROP TABLE IF EXISTS `tbl_attendance_correction_request`;
 CREATE TABLE `tbl_attendance_correction_request` (
-	`request_id`	BIGINT	NOT NULL	COMMENT 'AUTO_INCREMENT 정정요청 PK',
+	`request_id`	BIGINT	NOT NULL	AUTO_INCREMENT	COMMENT 'AUTO_INCREMENT 정정요청 PK',
 	`before_attendance_code_id`	BIGINT	NOT NULL	COMMENT '변경 전 출결코드 FK',
 	`requested_attendance_code_id`	BIGINT	NOT NULL	COMMENT '변경 요청 출결코드 FK',
 	`request_reason`	TEXT	NOT NULL	COMMENT '정정 사유(필수)',
@@ -291,7 +292,7 @@ CREATE TABLE `tbl_attendance_correction_request` (
 	`decided_at`	DATETIME	NULL	COMMENT '처리일시',
 	`admin_comment`	TEXT	NULL	COMMENT '관리자 코멘트(반려 시 권장)',
 	`pending_flag`	TINYINT(1)	NULL	COMMENT 'PENDING 표시용(선택)',
-	`attendance_id`	BIGINT	NOT NULL	DEFAULT AUTO_INCREMENT	COMMENT '출결 FK',
+	`attendance_id`	BIGINT	NOT NULL	COMMENT '출결 FK',
 	CONSTRAINT `PK_TBL_ATTENDANCE_CORRECTION_REQUEST` PRIMARY KEY (`request_id`)
 );
 
@@ -467,11 +468,11 @@ REFERENCES `tbl_course` (
 	`course_id`
 );
 
-ALTER TABLE `tbl_enrollment` ADD CONSTRAINT `FK_tbl_student_detail_TO_tbl_enrollment_1` FOREIGN KEY (
-	`student_detail_id`
+ALTER TABLE `tbl_enrollment` ADD CONSTRAINT `FK_tbl_user_TO_tbl_enrollment_1` FOREIGN KEY (
+	`student_id`
 )
-REFERENCES `tbl_student_detail` (
-	`student_detail_id`
+REFERENCES `tbl_user` (
+	`user_id`
 );
 
 ALTER TABLE `tbl_pwd_history` ADD CONSTRAINT `FK_tbl_user_TO_tbl_pwd_history_1` FOREIGN KEY (
@@ -516,11 +517,11 @@ REFERENCES `tbl_course` (
 	`course_id`
 );
 
-ALTER TABLE `tbl_cart` ADD CONSTRAINT `FK_tbl_student_detail_TO_tbl_cart_1` FOREIGN KEY (
-	`student_detail_id`
+ALTER TABLE `tbl_cart` ADD CONSTRAINT `FK_tbl_user_TO_tbl_cart_1` FOREIGN KEY (
+	`student_id`
 )
-REFERENCES `tbl_student_detail` (
-	`student_detail_id`
+REFERENCES `tbl_user` (
+	`user_id`
 );
 
 ALTER TABLE `tbl_bulk_upload_log` ADD CONSTRAINT `FK_tbl_file_TO_tbl_bulk_upload_log_1` FOREIGN KEY (
