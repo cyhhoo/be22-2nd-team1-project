@@ -1,4 +1,3 @@
-/*
 package com.mycompany.project.course.controller;
 
 import com.mycompany.project.course.dto.CourseCreateReqDTO;
@@ -143,4 +142,3 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getTeacherTimetable(teacherId, semester));
     }
 }
-*/

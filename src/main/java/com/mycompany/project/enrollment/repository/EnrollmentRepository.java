@@ -13,23 +13,4 @@ import java.util.Optional;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
-  // [중복 신청 방지용] 이미 신청한 강좌인지 확인
-  boolean existsByStudentAndCourse(User student, Course course);
-
-  // (필요시) 특정 학생의 신청 취소를 위해 조회
-  Optional<Enrollment> findByStudentAndCourse(User student, Course course);
-<<<<<<< HEAD
-
-  // 강좌별 수강신청 목록 조회
-  List<Enrollment> findByCourseId(Long courseId);
-=======
->>>>>>> 5460088e08a768449f4811c9681cd1a516af6c09
-
-  @Query("select e from Enrollment e where e.course.id = :courseId and e.status = :status")
-  List<Enrollment> findByCourseIdAndStatus(@Param("courseId") Long courseId,
-                                           @Param("status") EnrollmentStatus status);
-
-  @Query("select e from Enrollment e where e.course.id in :courseIds and e.status = :status")
-  List<Enrollment> findByCourseIdInAndStatus(@Param("courseIds") List<Long> courseIds,
-                                             @Param("status") EnrollmentStatus status);
 }

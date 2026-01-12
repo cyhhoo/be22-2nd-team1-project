@@ -1,4 +1,4 @@
-/*
+
 package com.mycompany.project.course.service;
 
 import com.mycompany.project.course.dto.TimeSlotDTO;
@@ -27,13 +27,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CourseService {
-    */
-/*
-     * [Architecture Note]
-     * - Command (CUD): Use JPA (CourseRepository) for domain entity state changes.
-     * - Query (Read): Use MyBatis (CourseMapper) for complex reads and duplicate
-     * checks.
-     *//*
+
+
+//     * [Architecture Note]
+//     * - Command (CUD): Use JPA (CourseRepository) for domain entity state changes.
+//     * - Query (Read): Use MyBatis (CourseMapper) for complex reads and duplicate
+//     * checks.
+//     */
 
     private final CourseRepository courseRepository;
 
@@ -43,10 +43,10 @@ public class CourseService {
     private final AttendanceRepository attendanceRepository;
     private final AttendanceCodeRepository attendanceCodeRepository;
 
-    */
+
 /**
      * 강좌 개설 신청 (상태: PENDING)
-     *//*
+     */
 
     @Transactional
     public void createCourse(CourseCreateReqDTO dto) {
@@ -105,10 +105,10 @@ public class CourseService {
         // Cascade.ALL로 인해 timeSlots도 자동 저장됨
     }
 
-    */
+
 /**
      * 강좌 승인 (PENDING -> OPEN)
-     *//*
+     */
 
     @Transactional
     public void approveCourse(Long courseId) {
@@ -122,13 +122,13 @@ public class CourseService {
         course.update(null, null, null, null, null, null, null, CourseStatus.OPEN);
     }
 
-    */
+
 /**
      * 강좌 반려 (PENDING -> REFUSE)
      *
      * @param courseId 강좌 ID
      * @param reason   반려 사유
-     *//*
+     */
 
     @Transactional
     public void refuseCourse(Long courseId, String reason) {
@@ -143,7 +143,7 @@ public class CourseService {
         course.update(null, null, null, null, null, null, null, CourseStatus.REFUSE);
     }
 
-    */
+
 /**
      * 강좌 정보 수정
      *
@@ -168,14 +168,14 @@ public class CourseService {
                 dto.getStatus());
     }
 
-    */
+
 /**
      * 강좌 변경 요청 생성 (즉시 반영 X)
      *
      * @param courseId 강좌 ID
      * @param dto      변경할 데이터 DTO
      * @param reason   변경 사유
-     *//*
+     */
 
     @Transactional
     public Long requestCourseUpdate(Long courseId, CourseUpdateReqDTO dto, String reason) {
@@ -194,10 +194,10 @@ public class CourseService {
         return savedRequest.getId();
     }
 
-    */
+
 /**
      * 강좌 변경 요청 승인 (Course에 반영)
-     *//*
+     */
 
     @Transactional
     public void approveChangeRequest(Long requestId) {
@@ -224,10 +224,9 @@ public class CourseService {
         request.approve();
     }
 
-    */
 /**
      * 강좌 변경 요청 반려
-     *//*
+     */
 
     @Transactional
     public void rejectChangeRequest(Long requestId, String reason) {
@@ -241,11 +240,11 @@ public class CourseService {
         request.reject(reason);
     }
 
-    */
+
 /**
      * 담당 교사 변경
      * - 변경하려는 교사의 스케줄 중복 확인 후 변경
-     *//*
+     */
 
     @Transactional
     public void changeTeacher(Long courseId, Long newTeacherId) {
@@ -274,7 +273,7 @@ public class CourseService {
         // notificationService.send(course.getEnrollments(), "담당 선생님이 변경되었습니다.");
     }
 
-    */
+
 /**
      * 학생 수강 일괄/강제 등록
      * - studentIds: 학생 ID 리스트 (1명이면 개별 등록, 여러 명이면 일괄 등록)
@@ -282,7 +281,7 @@ public class CourseService {
      * - 중복 시간표 체크:
      * - 선택과목(ELECTIVE) 중복 시: 기존 내역 자동 취소 후 등록
      * - 필수과목(MANDATORY) 중복 시: 예외 발생 (등록 불가)
-     *//*
+     */
 
     @Transactional
     public void enrollStudents(Long courseId, List<Long> studentIds, boolean force) {
@@ -338,12 +337,12 @@ public class CourseService {
         }
     }
 
-    */
+
 /**
      * 강좌 폐강 (상태 변경 및 수강생 일괄 취소) -> 강좌 삭제(DeleteCourse) (Soft Delete)
      * - 강좌 상태: CANCELED
      * - 수강생 상태: FORCED_CANCELED
-     *//*
+     */
 
     @Transactional
     public void deleteCourse(Long courseId, String reason) {
@@ -362,10 +361,10 @@ public class CourseService {
         }
     }
 
-    */
+
 /**
      * 학생 수강 강제 취소 (개별)
-     *//*
+     */
 
     @Transactional
     public void forceCancelStudent(Long courseId, Long studentId, String reason) {
@@ -424,10 +423,10 @@ public class CourseService {
         enrollment.updateMemo(memo);
     }
 
-    */
+
 /**
      * 교사별 강좌 목록 조회 (Paging)
-     *//*
+     */
 
     @Transactional(readOnly = true)
     public Page<CourseListResDTO> getCourseList(Long teacherDetailId, Pageable pageable) {
@@ -435,10 +434,10 @@ public class CourseService {
                 .map(this::convertToCourseListResDTO);
     }
 
-    */
+
 /**
      * 전체 강좌 목록 조회 (관리자용 - Paging)
-     *//*
+     */
 
     @Transactional(readOnly = true)
     public Page<CourseListResDTO> getAllCourses(Pageable pageable) {
@@ -458,11 +457,11 @@ public class CourseService {
                 .build();
     }
 
-    */
+
 /**
      * 강좌 상태 수동 변경 (조기 마감 / 재오픈)
      * - OPEN <-> CLOSED 상태 전환만 허용 (기타 상태 변경은 별도 프로세스 따름)
-     *//*
+     */
 
     @Transactional
     public void changeCourseStatus(Long courseId, CourseStatus status) {
@@ -477,11 +476,11 @@ public class CourseService {
         course.changeStatus(status);
     }
 
-    */
+
 /**
      * 교사 주간 시간표 조회
      * Grid 형태이므로, 요일/교시별로 매핑된 리스트 반환
-     *//*
+     */
 
     @Transactional(readOnly = true)
     public com.mycompany.project.course.dto.TeacherTimetableResDTO getTeacherTimetable(Long teacherDetailId,
@@ -511,4 +510,4 @@ public class CourseService {
                 .getId();
     }
 }
-*/
+
