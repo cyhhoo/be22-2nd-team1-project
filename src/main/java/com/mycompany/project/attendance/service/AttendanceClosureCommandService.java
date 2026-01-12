@@ -12,7 +12,6 @@ import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.repository.EnrollmentMapper;
-import com.mycompany.project.enrollment.repository.EnrollmentRepository;
 import com.mycompany.project.schedule.command.domain.aggregate.AcademicYear;
 import com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository;
 import com.mycompany.project.user.command.domain.aggregate.Role;
@@ -244,7 +243,7 @@ public class AttendanceClosureCommandService {
 
         // enrollment에서 학생ID만 뽑아서 student_detail 조회용 리스트로 만든다.
         List<Long> studentIds = enrollments.stream()
-                .map(enrollment -> enrollment.getStudentDetailId().getId())
+                .map(enrollment -> enrollment.getStudentDetail().getId())
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -280,7 +279,7 @@ public class AttendanceClosureCommandService {
 
         // 최종: enrollment 중에서 "조건에 맞는 학생"의 enrollmentId만 반환
         return enrollments.stream()
-                .filter(enrollment -> matchedStudentIds.contains(enrollment.getStudentDetailId().getId()))
+                .filter(enrollment -> matchedStudentIds.contains(enrollment.getStudentDetail().getId()))
                 .map(Enrollment::getEnrollmentId)
                 .collect(Collectors.toList());
     }

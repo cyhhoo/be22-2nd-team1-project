@@ -25,7 +25,7 @@ public class Enrollment extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "student_detail_id", nullable = false)
-  private StudentDetail studentDetailId;
+  private StudentDetail studentDetail;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "course_id", nullable = false)
@@ -36,7 +36,7 @@ public class Enrollment extends BaseEntity {
 
   @Builder
   public Enrollment(StudentDetail studentDetail, Course course) {
-    this.studentDetailId = studentDetail;
+    this.studentDetail = studentDetail;
     this.course = course;
     this.status = EnrollmentStatus.APPLIED;
   }

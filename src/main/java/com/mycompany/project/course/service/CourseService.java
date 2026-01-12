@@ -23,7 +23,6 @@ import com.mycompany.project.course.repository.CourseChangeRequestRepository;
 import com.mycompany.project.course.dto.StudentDetailResDTO;
 import com.mycompany.project.course.dto.CourseListResDTO;
 import com.mycompany.project.user.command.domain.repository.UserRepository;
-import com.mycompany.project.user.command.domain.aggregate.User;
 
 import com.mycompany.project.common.service.RefundService;
 import org.springframework.data.domain.Page;
@@ -387,7 +386,7 @@ public class CourseService {
             if (enrollment.getStatus() == EnrollmentStatus.APPLIED) {
                 enrollment.cancel(); // Force cancel via entity not supported
                 // 환불 로직 호출
-                refundService.processRefund(enrollment.getStudentDetailId().getUser().getUserId(), courseId,
+                refundService.processRefund(enrollment.getStudentDetail().getUser().getUserId(), courseId,
                         "강좌 폐강: " + reason);
             }
         }
@@ -407,7 +406,7 @@ public class CourseService {
 
         Enrollment enrollment = getEnrollmentsByCourseId(courseId)
                 .stream()
-                .filter(e -> e.getStudentDetailId().getUser().getUserId().equals(studentId))
+                .filter(e -> e.getStudentDetail().getUser().getUserId().equals(studentId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생의 수강 신청 내역이 없습니다."));
 
@@ -418,7 +417,7 @@ public class CourseService {
     public StudentDetailResDTO getStudentDetail(Long courseId, Long studentId) {
         Enrollment enrollment = getEnrollmentsByCourseId(courseId)
                 .stream()
-                .filter(e -> e.getStudentDetailId().getUser().getUserId().equals(studentId))
+                .filter(e -> e.getStudentDetail().getUser().getUserId().equals(studentId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
 
@@ -433,7 +432,7 @@ public class CourseService {
 
         return StudentDetailResDTO.builder()
                 .studentId(studentId)
-                .studentName(enrollment.getStudentDetailId().getUser().getName())
+                .studentName(enrollment.getStudentDetail().getUser().getName())
                 .memo(null) // Entity does not support memo
                 .attendancePresent(presentCount)
                 .attendanceLate(lateCount)

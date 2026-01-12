@@ -2,10 +2,50 @@
 @host = http://localhost:8080
 @contentType = application/json
 @studentId = 20
+@email = test@example.com
+@password = Password123!
+@name = Test User
+@birthDate = 2005-01-01
+@role = STUDENT
+
 
 # ==========================================
 # 1. [Happy Path] 전체 성공 시나리오
 # ==========================================
+
+### 0-1. 회원 가입
+POST http://localhost:8080/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "name": "{{name}}",
+  "birthDate": "{{birthDate}}",
+  "role": "{{role}}"
+}
+
+### 0-2. 계정 활성화
+POST http://localhost:8080/api/auth/activate
+Content-Type: {{contentType}}
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "name": "{{name}}",
+  "birthDate": "{{birthDate}}",
+  "role": "{{role}}"
+}
+
+### 0-3. 로그인
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
 
 ### 1-1. 장바구니 담기 (과목 101)
 POST {{host}}/api/carts
@@ -127,14 +167,14 @@ X-USER-ID: {{studentId}}
 ### 6-2. 장바구니 삭제 요청
 # 주의: 지우고 싶은 'courseId'(과목ID)를 URL 경로에 넣어야 합니다. (예: 101)
 # 기대 결과: 200 OK -> DB 확인 시 데이터 아예 사라짐
-DELETE {{host}}/api/carts/courses/301
+DELETE {{host}}/api/carts/courses/201
 X-USER-ID: {{studentId}}
 
 
 ### 5-2. 수강 취소 요청
 # 주의: 위 조회 결과에서 나온 'enrollmentId'를 URL 경로에 넣어야 합니다. (예: 1)
 # 기대 결과: 200 OK -> DB 확인 시 데이터는 남아있고 status='CANCELLED'로 변경됨
-DELETE {{host}}/api/enrollments/5
+DELETE {{host}}/api/enrollments/3
 X-USER-ID: {{studentId}}
 
 
