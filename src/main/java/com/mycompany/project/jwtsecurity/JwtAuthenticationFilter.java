@@ -19,7 +19,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtTokenProvider tokenProvider;
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String requestURI = request.getRequestURI();
 
       // INACTIVE면서 계정 활성화 API가 아니라면 차단
-      if("INACTIVE".equals(status) && !requestURI.startsWith("/api/auth/activate")){
+      if ("INACTIVE".equals(status) && !requestURI.startsWith("/api/auth/activate")) {
         sendErrorResponse(response);
         return;
       }
@@ -59,7 +59,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   private void sendErrorResponse(HttpServletResponse response) throws IOException {
-    ApiResponse<?> apiResponse = ApiResponse.failure(ErrorCode.ACCOUNT_INACTIVE.getCode(), ErrorCode.ACCOUNT_INACTIVE.getMessage());
+    ApiResponse<?> apiResponse = ApiResponse.failure(ErrorCode.ACCOUNT_INACTIVE.getCode(),
+        ErrorCode.ACCOUNT_INACTIVE.getMessage());
 
     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
     response.setContentType("application/json;charset=UTF-8");
