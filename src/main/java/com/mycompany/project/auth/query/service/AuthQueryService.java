@@ -32,7 +32,7 @@ public class AuthQueryService {
 
     // 토큰 생성 및 저장
     private TokenResponse generateAndSaveToken(User user) {
-        String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole());
+        String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole(), user.getStatus());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
 
         Token tokenEntity = Token.builder()
