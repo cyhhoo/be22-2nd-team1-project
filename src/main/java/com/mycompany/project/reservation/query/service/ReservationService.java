@@ -3,6 +3,8 @@ package com.mycompany.project.reservation.query.service;
 import com.mycompany.project.reservation.query.dto.ReservationDTO;
 import com.mycompany.project.reservation.query.dto.FacilityDTO;
 import com.mycompany.project.reservation.query.mapper.ReservationMapper;
+import lombok.RequiredArgsConstructor;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
