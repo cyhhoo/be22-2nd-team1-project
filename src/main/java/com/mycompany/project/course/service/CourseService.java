@@ -241,7 +241,7 @@ public class CourseService {
      */
     private List<Enrollment> getEnrollmentsByCourseId(Long courseId) {
         return enrollmentRepository.findAll().stream()
-                .filter(e -> e.getCourse().getId().equals(courseId))
+                .filter(e -> e.getCourse().getCourseId().equals(courseId))
                 .collect(java.util.stream.Collectors.toList());
     }
 

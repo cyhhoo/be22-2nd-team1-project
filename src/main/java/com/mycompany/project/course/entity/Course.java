@@ -17,8 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA는 기본 생성자가 필수 (protected 권장)
 @EntityListeners(AuditingEntityListener.class) // 생성일 자동 주입
-@AllArgsConstructor // [핵심] 빌더가 모든 필드를 다룰 수 있게 함
-@Builder
+
 public class Course {
 
   @Id
@@ -103,7 +102,7 @@ public class Course {
       this.currentCount--;
     }
   }
-   * 강좌 정보 수정 메서드
+   /** 강좌 정보 수정 메서드
    * <p>
    * 비즈니스 로직을 엔티티 내에 캡슐화하여,
    * Service에서는 이 메서드를 호출(메시지 전송)하는 방식으로 수정합니다.
@@ -116,8 +115,8 @@ public class Course {
    * @param subjectId       과목 ID
    * @param academicYearId  학년 ID
    * @param teacherDetailId 교사 ID
-   * @param status          강좌 상태
-   */
+   * @param status          강좌 상태*/
+
   /**
    * 강좌 정보 수정 (상태 변경 제외)
    */
@@ -136,7 +135,7 @@ public class Course {
     if (academicYearId != null)
       this.academicYearId = academicYearId;
     if (teacherDetailId != null)
-      this.teacherDetailId = teacherDetailId;
+      this.teacherDetail = teacherDetail;
   }
 
   /**
