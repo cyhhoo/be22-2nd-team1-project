@@ -17,7 +17,7 @@ public class AcademicYear {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long academicYearId;
 
-    @Column(nullable = false)
+    @Column(name = "proc_year", nullable = false)
     private Integer year; // 2025, 2026...
 
     @Column(nullable = false)

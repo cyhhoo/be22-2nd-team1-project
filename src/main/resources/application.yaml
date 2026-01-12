@@ -16,14 +16,5 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
-#spring:
-#  datasource:
-#    driver-class-name: {driver class}
-#    url: jdbc:mariadb://{ip}:{port}/{database}
-#    username: {user}
-#    password: {password}
-#  jpa:
-
-
-#jwt:
-#  secret: {시크릿 키 입력} }
+jwt:
+  secret: be22ndteam1schoolmateHasToBeVeryLongToSupportHS256AlgorithmSecurityRequirements2026!

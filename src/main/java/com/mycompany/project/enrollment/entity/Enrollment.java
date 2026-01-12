@@ -2,29 +2,36 @@ package com.mycompany.project.enrollment.entity;
 
 import com.mycompany.project.common.entity.BaseEntity;
 import com.mycompany.project.course.entity.Course;
-
-import com.mycompany.project.user.command.domain.aggregate.User;
+import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity
-@Table(name = "tbl_enrollment", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_enrollment_user_course", columnNames = { "user_id", "course_id" })
-})
 @Getter
+@Table(
+    name = "tbl_enrollment",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_enrollment_student_course",
+            columnNames = {"student_detail_id", "course_id"}
+        )
+    }
+)
+@SQLDelete(sql = "UPDATE tbl_enrollment SET status = 'CANCELLED' WHERE enrollment_id = ?")
+@Where(clause = "status = 'APPLIED'")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Enrollment extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "enrollment_id")
   private Long enrollmentId;
 
-  // Command 쪽은 객체 그래프 탐색과 무결성을 위해 연관관계 매핑 유지
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
-  private User student;
+  @JoinColumn(name = "student_detail_id", nullable = false)
+  private StudentDetail studentDetail;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "course_id", nullable = false)
@@ -34,8 +41,8 @@ public class Enrollment extends BaseEntity {
   private EnrollmentStatus status;
 
   @Builder
-  public Enrollment(User student, Course course) {
-    this.student = student;
+  public Enrollment(StudentDetail studentDetail, Course course) {
+    this.studentDetail = studentDetail;
     this.course = course;
     this.status = EnrollmentStatus.APPLIED;
   }

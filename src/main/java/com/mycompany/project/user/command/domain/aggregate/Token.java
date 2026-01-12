@@ -1,6 +1,8 @@
 package com.mycompany.project.user.command.domain.aggregate;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,10 +20,13 @@ public class Token {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long tokenId;
 
+  @NotBlank
   @Column(nullable = false, unique = true)
   private String token; // Refresh Token 값
-  @Column(nullable = false)
 
+  @NotBlank
+  @Email
+  @Column(nullable = false)
   private String email; // 누구의 토큰인지 (User 연관관계를 맺어도 되지만, 간단히 이메일로 저장)
 
   // 만료 시간 등은 JWT 자체 claim을 활용하거나 필요 시 필드 추가
