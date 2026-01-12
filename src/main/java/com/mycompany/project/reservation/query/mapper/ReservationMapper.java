@@ -14,17 +14,12 @@ public interface ReservationMapper {
 
     // 예약 가능 시설 조회
     List<FacilityDTO> selectAvailableFacilities(
-<<<<<<< HEAD
             @Param("reservationDate") LocalDate reservationDate,
             @Param("startTime") LocalTime startTime
     );
-=======
-            @Param("startTime") LocalDateTime startTime);
->>>>>>> c903d997dca1c36896004362fb3f750d68730251
 
     // 나의 예약 조회
     List<ReservationDTO> selectMyReservations(
-<<<<<<< HEAD
             @Param("studentId") Long studentId,
             @Param("status") String status
     );
@@ -36,12 +31,3 @@ public interface ReservationMapper {
             @Param("status") String status
     );
 }
-=======
-            @Param("studentId") int studentId,
-            @Param("status") String status);
-
-    List<ReservationDTO> selectReservationList(
-            @Param("studentId") Integer studentId,
-            @Param("status") String status);
-}
->>>>>>> c903d997dca1c36896004362fb3f750d68730251
