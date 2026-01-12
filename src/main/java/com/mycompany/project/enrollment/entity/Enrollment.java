@@ -10,15 +10,9 @@ import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
-@Table(
-    name = "tbl_enrollment",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_enrollment_student_course",
-            columnNames = {"student_detail_id", "course_id"}
-        )
-    }
-)
+@Table(name = "tbl_enrollment", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_enrollment_student_course", columnNames = { "student_detail_id", "course_id" })
+})
 @SQLDelete(sql = "UPDATE tbl_enrollment SET status = 'CANCELLED' WHERE enrollment_id = ?")
 @Where(clause = "status = 'APPLIED'")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -31,7 +25,7 @@ public class Enrollment extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "student_detail_id", nullable = false)
-  private StudentDetail studentDetail;
+  private StudentDetail studentDetailId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "course_id", nullable = false)
@@ -42,7 +36,7 @@ public class Enrollment extends BaseEntity {
 
   @Builder
   public Enrollment(StudentDetail studentDetail, Course course) {
-    this.studentDetail = studentDetail;
+    this.studentDetailId = studentDetail;
     this.course = course;
     this.status = EnrollmentStatus.APPLIED;
   }

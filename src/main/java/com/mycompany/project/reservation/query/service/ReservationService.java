@@ -3,6 +3,8 @@ package com.mycompany.project.reservation.query.service;
 import com.mycompany.project.reservation.query.dto.ReservationDTO;
 import com.mycompany.project.reservation.query.dto.FacilityDTO;
 import com.mycompany.project.reservation.query.mapper.ReservationMapper;
+import lombok.RequiredArgsConstructor;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
@@ -15,10 +17,10 @@ public class ReservationService {
     private final ReservationMapper reservationMapper;
 
     public List<FacilityDTO> selectAvailableFacilities(LocalDateTime startTime) {
-        return reservationMapper.selectAvailableFacilities(startTime);
+        return reservationMapper.selectAvailableFacilities(startTime.toLocalDate(), startTime.toLocalTime());
     }
 
-    public List<ReservationDTO> selectMyReservations(int studentId, String status) {
+    public List<ReservationDTO> selectMyReservations(Long studentId, String status) {
         return reservationMapper.selectMyReservations(studentId, status);
     }
 }

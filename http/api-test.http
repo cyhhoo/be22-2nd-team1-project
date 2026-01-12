@@ -1,0 +1,40 @@
+### 예약 신청
+POST http://localhost:8080/reservation
+Content-Type: application/json
+
+{
+  "facilityId": 1,
+  "reservationDate": "2026-01-15",
+  "startTime": "10:00"
+}
+
+### 예약 변경
+PUT http://localhost:8080/reservation/1
+Content-Type: application/json
+
+{
+  "reservationDate": "2026-01-16",
+  "startTime": "11:00"
+}
+
+### 예약 취소
+DELETE http://localhost:8080/reservation/1
+
+### 예약 승인
+PUT http://localhost:8080/reservation/1/approve
+Content-Type: application/json
+
+{
+  "approve": true,
+  "rejectionReason": null
+}
+
+
+###  예약 거부
+PUT http://localhost:8080/reservation/1/approve
+Content-Type: application/json
+
+{
+  "approve": false,
+  "rejectionReason": "시설 점검으로 이용 불가"
+}

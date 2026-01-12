@@ -1,6 +1,5 @@
 package com.mycompany.project.course.service;
 
-import com.mycompany.project.attendance.entity.Attendance;
 import com.mycompany.project.attendance.repository.AttendanceRepository;
 import com.mycompany.project.course.dto.TimeSlotDTO;
 import com.mycompany.project.course.entity.*;
@@ -8,6 +7,9 @@ import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
+import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
+import com.mycompany.project.user.command.domain.repository.StudentDetailRepository;
+import com.mycompany.project.user.command.domain.repository.TeacherDetailRepository;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +30,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +50,8 @@ public class CourseService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final RefundService refundService;
+    private final StudentDetailRepository studentDetailRepository;
+    private final TeacherDetailRepository teacherDetailRepository;
 
     /**
      * 강좌 개설 신청 (상태: PENDING)
@@ -65,7 +71,7 @@ public class CourseService {
                 .tuition(dto.getTuition())
                 .subjectId(dto.getSubjectId())
                 .academicYearId(dto.getAcademicYearId())
-                .teacherDetailId(dto.getTeacherDetailId())
+                .teacherDetail(teacherDetailRepository.getReferenceById(dto.getTeacherDetailId()))
                 .status(CourseStatus.PENDING) // 초기 상태 PENDING 설정
                 .build();
 
@@ -163,7 +169,8 @@ public class CourseService {
                 dto.getTuition(),
                 dto.getSubjectId(),
                 dto.getAcademicYearId(),
-                dto.getTeacherDetailId(),
+                dto.getTeacherDetailId() != null ? teacherDetailRepository.getReferenceById(dto.getTeacherDetailId())
+                        : null,
                 dto.getStatus());
     }
 
@@ -213,7 +220,9 @@ public class CourseService {
                 request.getTargetTuition(),
                 null,
                 null,
-                request.getTargetTeacherDetailId() // 교사 변경 반영
+                request.getTargetTeacherDetailId() != null
+                        ? teacherDetailRepository.getReferenceById(request.getTargetTeacherDetailId())
+                        : null // 교사 변경 반영
         );
 
         request.approve();
@@ -242,7 +251,7 @@ public class CourseService {
     private List<Enrollment> getEnrollmentsByCourseId(Long courseId) {
         return enrollmentRepository.findAll().stream()
                 .filter(e -> e.getCourse().getCourseId().equals(courseId))
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     /**
@@ -270,7 +279,8 @@ public class CourseService {
         }
 
         // 2. 교사 변경 반영
-        course.updateCourseInfo(null, null, null, null, null, null, newTeacherId);
+        course.updateCourseInfo(null, null, null, null, null, null,
+                teacherDetailRepository.getReferenceById(newTeacherId));
 
         // 3. 알림 발송
         // Lazy Loading Issue 방지를 위해 Enrollment 조회 필요할 수 있음
@@ -301,33 +311,37 @@ public class CourseService {
             }
         }
 
-        // 2. 학생 일괄 조회 (N+1 문제 해결)
-        List<User> students = userRepository.findAllById(studentIds);
+        // 2. 학생 상세 정보 일괄 조회
+        List<StudentDetail> students = studentDetailRepository.findAllById(studentIds);
         if (students.size() != studentIds.size()) {
-            List<Long> foundIds = students.stream().map(User::getUserId).toList();
+            List<Long> foundIds = students.stream().map(StudentDetail::getId).toList();
             List<Long> missingIds = studentIds.stream()
                     .filter(id -> !foundIds.contains(id))
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
             throw new IllegalArgumentException("존재하지 않는 학생 ID가 포함되어 있습니다: " + missingIds);
         }
 
-        // 학생 ID로 빠르게 조회하기 위해 Map으로 변환
-        java.util.Map<Long, User> studentMap = students.stream()
-                .collect(java.util.stream.Collectors.toMap(User::getUserId, java.util.function.Function.identity()));
+        // 학생 ID(User ID)로 빠르게 조회하기 위해 Map으로 변환
+        Map<Long, StudentDetail> studentMap = students.stream()
+                .collect(Collectors.toMap(
+                        s -> s.getUser().getUserId(),
+                        java.util.function.Function.identity()));
 
-        // 3. 학생별 등록 프로세스 (일괄 조회된 내용 이용)
+        // 3. 학생별 등록 프로세스
         for (Long studentId : studentIds) {
-            User student = studentMap.get(studentId);
+            StudentDetail student = studentMap.get(studentId);
+            if (student == null)
+                continue;
 
-            // 3-1. 시간표 중복 검사 (개별 중복검사)
+            // 3-1. 시간표 중복 검사
             for (CourseTimeSlot slot : course.getTimeSlots()) {
-                List<java.util.Map<String, Object>> conflicts = courseMapper.findConflictingEnrollments(
+                List<Map<String, Object>> conflicts = courseMapper.findConflictingEnrollments(
                         course.getAcademicYearId(),
                         studentId,
                         slot.getDayOfWeek(),
                         slot.getPeriod());
 
-                for (java.util.Map<String, Object> conflict : conflicts) {
+                for (Map<String, Object> conflict : conflicts) {
                     String existingTypeStr = (String) conflict.get("courseType");
                     CourseType existingType = CourseType.valueOf(existingTypeStr);
                     Long existingEnrollmentId = (Long) conflict.get("enrollmentId");
@@ -345,10 +359,9 @@ public class CourseService {
                 }
             }
 
-            // 3-2. 수강 등록
-            Enrollment enrollment = Enrollment
-                    .builder()
-                    .student(student)
+            // 3-2. 수강 등록 (필드명 studentDetail로 수정)
+            Enrollment enrollment = Enrollment.builder()
+                    .studentDetail(student)
                     .course(course)
                     .build();
             enrollmentRepository.save(enrollment);
@@ -374,7 +387,8 @@ public class CourseService {
             if (enrollment.getStatus() == EnrollmentStatus.APPLIED) {
                 enrollment.cancel(); // Force cancel via entity not supported
                 // 환불 로직 호출
-                refundService.processRefund(enrollment.getStudent().getUserId(), courseId, "강좌 폐강: " + reason);
+                refundService.processRefund(enrollment.getStudentDetailId().getUser().getUserId(), courseId,
+                        "강좌 폐강: " + reason);
             }
         }
 
@@ -393,7 +407,7 @@ public class CourseService {
 
         Enrollment enrollment = getEnrollmentsByCourseId(courseId)
                 .stream()
-                .filter(e -> e.getStudent().getUserId().equals(studentId)) // Fixed: e.getStudent().getUserId()
+                .filter(e -> e.getStudentDetailId().getUser().getUserId().equals(studentId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생의 수강 신청 내역이 없습니다."));
 
@@ -404,7 +418,7 @@ public class CourseService {
     public StudentDetailResDTO getStudentDetail(Long courseId, Long studentId) {
         Enrollment enrollment = getEnrollmentsByCourseId(courseId)
                 .stream()
-                .filter(e -> e.getStudent().getUserId().equals(studentId)) // Fixed
+                .filter(e -> e.getStudentDetailId().getUser().getUserId().equals(studentId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
 
@@ -419,7 +433,7 @@ public class CourseService {
 
         return StudentDetailResDTO.builder()
                 .studentId(studentId)
-                .studentName(enrollment.getStudent().getName()) // Improved: Get real name
+                .studentName(enrollment.getStudentDetailId().getUser().getName())
                 .memo(null) // Entity does not support memo
                 .attendancePresent(presentCount)
                 .attendanceLate(lateCount)
@@ -439,7 +453,7 @@ public class CourseService {
      */
     @Transactional(readOnly = true)
     public Page<CourseListResDTO> getCourseList(Long teacherDetailId, Pageable pageable) {
-        return courseRepository.findByTeacherDetailId(teacherDetailId, pageable)
+        return courseRepository.findByTeacherDetail_Id(teacherDetailId, pageable)
                 .map(this::convertToCourseListResDTO);
     }
 
@@ -454,7 +468,7 @@ public class CourseService {
 
     private CourseListResDTO convertToCourseListResDTO(Course course) {
         return CourseListResDTO.builder()
-                .courseId(course.getId())
+                .courseId(course.getCourseId())
                 .name(course.getName())
                 .courseType(course.getCourseType())
                 .status(course.getStatus())
@@ -488,7 +502,7 @@ public class CourseService {
     @Transactional(readOnly = true)
     public com.mycompany.project.course.dto.TeacherTimetableResDTO getTeacherTimetable(Long teacherDetailId,
             Long academicYearId) {
-        List<java.util.Map<String, Object>> timeSlotsMap = courseMapper.findTeacherTimetable(academicYearId,
+        List<Map<String, Object>> timeSlotsMap = courseMapper.findTeacherTimetable(academicYearId,
                 teacherDetailId);
 
         List<com.mycompany.project.course.dto.TeacherTimetableResDTO.TimeSlotInfo> timeSlots = timeSlotsMap.stream()
@@ -500,7 +514,7 @@ public class CourseService {
                         .classroom((String) m.get("classroom"))
                         .courseType(String.valueOf(m.get("courseType")))
                         .build())
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
         return com.mycompany.project.course.dto.TeacherTimetableResDTO.builder()
                 .timeSlots(timeSlots)
