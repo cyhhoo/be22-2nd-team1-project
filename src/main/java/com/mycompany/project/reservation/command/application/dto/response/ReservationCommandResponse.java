@@ -18,3 +18,4 @@ public class ReservationCommandResponse {
             .build();
   }
 }
+//Microsoft.QuickAction.LiveCaptions
