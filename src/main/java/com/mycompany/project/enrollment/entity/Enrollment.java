@@ -60,4 +60,4 @@ public class Enrollment extends BaseEntity {
 /*
  * Command는 JPA를 쓰고, **Query는 MyBatis(또는 QueryDSL)**를 쓴다.
  * Mapper가 query쪽, Command가 repository쪽
- * */
+ */
