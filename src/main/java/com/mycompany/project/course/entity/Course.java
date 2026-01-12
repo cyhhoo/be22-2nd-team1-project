@@ -13,6 +13,8 @@ import java.util.List;
 @Entity
 @Table(name = "tbl_course")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA는 기본 생성자가 필수 (protected 권장)
 @EntityListeners(AuditingEntityListener.class) // 생성일 자동 주입
 @AllArgsConstructor // [핵심] 빌더가 모든 필드를 다룰 수 있게 함
@@ -30,10 +32,10 @@ public class Course {
   private TeacherDetail teacherDetail;
 
   @Column(name = "academic_year_id")
-  private Long academicYearId;
+  private Long academicYearId; // FK: tbl_academic_year
 
   @Column(name = "subject_id")
-  private Long subjectId;
+  private Long subjectId; // FK: tbl_subject
 
   @Column(name = "name", nullable = false, length = 100)
   private String name;
@@ -63,24 +65,15 @@ public class Course {
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
+  @Column(name = "rejection_reason", length = 500)
+  private String rejectionReason; // 반려 사유
+
   // 양방향 연관관계 (Course -> CourseTimeSlot)
   // cascade = ALL: 강좌가 삭제되면 시간표도 같이 삭제
   // orphanRemoval = true: 리스트에서 제거되면 DB에서도 삭제
   @Builder.Default
   @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CourseTimeSlot> timeSlots = new ArrayList<>();
-
-  @Builder
-  public Course(TeacherDetail teacherDetail, Long academicYearId, Long subjectId, String name,
-                CourseType courseType, Integer maxCapacity, Integer tuition) {
-    this.teacherDetail = teacherDetail;
-    this.academicYearId = academicYearId;
-    this.subjectId = subjectId;
-    this.name = name;
-    this.courseType = courseType;
-    this.maxCapacity = maxCapacity;
-    this.tuition = tuition;
-  }
 
   // 연관관계 편의 메서드 (객체 양쪽에 값을 넣어줌)
   public void addTimeSlot(CourseTimeSlot timeSlot) {
@@ -110,4 +103,62 @@ public class Course {
       this.currentCount--;
     }
   }
+   * 강좌 정보 수정 메서드
+   * <p>
+   * 비즈니스 로직을 엔티티 내에 캡슐화하여,
+   * Service에서는 이 메서드를 호출(메시지 전송)하는 방식으로 수정합니다.
+   * </p>
+   *
+   * @param name            강좌명
+   * @param courseType      강좌 타입
+   * @param maxCapacity     최대 수강 인원
+   * @param tuition         수강료
+   * @param subjectId       과목 ID
+   * @param academicYearId  학년 ID
+   * @param teacherDetailId 교사 ID
+   * @param status          강좌 상태
+   */
+  /**
+   * 강좌 정보 수정 (상태 변경 제외)
+   */
+  public void updateCourseInfo(String name, CourseType courseType, Integer maxCapacity, Integer tuition,
+      Long subjectId, Long academicYearId, Long teacherDetailId) {
+    if (name != null)
+      this.name = name;
+    if (courseType != null)
+      this.courseType = courseType;
+    if (maxCapacity != null && maxCapacity > 0)
+      this.maxCapacity = maxCapacity;
+    if (tuition != null && tuition >= 0)
+      this.tuition = tuition;
+    if (subjectId != null)
+      this.subjectId = subjectId;
+    if (academicYearId != null)
+      this.academicYearId = academicYearId;
+    if (teacherDetailId != null)
+      this.teacherDetailId = teacherDetailId;
+  }
+
+  /**
+   * 강좌 상태 변경
+   */
+  public void changeStatus(CourseStatus status) {
+    if (status != null) {
+      this.status = status;
+    }
+  }
+
+  /**
+   * 통합 업데이트 메서드 (정보 수정 + 상태 변경)
+   */
+  public void update(String name, CourseType courseType, Integer maxCapacity, Integer tuition,
+      Long subjectId, Long academicYearId, Long teacherDetailId, CourseStatus status) {
+    updateCourseInfo(name, courseType, maxCapacity, tuition, subjectId, academicYearId, teacherDetailId);
+    changeStatus(status);
+  }
+
+  public void setRejectionReason(String rejectionReason) {
+    this.rejectionReason = rejectionReason;
+  }
+
 }
