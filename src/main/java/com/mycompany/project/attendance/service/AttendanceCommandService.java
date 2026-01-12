@@ -338,7 +338,7 @@ public class AttendanceCommandService {
      * - 강좌에 저장된 담당교사(teacherDetailId)가 요청 userId와 같아야 한다.
      */
     private void ensureCourseTeacher(Long userId, Course course) {
-        if (!Objects.equals(course.getTeacherDetailId(), userId)) {
+        if (!Objects.equals(course.getTeacherDetail().getId(), userId)) {
             throw new IllegalStateException("과목 담당 교사만 처리할 수 있습니다.");
         }
     }
@@ -351,7 +351,7 @@ public class AttendanceCommandService {
     private void ensureConfirmAuthority(Long userId, Course course) {
 
         // 담당교사면 확정 가능
-        if (Objects.equals(course.getTeacherDetailId(), userId)) {
+        if (Objects.equals(course.getTeacherDetail().getId(), userId)) {
             return;
         }
 
@@ -365,7 +365,7 @@ public class AttendanceCommandService {
 
         // 강좌에 속한 학생 목록 조회
         List<Enrollment> enrollments = enrollmentRepository.findByCourseIdAndStatus(
-                course.getId(), ENROLLMENT_STATUS_APPLIED
+                course.getCourseId(), ENROLLMENT_STATUS_APPLIED
         );
 
         if (enrollments.isEmpty()) {
@@ -374,7 +374,7 @@ public class AttendanceCommandService {
 
         // 학생ID만 추출
         List<Long> studentIds = enrollments.stream()
-                .map(Enrollment::getStudentId)
+                .map(enrollment -> enrollment.getStudentDetail().getId())
                 .collect(Collectors.toList());
 
         // 담임의 학년/반과 학생들이 완전히 일치하는지 확인

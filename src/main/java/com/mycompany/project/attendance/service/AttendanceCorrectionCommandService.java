@@ -202,10 +202,10 @@ public class AttendanceCorrectionCommandService {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new IllegalArgumentException("수강신청 정보가 없습니다."));
 
-        Course course = courseRepository.findById(enrollment.getCourseId())
+        Course course = courseRepository.findById(enrollment.getCourse().getCourseId())
                 .orElseThrow(() -> new IllegalArgumentException("과목 정보가 없습니다."));
 
-        if (course.getTeacherDetailId() == null || !course.getTeacherDetailId().equals(teacherId)) {
+        if (course.getTeacherDetail() == null || !course.getTeacherDetail().getId().equals(teacherId)) {
             throw new IllegalStateException("과목 담당 교사만 정정요청을 생성할 수 있습니다.");
         }
     }
