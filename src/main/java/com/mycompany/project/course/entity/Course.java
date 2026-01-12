@@ -17,8 +17,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA는 기본 생성자가 필수 (protected 권장)
 @EntityListeners(AuditingEntityListener.class) // 생성일 자동 주입
-@AllArgsConstructor // [핵심] 빌더가 모든 필드를 다룰 수 있게 함
-@Builder
 public class Course {
 
   @Id
@@ -75,6 +73,13 @@ public class Course {
   @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CourseTimeSlot> timeSlots = new ArrayList<>();
 
+  // teacherDetailId 필드 삭제 (DuplicateMappingException 해결)
+  // 대신 teacherDetail.getId()를 활용하도록 헬퍼 메서드 추가
+
+  public Long getTeacherDetailId() {
+    return this.teacherDetail != null ? this.teacherDetail.getId() : null;
+  }
+
   // 연관관계 편의 메서드 (객체 양쪽에 값을 넣어줌)
   public void addTimeSlot(CourseTimeSlot timeSlot) {
     this.timeSlots.add(timeSlot);
@@ -103,26 +108,12 @@ public class Course {
       this.currentCount--;
     }
   }
-   * 강좌 정보 수정 메서드
-   * <p>
-   * 비즈니스 로직을 엔티티 내에 캡슐화하여,
-   * Service에서는 이 메서드를 호출(메시지 전송)하는 방식으로 수정합니다.
-   * </p>
-   *
-   * @param name            강좌명
-   * @param courseType      강좌 타입
-   * @param maxCapacity     최대 수강 인원
-   * @param tuition         수강료
-   * @param subjectId       과목 ID
-   * @param academicYearId  학년 ID
-   * @param teacherDetailId 교사 ID
-   * @param status          강좌 상태
-   */
+
   /**
    * 강좌 정보 수정 (상태 변경 제외)
    */
   public void updateCourseInfo(String name, CourseType courseType, Integer maxCapacity, Integer tuition,
-      Long subjectId, Long academicYearId, Long teacherDetailId) {
+      Long subjectId, Long academicYearId, TeacherDetail teacherDetail) {
     if (name != null)
       this.name = name;
     if (courseType != null)
@@ -135,8 +126,8 @@ public class Course {
       this.subjectId = subjectId;
     if (academicYearId != null)
       this.academicYearId = academicYearId;
-    if (teacherDetailId != null)
-      this.teacherDetailId = teacherDetailId;
+    if (teacherDetail != null)
+      this.teacherDetail = teacherDetail;
   }
 
   /**
@@ -152,8 +143,8 @@ public class Course {
    * 통합 업데이트 메서드 (정보 수정 + 상태 변경)
    */
   public void update(String name, CourseType courseType, Integer maxCapacity, Integer tuition,
-      Long subjectId, Long academicYearId, Long teacherDetailId, CourseStatus status) {
-    updateCourseInfo(name, courseType, maxCapacity, tuition, subjectId, academicYearId, teacherDetailId);
+      Long subjectId, Long academicYearId, TeacherDetail teacherDetail, CourseStatus status) {
+    updateCourseInfo(name, courseType, maxCapacity, tuition, subjectId, academicYearId, teacherDetail);
     changeStatus(status);
   }
 

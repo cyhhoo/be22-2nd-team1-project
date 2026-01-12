@@ -66,4 +66,29 @@
             e.created_at DESC
     </select>
 
+    <!-- 추가 -->
+    <select id="selectByCourseIdsAndStatus" resultMap="EnrollmentResultMap">
+        SELECT
+        enrollment_id,
+        student_detail_id,
+        course_id,
+        status,
+        created_at,
+        updated_at
+        FROM tbl_enrollment
+        WHERE course_id IN
+        <foreach item="id" collection="courseIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND status = #{status}
+    </select>
+
+    <!-- Enrollment 엔티티와 매핑을 위한 ResultMap (필요시) -->
+    <resultMap id="EnrollmentResultMap" type="com.mycompany.project.enrollment.entity.Enrollment">
+        <id property="enrollmentId" column="enrollment_id"/>
+        <result property="status" column="status"/>
+        <!-- 연관 관계는 필요에 따라 추가 설정 -->
+    </resultMap>
+
+
 </mapper>

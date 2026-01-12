@@ -14,11 +14,7 @@ spring:
       hibernate:
         format_sql: true
 
-mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.mycompany.project
-  configuration:
-    map-underscore-to-camel-case: true
+
 
 jwt:
   secret: be22ndteam1schoolmateHasToBeVeryLongToSupportHS256AlgorithmSecurityRequirements2026!

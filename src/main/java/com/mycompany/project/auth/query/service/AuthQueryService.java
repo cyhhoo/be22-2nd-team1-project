@@ -2,7 +2,8 @@ package com.mycompany.project.auth.query.service;
 
 import com.mycompany.project.auth.query.dto.LoginRequest;
 import com.mycompany.project.auth.query.dto.TokenResponse;
-import com.mycompany.project.exception.AccountInactiveException;
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.jwtsecurity.JwtTokenProvider;
 import com.mycompany.project.user.command.domain.aggregate.Token;
 import com.mycompany.project.user.command.domain.aggregate.User;
@@ -58,7 +59,7 @@ public class AuthQueryService {
 
         // 2. 비활성 상태 확인
         if (user.getStatus() == UserStatus.INACTIVE) {
-            throw new AccountInactiveException("계정이 활성화되지 않았습니다. 최초 비밀번호 변경 및 계정 활성화를 진행해주세요.");
+            throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE);
         }
 
         // 3. 비밀번호 불일치 체크

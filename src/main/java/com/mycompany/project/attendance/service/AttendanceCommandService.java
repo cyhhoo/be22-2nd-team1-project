@@ -83,9 +83,8 @@ public class AttendanceCommandService {
                 .orElseThrow(() -> new IllegalArgumentException("기본 출결 코드(PRESENT)를 찾을 수 없습니다."));
 
         // 해당 강좌에 신청된 학생 목록(APPLIED) 조회
-        List<Enrollment> enrollments = enrollmentRepository.findByCourseIdAndStatus(
-                request.getCourseId(), ENROLLMENT_STATUS_APPLIED
-        );
+        List<Enrollment> enrollments = enrollmentRepository.findByCourse_CourseIdAndStatus(
+                request.getCourseId(), ENROLLMENT_STATUS_APPLIED);
         if (enrollments.isEmpty()) {
             // 수강신청이 없으면 생성할 출결도 없음
             return List.of();
@@ -99,8 +98,7 @@ public class AttendanceCommandService {
 
             // (enrollmentId + 날짜 + 교시) 기준으로 출결이 이미 있는지 확인
             Optional<Attendance> existing = attendanceRepository.findByEnrollmentIdAndClassDateAndPeriod(
-                    enrollment.getEnrollmentId(), request.getClassDate(), period
-            );
+                    enrollment.getEnrollmentId(), request.getClassDate(), period);
 
             if (existing.isEmpty()) {
                 // 없으면 기본 코드(PRESENT)로 새 출결 생성
@@ -151,9 +149,8 @@ public class AttendanceCommandService {
         ensureCourseTeacher(request.getUserId(), course);
 
         // 과목에 등록된 수강신청 목록을 가져와서 "요청 enrollmentId가 이 강좌 소속인지" 검증한다.
-        List<Enrollment> enrollments = enrollmentRepository.findByCourseIdAndStatus(
-                request.getCourseId(), ENROLLMENT_STATUS_APPLIED
-        );
+        List<Enrollment> enrollments = enrollmentRepository.findByCourse_CourseIdAndStatus(
+                request.getCourseId(), ENROLLMENT_STATUS_APPLIED);
 
         List<Long> enrollmentIds = enrollments.stream()
                 .map(Enrollment::getEnrollmentId)
@@ -186,15 +183,15 @@ public class AttendanceCommandService {
 
             // 기존 출결이 있는지 조회
             Optional<Attendance> existing = attendanceRepository.findByEnrollmentIdAndClassDateAndPeriod(
-                    item.getEnrollmentId(), request.getClassDate(), period
-            );
+                    item.getEnrollmentId(), request.getClassDate(), period);
 
             if (existing.isPresent()) {
                 // 있으면 수정 처리
                 Attendance attendance = existing.get();
 
                 // 확정/마감이면 저장 불가
-                if (attendance.getState() == AttendanceState.CONFIRMED || attendance.getState() == AttendanceState.CLOSED) {
+                if (attendance.getState() == AttendanceState.CONFIRMED
+                        || attendance.getState() == AttendanceState.CLOSED) {
                     throw new IllegalStateException("확정/마감 상태의 출결은 수정할 수 없습니다.");
                 }
 
@@ -210,8 +207,7 @@ public class AttendanceCommandService {
                         code.getId(),
                         item.getEnrollmentId(),
                         request.getUserId(),
-                        item.getReason()
-                );
+                        item.getReason());
                 toSave.add(attendance);
             }
         }
@@ -243,9 +239,8 @@ public class AttendanceCommandService {
         ensureConfirmAuthority(request.getUserId(), course);
 
         // 강좌에 속한 학생 목록(APPLIED) 조회
-        List<Enrollment> enrollments = enrollmentRepository.findByCourseIdAndStatus(
-                request.getCourseId(), ENROLLMENT_STATUS_APPLIED
-        );
+        List<Enrollment> enrollments = enrollmentRepository.findByCourse_CourseIdAndStatus(
+                request.getCourseId(), ENROLLMENT_STATUS_APPLIED);
 
         if (enrollments.isEmpty()) {
             throw new IllegalStateException("확정할 출결 대상이 없습니다.");
@@ -259,8 +254,7 @@ public class AttendanceCommandService {
         // 미입력 출결 체크:
         // enrollment 수만큼 출결 레코드가 있어야 확정 가능
         long attendanceCount = attendanceRepository.countByEnrollmentIdInAndClassDateAndPeriod(
-                enrollmentIds, request.getClassDate(), request.getPeriod().byteValue()
-        );
+                enrollmentIds, request.getClassDate(), request.getPeriod().byteValue());
 
         if (attendanceCount < enrollmentIds.size()) {
             throw new IllegalStateException("미입력 출결이 있어 확정할 수 없습니다.");
@@ -268,8 +262,7 @@ public class AttendanceCommandService {
 
         // 대상 출결들을 한번에 조회
         List<Attendance> attendances = attendanceRepository.findByEnrollmentIdInAndClassDateAndPeriod(
-                enrollmentIds, request.getClassDate(), request.getPeriod().byteValue()
-        );
+                enrollmentIds, request.getClassDate(), request.getPeriod().byteValue());
 
         // 하나씩 상태 확인 후 확정 처리
         for (Attendance attendance : attendances) {
@@ -364,9 +357,8 @@ public class AttendanceCommandService {
         }
 
         // 강좌에 속한 학생 목록 조회
-        List<Enrollment> enrollments = enrollmentRepository.findByCourseIdAndStatus(
-                course.getCourseId(), ENROLLMENT_STATUS_APPLIED
-        );
+        List<Enrollment> enrollments = enrollmentRepository.findByCourse_CourseIdAndStatus(
+                course.getCourseId(), ENROLLMENT_STATUS_APPLIED);
 
         if (enrollments.isEmpty()) {
             throw new IllegalStateException("확정할 출결 대상이 없습니다.");
@@ -374,15 +366,14 @@ public class AttendanceCommandService {
 
         // 학생ID만 추출
         List<Long> studentIds = enrollments.stream()
-                .map(enrollment -> enrollment.getStudentDetail().getId())
+                .map(enrollment -> enrollment.getStudentDetailId().getId())
                 .collect(Collectors.toList());
 
         // 담임의 학년/반과 학생들이 완전히 일치하는지 확인
         String classNo = String.valueOf(teacherDetail.getHomeroomClassNo());
 
         long matchedCount = studentDetailRepository.countByIdInAndGradeAndClassNo(
-                studentIds, teacherDetail.getHomeroomGrade(), classNo
-        );
+                studentIds, teacherDetail.getHomeroomGrade(), classNo);
 
         // 한 명이라도 학년/반이 다르면 "그 반 담임"이 아니라고 판단
         if (matchedCount != studentIds.size()) {
