@@ -18,9 +18,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
   // (필요시) 특정 학생의 신청 취소를 위해 조회
   Optional<Enrollment> findByStudentAndCourse(User student, Course course);
+<<<<<<< HEAD
 
   // 강좌별 수강신청 목록 조회
   List<Enrollment> findByCourseId(Long courseId);
+=======
+>>>>>>> 5460088e08a768449f4811c9681cd1a516af6c09
 
   @Query("select e from Enrollment e where e.course.id = :courseId and e.status = :status")
   List<Enrollment> findByCourseIdAndStatus(@Param("courseId") Long courseId,

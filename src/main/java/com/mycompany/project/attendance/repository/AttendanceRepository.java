@@ -2,7 +2,10 @@ package com.mycompany.project.attendance.repository;
 
 import com.mycompany.project.attendance.entity.Attendance;
 import com.mycompany.project.attendance.entity.enums.AttendanceState;
+<<<<<<< HEAD
 import org.springframework.data.jpa.repository.JpaRepository;
+=======
+>>>>>>> 5460088e08a768449f4811c9681cd1a516af6c09
 
 import java.time.LocalDate;
 import java.util.Collection;
