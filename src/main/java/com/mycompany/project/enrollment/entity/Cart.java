@@ -2,6 +2,7 @@ package com.mycompany.project.enrollment.entity;
 
 import com.mycompany.project.common.entity.BaseEntity; // 1. 생성일시 기록용
 import com.mycompany.project.course.entity.Course;
+import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
 import com.mycompany.project.user.command.domain.aggregate.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +14,7 @@ import lombok.*;
     uniqueConstraints = {
         @UniqueConstraint(
             name = "uk_cart_student_course",
-            columnNames = {"student_id", "course_id"}
+            columnNames = {"student_detail_id", "course_id"}
         )
     }
 )
@@ -30,8 +31,8 @@ public class Cart extends BaseEntity { // BaseEntity 상속 (담은 날짜 creat
 
   // Command 쪽은 객체 그래프 탐색과 무결성을 위해 연관관계 매핑 유지
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "student_id", nullable = false) // 4. [무결성] 필수값(Not Null) 지정
-  private User student;
+  @JoinColumn(name = "student_detail_id", nullable = false)// 4. [무결성] 필수값(Not Null) 지정
+  private StudentDetail studentDetail;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "course_id", nullable = false) // 4. [무결성] 필수값(Not Null) 지정
@@ -39,8 +40,8 @@ public class Cart extends BaseEntity { // BaseEntity 상속 (담은 날짜 creat
 
   // --- 생성자 (Builder 패턴) ---
   @Builder
-  public Cart(User student, Course course) {
-    this.student = student;
+  public Cart(StudentDetail studentDetail, Course course) {
+    this.studentDetail = studentDetail;
     this.course = course;
   }
 }

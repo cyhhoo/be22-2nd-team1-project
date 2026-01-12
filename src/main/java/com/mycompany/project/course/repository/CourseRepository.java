@@ -1,19 +1,24 @@
 package com.mycompany.project.course.repository;
 
-import com.mycompany.project.course.entity.Course;
+import jakarta.persistence.LockModeType;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.mycompany.project.course.entity.Course;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-<<<<<<< HEAD
-import java.util.List;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
-    List<Course> findByAcademicYearId(Long academicYearId);
-=======
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
->>>>>>> 5460088e08a768449f4811c9681cd1a516af6c09
+
+  // [핵심] 비관적 락(Pessimistic Lock) 적용
+  // 이 메서드로 조회하면, 트랜잭션이 끝날 때까지 다른 사람은 이 강좌를 수정하지 못하고 대기합니다.
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select c from Course c where c.courseId = :id")
+  Optional<Course> findByIdWithLock(@Param("id") Long id);
 
     // 교사별 강좌 목록 조회
     Page<Course> findByTeacherDetailId(Long teacherDetailId, Pageable pageable);
