@@ -4,40 +4,59 @@ import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
-  // 1. [중복 신청 방지] User가 아니라 StudentDetail 객체로 검사
+  // [수정 1] 메서드 이름 변경 (Student -> StudentDetail)
+  // 필드명이 studentDetail이므로 ByStudentDetail로 해야 함
   boolean existsByStudentDetailAndCourse(StudentDetail studentDetail, Course course);
 
-  // [수정 전] 에러 발생 (Course.id를 찾으려 함)
-  // List<Enrollment> findByCourseIdInAndStatus(List<Long> courseIds, EnrollmentStatus status);
+  // [수정 2] 메서드 이름 변경 (Student -> StudentDetail)
+  Optional<Enrollment> findByStudentDetailAndCourse(StudentDetail studentDetail, Course course);
 
-  // [수정 후] JPQL로 "e.course.courseId"라고 명확히 지정
-  @Query("SELECT e FROM Enrollment e WHERE e.course.courseId IN :courseIds AND e.status = :status")
-  List<Enrollment> findByCourseIdInAndStatus(@Param("courseIds") List<Long> courseIds, @Param("status") EnrollmentStatus status);
+  // 강좌별 전체 수강신청 목록
+  @Query("select e from Enrollment e where e.course.courseId = :courseId")
+  List<Enrollment> findByCourseId(@Param("courseId") Long courseId);
 
-  // 3. [시간표 중복 방지] 쿼리 경로 수정 (e.student -> e.studentDetail.user.userId)
-  // Enrollment -> StudentDetail -> User -> userId 순으로 접근
+  // 강좌 + 상태로 수강신청 목록 조회
   @Query("""
-        SELECT count(e) > 0 
-        FROM Enrollment e
-        JOIN e.course c
-        JOIN c.timeSlots ts
-        WHERE e.studentDetail.user.userId = :userId
-          AND e.status = 'APPLIED'
-          AND ts.dayOfWeek = :dayOfWeek
-          AND ts.period = :period
+        select e
+        from Enrollment e
+        where e.course.courseId = :courseId
+          and e.status = :status
     """)
-  boolean existsTimeConflict(
-      @Param("userId") Long userId,
-      @Param("dayOfWeek") String dayOfWeek,
-      @Param("period") Integer period
-  );
+  List<Enrollment> findByCourseIdAndStatus(@Param("courseId") Long courseId,
+                                           @Param("status") EnrollmentStatus status);
+
+  // 여러 강좌 + 상태로 조회 (일괄 조회용)
+  @Query("""
+        select e
+        from Enrollment e
+        where e.course.courseId in :courseIds
+          and e.status = :status
+    """)
+  List<Enrollment> findByCourseIdInAndStatus(@Param("courseIds") List<Long> courseIds,
+                                             @Param("status") EnrollmentStatus status);
+
+  // [수정 3] JPQL 경로 수정 (studentDetail.user.userId)
+  // 시간표 중복 체크
+  @Query("""
+        select count(e) > 0
+        from Enrollment e
+        join e.course c
+        join c.timeSlots ts
+        where e.studentDetail.user.userId = :userId
+          and e.status = 'APPLIED'
+          and ts.dayOfWeek = :dayOfWeek
+          and ts.period = :period
+    """)
+  boolean existsTimeConflict(@Param("userId") Long userId,
+                             @Param("dayOfWeek") String dayOfWeek,
+                             @Param("period") Integer period);
 }

@@ -34,7 +34,7 @@ public class EnrollmentCommandService {
    * 단건 수강 신청
    */
   public Long register(Long userId, EnrollmentApplyRequest request) {
-    StudentDetail studentDetail = studentDetailRepository.findByUserId(userId)
+    StudentDetail studentDetail = studentDetailRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
 
     Course course = courseRepository.findByIdWithLock(request.getCourseId())
@@ -99,7 +99,7 @@ public class EnrollmentCommandService {
     List<BulkEnrollmentResult> results = new ArrayList<>();
 
     // 학생 정보 미리 조회 (반복문 밖)
-    StudentDetail student = studentDetailRepository.findByUserId(userId)
+    StudentDetail student = studentDetailRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
 
     for (Long courseId : courseIds) {
