@@ -16,6 +16,8 @@ import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.user.command.domain.aggregate.TeacherDetail;
 import com.mycompany.project.user.command.domain.repository.StudentDetailRepository;
 import com.mycompany.project.user.command.domain.repository.TeacherDetailRepository;
@@ -73,14 +75,14 @@ public class AttendanceCommandService {
 
         // 강좌 존재 확인
         Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 과목입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND));
 
         // 권한 체크: 과목 담당 교사만 생성 가능
         ensureCourseTeacher(request.getUserId(), course);
 
         // 기본 출결 코드(PRESENT) 조회 (활성화된 코드만)
         AttendanceCode defaultCode = attendanceCodeRepository.findByCodeAndActiveTrue(DEFAULT_ATTENDANCE_CODE)
-                .orElseThrow(() -> new IllegalArgumentException("기본 출결 코드(PRESENT)를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.DEFAULT_ATTENDANCE_CODE_NOT_FOUND));
 
         // 해당 강좌에 신청된 학생 목록(APPLIED) 조회
         List<Enrollment> enrollments = enrollmentRepository.findByCourse_CourseIdAndStatus(
@@ -143,7 +145,7 @@ public class AttendanceCommandService {
 
         // 강좌 존재 확인
         Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 과목입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND));
 
         // 권한 체크: 과목 담당 교사만 저장 가능
         ensureCourseTeacher(request.getUserId(), course);
@@ -165,20 +167,20 @@ public class AttendanceCommandService {
 
             // 항목 단위 필수값 검증
             if (item.getEnrollmentId() == null || item.getAttendanceCodeId() == null) {
-                throw new IllegalArgumentException("출결 항목 정보가 누락되었습니다.");
+                throw new BusinessException(ErrorCode.ATTENDANCE_ITEM_INFO_MISSING);
             }
 
             // 요청 enrollmentId가 이 강좌에 속한 학생인지 검증
             if (!enrollmentIds.contains(item.getEnrollmentId())) {
-                throw new IllegalArgumentException("해당 과목의 수강 신청이 아닙니다.");
+                throw new BusinessException(ErrorCode.NOT_ENROLLED_IN_COURSE);
             }
 
             // 출결 코드 존재/활성 여부 검증
             AttendanceCode code = attendanceCodeRepository.findById(item.getAttendanceCodeId())
-                    .orElseThrow(() -> new IllegalArgumentException("출결 코드가 존재하지 않습니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.ATTENDANCE_CODE_NOT_FOUND));
 
             if (!code.isActive()) {
-                throw new IllegalStateException("비활성화된 출결 코드는 사용할 수 없습니다.");
+                throw new BusinessException(ErrorCode.ATTENDANCE_CODE_INACTIVE);
             }
 
             // 기존 출결이 있는지 조회
@@ -192,7 +194,7 @@ public class AttendanceCommandService {
                 // 확정/마감이면 저장 불가
                 if (attendance.getState() == AttendanceState.CONFIRMED
                         || attendance.getState() == AttendanceState.CLOSED) {
-                    throw new IllegalStateException("확정/마감 상태의 출결은 수정할 수 없습니다.");
+                    throw new BusinessException(ErrorCode.ATTENDANCE_CANNOT_MODIFY_CONFIRMED_OR_CLOSED);
                 }
 
                 // 엔티티 비즈니스 메서드로 저장 처리(코드/사유/저장자/시간 갱신)
@@ -231,7 +233,7 @@ public class AttendanceCommandService {
 
         // 강좌 존재 확인
         Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 과목입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND));
 
         // 권한 체크:
         // 1) 과목 담당교사면 OK
@@ -243,7 +245,7 @@ public class AttendanceCommandService {
                 request.getCourseId(), ENROLLMENT_STATUS_APPLIED);
 
         if (enrollments.isEmpty()) {
-            throw new IllegalStateException("확정할 출결 대상이 없습니다.");
+            throw new BusinessException(ErrorCode.ATTENDANCE_NOTHING_TO_CONFIRM);
         }
 
         // enrollmentId 목록 추출
@@ -257,7 +259,7 @@ public class AttendanceCommandService {
                 enrollmentIds, request.getClassDate(), request.getPeriod().byteValue());
 
         if (attendanceCount < enrollmentIds.size()) {
-            throw new IllegalStateException("미입력 출결이 있어 확정할 수 없습니다.");
+            throw new BusinessException(ErrorCode.ATTENDANCE_CANNOT_CONFIRM_WITH_UNFILLED_ITEMS);
         }
 
         // 대상 출결들을 한번에 조회
@@ -269,7 +271,7 @@ public class AttendanceCommandService {
 
             // 마감(CLOSED)은 확정 자체가 불가
             if (attendance.getState() == AttendanceState.CLOSED) {
-                throw new IllegalStateException("마감된 출결은 확정할 수 없습니다.");
+                throw new BusinessException(ErrorCode.ATTENDANCE_CANNOT_CONFIRM_CLOSED);
             }
 
             // 이미 확정이면 넘어감
@@ -294,7 +296,7 @@ public class AttendanceCommandService {
                 || request.getClassDate() == null
                 || request.getPeriod() == null
                 || request.getUserId() == null) {
-            throw new IllegalArgumentException("필수 파라미터가 누락되었습니다.");
+            throw new BusinessException(ErrorCode.REQUIRED_PARAMETER_MISSING);
         }
     }
 
@@ -306,10 +308,10 @@ public class AttendanceCommandService {
                 || request.getPeriod() == null
                 || request.getUserId() == null
                 || request.getItems() == null) {
-            throw new IllegalArgumentException("필수 파라미터가 누락되었습니다.");
+            throw new BusinessException(ErrorCode.ATTENDANCE_REQUIRED_PARAMS_MISSING);
         }
         if (request.getItems().isEmpty()) {
-            throw new IllegalArgumentException("저장할 출결 항목이 없습니다.");
+            throw new BusinessException(ErrorCode.ATTENDANCE_ITEMS_EMPTY);
         }
     }
 
@@ -320,7 +322,7 @@ public class AttendanceCommandService {
                 || request.getClassDate() == null
                 || request.getPeriod() == null
                 || request.getUserId() == null) {
-            throw new IllegalArgumentException("필수 파라미터가 누락되었습니다.");
+            throw new BusinessException(ErrorCode.REQUIRED_PARAMETER_MISSING);
         }
     }
 
@@ -332,7 +334,7 @@ public class AttendanceCommandService {
      */
     private void ensureCourseTeacher(Long userId, Course course) {
         if (!Objects.equals(course.getTeacherDetail().getId(), userId)) {
-            throw new IllegalStateException("과목 담당 교사만 처리할 수 있습니다.");
+            throw new BusinessException(ErrorCode.ONLY_COURSE_TEACHER_ALLOWED);
         }
     }
 
@@ -350,10 +352,10 @@ public class AttendanceCommandService {
 
         // 담당교사가 아니라면 담임 권한(학년/반)이 있어야 함
         TeacherDetail teacherDetail = teacherDetailRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("담임 권한이 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.HOMEROOM_PERMISSION_REQUIRED));
 
         if (teacherDetail.getHomeroomGrade() == null || teacherDetail.getHomeroomClassNo() == null) {
-            throw new IllegalStateException("담임 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.HOMEROOM_PERMISSION_REQUIRED);
         }
 
         // 강좌에 속한 학생 목록 조회
@@ -361,7 +363,7 @@ public class AttendanceCommandService {
                 course.getCourseId(), ENROLLMENT_STATUS_APPLIED);
 
         if (enrollments.isEmpty()) {
-            throw new IllegalStateException("확정할 출결 대상이 없습니다.");
+            throw new BusinessException(ErrorCode.ATTENDANCE_NOTHING_TO_CONFIRM);
         }
 
         // 학생ID만 추출
@@ -377,7 +379,7 @@ public class AttendanceCommandService {
 
         // 한 명이라도 학년/반이 다르면 "그 반 담임"이 아니라고 판단
         if (matchedCount != studentIds.size()) {
-            throw new IllegalStateException("담임 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.HOMEROOM_PERMISSION_REQUIRED);
         }
     }
 }

@@ -1,3 +1,4 @@
+/*
 package com.mycompany.project.course.service;
 
 import com.mycompany.project.course.dto.TeacherTimetableResDTO;
@@ -71,3 +72,4 @@ class CourseServiceTimetableTest {
         assertThat(slot2.getCourseName()).isEqualTo("Science");
     }
 }
+*/

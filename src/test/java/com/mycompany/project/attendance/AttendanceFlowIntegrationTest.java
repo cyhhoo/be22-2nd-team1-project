@@ -22,13 +22,19 @@ import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.course.entity.CourseType;
 import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
-import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
+import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.schedule.command.domain.aggregate.AcademicYear;
+import com.mycompany.project.schedule.command.domain.aggregate.Subject;
 import com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository;
 import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
+import com.mycompany.project.user.command.domain.aggregate.TeacherDetail;
 import com.mycompany.project.user.command.domain.aggregate.User;
 import com.mycompany.project.user.command.domain.aggregate.UserStatus;
+import com.mycompany.project.user.command.domain.repository.StudentDetailRepository;
+import com.mycompany.project.user.command.domain.repository.SubjectRepository;
+import com.mycompany.project.user.command.domain.repository.TeacherDetailRepository;
 import com.mycompany.project.user.command.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,6 +87,15 @@ class AttendanceFlowIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private TeacherDetailRepository teacherDetailRepository;
+
+    @Autowired
+    private StudentDetailRepository studentDetailRepository;
+
+    @Autowired
+    private SubjectRepository subjectRepository;
+
+    @Autowired
     private AcademicYearRepository academicYearRepository;
 
     @Autowired
@@ -92,6 +107,9 @@ class AttendanceFlowIntegrationTest {
     private User teacher;
     private User admin;
     private User student;
+    private TeacherDetail teacherDetail;
+    private StudentDetail studentDetail;
+    private Subject subject;
     private Course course;
     private Enrollment enrollment;
     private AttendanceCode presentCode;
@@ -105,6 +123,9 @@ class AttendanceFlowIntegrationTest {
         attendanceRepository.deleteAll();
         enrollmentRepository.deleteAll();
         courseRepository.deleteAll();
+        teacherDetailRepository.deleteAll();
+        studentDetailRepository.deleteAll();
+        subjectRepository.deleteAll();
         userRepository.deleteAll();
         attendanceCodeRepository.deleteAll();
         academicYearRepository.deleteAll();
@@ -136,24 +157,23 @@ class AttendanceFlowIntegrationTest {
             .birthDate("2007-01-01")
             .build());
 
-        course = courseRepository.save(Course.builder()
-            .teacherDetailId(teacher.getUserId())
-            .academicYearId(1L)
-            .subjectId(1L)
+        subject = subjectRepository.save(Subject.builder()
             .name("Math")
-            .courseType(CourseType.MANDATORY)
-            .maxCapacity(30)
-            .tuition(0)
             .build());
 
-        enrollment = enrollmentRepository.save(Enrollment.builder()
-            .student(student)
-            .course(course)
-            .status(EnrollmentStatus.APPLIED)
+        teacherDetail = teacherDetailRepository.save(TeacherDetail.builder()
+            .user(teacher)
+            .subject(subject)
+            .homeroomGrade(1)
+            .homeroomClassNo(1)
             .build());
 
-        presentCode = attendanceCodeRepository.save(new AttendanceCode("PRESENT", "Present", false));
-        lateCode = attendanceCodeRepository.save(new AttendanceCode("LATE", "Late", false));
+        studentDetail = studentDetailRepository.save(StudentDetail.builder()
+            .user(student)
+            .grade(1)
+            .classNo("1")
+            .studentNo(1)
+            .build());
 
         academicYear = academicYearRepository.save(AcademicYear.builder()
             .year(2025)
@@ -162,6 +182,24 @@ class AttendanceFlowIntegrationTest {
             .endDate(LocalDate.of(2025, 7, 31))
             .isCurrent(true)
             .build());
+
+        course = courseRepository.save(Course.builder()
+            .teacherDetail(teacherDetail)
+            .academicYearId(academicYear.getAcademicYearId())
+            .subjectId(subject.getId())
+            .name("Math")
+            .courseType(CourseType.MANDATORY)
+            .maxCapacity(30)
+            .tuition(0)
+            .build());
+
+        enrollment = enrollmentRepository.save(Enrollment.builder()
+            .studentDetail(studentDetail)
+            .course(course)
+            .build());
+
+        presentCode = attendanceCodeRepository.save(new AttendanceCode("PRESENT", "Present", false));
+        lateCode = attendanceCodeRepository.save(new AttendanceCode("LATE", "Late", false));
     }
 
     @Test
@@ -170,7 +208,7 @@ class AttendanceFlowIntegrationTest {
         LocalDate classDate = LocalDate.of(2025, 3, 1);
 
         AttendanceCreateRequest generateRequest = AttendanceCreateRequest.builder()
-            .courseId(course.getId())
+            .courseId(course.getCourseId())
             .classDate(classDate)
             .period(1)
             .userId(teacher.getUserId())
@@ -188,7 +226,7 @@ class AttendanceFlowIntegrationTest {
             .andExpect(jsonPath("$[*].code", hasItem("PRESENT")));
 
         AttendanceConfirmRequest confirmRequest = AttendanceConfirmRequest.builder()
-            .courseId(course.getId())
+            .courseId(course.getCourseId())
             .classDate(classDate)
             .period(1)
             .userId(teacher.getUserId())
@@ -208,7 +246,7 @@ class AttendanceFlowIntegrationTest {
             .academicYearId(academicYear.getAcademicYearId())
             .scopeType(ScopeType.MONTH)
             .scopeValue("2025-03")
-            .courseId(course.getId())
+            .courseId(course.getCourseId())
             .userId(admin.getUserId())
             .build();
 
@@ -261,7 +299,7 @@ class AttendanceFlowIntegrationTest {
     void studentCannotGenerateAttendances() {
         // 학생이 출석부를 생성하려고 시도하는 상황
         AttendanceCreateRequest request = AttendanceCreateRequest.builder()
-                .courseId(course.getId())
+                .courseId(course.getCourseId())
                 .classDate(LocalDate.of(2025, 3, 1))
                 .period(1)
                 .userId(student.getUserId()) // ❗ 학생 ID로 요청
@@ -269,7 +307,7 @@ class AttendanceFlowIntegrationTest {
 
         // 담당 교사만 가능하므로 예외가 발생해야 정상
         assertThatThrownBy(() -> attendanceCommandService.generateAttendances(request))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(BusinessException.class);
     }
 
     @Test
@@ -280,7 +318,7 @@ class AttendanceFlowIntegrationTest {
         // 1) 담당 교사가 출석부를 생성한다.
         //    - 생성된 출결은 기본적으로 SAVED 상태로 생성됨(너가 만든 Attendance 엔티티 생성자 로직 기준)
         AttendanceCreateRequest generateRequest = AttendanceCreateRequest.builder()
-                .courseId(course.getId())
+                .courseId(course.getCourseId())
                 .classDate(classDate)
                 .period(1)
                 .userId(teacher.getUserId())
@@ -302,7 +340,7 @@ class AttendanceFlowIntegrationTest {
         // 3) 정책: "확정(CONFIRMED) 또는 마감(CLOSED)된 출결만 정정요청 가능"
         //    => SAVED면 예외가 떠야 정상
         assertThatThrownBy(() -> attendanceCorrectionCommandService.createCorrectionRequest(correctionCreateRequest))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(BusinessException.class);
     }
 
     @Test
@@ -311,7 +349,7 @@ class AttendanceFlowIntegrationTest {
         LocalDate classDate = LocalDate.of(2025, 3, 1);
 
         AttendanceCreateRequest request = AttendanceCreateRequest.builder()
-                .courseId(course.getId())
+                .courseId(course.getCourseId())
                 .classDate(classDate)
                 .period(1)
                 .userId(teacher.getUserId())
@@ -334,4 +372,3 @@ class AttendanceFlowIntegrationTest {
         assertThat(one).isNotNull();
     }
 }
-
