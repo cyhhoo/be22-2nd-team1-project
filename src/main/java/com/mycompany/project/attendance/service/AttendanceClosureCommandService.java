@@ -16,8 +16,9 @@ import com.mycompany.project.schedule.command.domain.aggregate.AcademicYear;
 import com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository;
 import com.mycompany.project.user.command.domain.aggregate.Role;
 import com.mycompany.project.user.command.domain.aggregate.User;
+import com.mycompany.project.user.command.domain.repository.StudentDetailRepository;
 import com.mycompany.project.user.command.domain.repository.UserRepository;
-import com.mycompany.project.user.repository.StudentDetailRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

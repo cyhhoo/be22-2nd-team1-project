@@ -1,8 +1,8 @@
 package com.mycompany.project.attendance.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import com.mycompany.project.attendance.entity.Attendance;
 import com.mycompany.project.attendance.entity.enums.AttendanceState;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -54,4 +54,10 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
                                                                      LocalDate fromDate,
                                                                      LocalDate toDate,
                                                                      AttendanceState state);
+
+    /**
+     * 특정 수강신청(enrollment) + 출결코드 기준 카운트
+     * - 출석/지각/결석 등 코드별 집계에 사용
+     */
+    long countByEnrollmentIdAndAttendanceCodeId(Long enrollmentId, Long attendanceCodeId);
 }

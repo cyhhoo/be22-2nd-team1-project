@@ -2,11 +2,11 @@ package com.mycompany.project.enrollment.repository;
 
 import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.enrollment.entity.Enrollment;
-import com.mycompany.project.user.command.domain.aggregate.User;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
+import com.mycompany.project.user.command.domain.aggregate.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +18,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
   // (필요시) 특정 학생의 신청 취소를 위해 조회
   Optional<Enrollment> findByStudentAndCourse(User student, Course course);
+
+  // 강좌별 수강신청 목록 조회
+  List<Enrollment> findByCourseId(Long courseId);
 
   @Query("select e from Enrollment e where e.course.id = :courseId and e.status = :status")
   List<Enrollment> findByCourseIdAndStatus(@Param("courseId") Long courseId,

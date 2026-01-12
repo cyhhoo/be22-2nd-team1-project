@@ -1,11 +1,11 @@
-package com.mycompany.project.user.repository;
-
+package com.mycompany.project.user.command.domain.repository;
 import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
 public interface StudentDetailRepository extends JpaRepository<StudentDetail, Long> {
+
 
     List<StudentDetail> findByIdInAndGradeAndClassNo(List<Long> studentIds,
                                                      Integer studentGrade,
