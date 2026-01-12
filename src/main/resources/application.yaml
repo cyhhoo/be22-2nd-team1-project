@@ -2,17 +2,17 @@ spring:
   profiles:
     active: dev
 
-  jpa:
-    database-platform: org.hibernate.dialect.MariaDBDialect
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
+#  jpa:
+#    database-platform: org.hibernate.dialect.MariaDBDialect
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        format_sql: true
 
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.mycompany.project
+  #type-aliases-package: com.mycompany.project
   configuration:
     map-underscore-to-camel-case: true
 
