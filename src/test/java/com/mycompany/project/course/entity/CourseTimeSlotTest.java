@@ -50,7 +50,7 @@ class CourseMappingTest {
     em.flush();
     em.clear();
 
-    Course foundCourse = em.find(Course.class, course.getId());
+    Course foundCourse = em.find(Course.class, course.getCourseId());
 
     // then - Course 검증
     assertThat(foundCourse).isNotNull();
