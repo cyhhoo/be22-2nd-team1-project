@@ -62,7 +62,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
     logger.error("AccountInactiveException: ", e);
 
-    ErrorCode errorCode = ErrorCode.ACCOUNT_INACTIVE;
+    ErrorCode errorCode = e.getErrorCode();
     ApiResponse<Void> response = ApiResponse.failure(errorCode.getCode(), errorCode.getMessage());
     return ResponseEntity.status(errorCode.getStatus()).body(response);
   }

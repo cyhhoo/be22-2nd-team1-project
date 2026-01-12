@@ -50,11 +50,11 @@ public class AuthQueryService {
     @Transactional
     public TokenResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // 1. 잠금 상태 확인 (제일 먼저)
         if (user.isLocked()) {
-            throw new IllegalArgumentException("계정이 잠금되었습니다. 관리자에게 문의하세요.");
+            throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
         }
 
         // 2. 비활성 상태 확인
@@ -67,7 +67,7 @@ public class AuthQueryService {
             // 실패 처리 호출
             user.loginFail();
             // 실패 남은 횟수 알려주기
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다. (실패 횟수: " + user.getLoginFailCount() + "/5)");
+            throw new BusinessException(ErrorCode.INVALID_PASSWORD);
         }
         // 3. 로그인 성공 처리
         user.loginSuccess();
@@ -81,16 +81,16 @@ public class AuthQueryService {
     public TokenResponse reissue(String refreshToken) {
         // 1. 토큰 유효성 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 
         // 2. DB에 존재하는지 확인
         Token storedToken = tokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 만료된 토큰입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.TOKEN_NOT_FOUND));
 
         // 3. 사용자 정보 조회
         User user = userRepository.findByEmail(storedToken.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         // 4. 기존 토큰 삭제 (RTR - 일회용 사용)
         tokenRepository.delete(storedToken);
