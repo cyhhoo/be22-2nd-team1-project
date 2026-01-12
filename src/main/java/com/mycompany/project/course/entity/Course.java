@@ -1,5 +1,6 @@
 package com.mycompany.project.course.entity;
 
+import com.mycompany.project.user.command.domain.aggregate.TeacherDetail;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,16 +17,19 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA는 기본 생성자가 필수 (protected 권장)
 @EntityListeners(AuditingEntityListener.class) // 생성일 자동 주입
+@AllArgsConstructor // [핵심] 빌더가 모든 필드를 다룰 수 있게 함
+@Builder
 public class Course {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "course_id")
-  private Long id;
+  private Long courseId;
 
   // 다른 도메인(Teacher, Subject 등)은 ID로만 참조 (느슨한 결합)
-  @Column(name = "teacher_detail_id")
-  private Long teacherDetailId; // FK: tbl_teacher_detail
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "teacher_detail_id", nullable = false)
+  private TeacherDetail teacherDetail;
 
   @Column(name = "academic_year_id")
   private Long academicYearId; // FK: tbl_academic_year
@@ -44,17 +48,18 @@ public class Course {
   private Integer maxCapacity;
 
   @Builder.Default
-  @Column(name = "current_count")
+  @Column(name = "current_count", nullable = false)
   private Integer currentCount = 0; // 기본값 0
 
   @Builder.Default
-  @Column(name = "tuition")
-  private Integer tuition = 0; // 기본값 0
+  @Column(nullable = false)
+  private Integer tuition = 0;
 
+  // [수정] 기본값 OPEN 적용
   @Builder.Default
-  @Enumerated(EnumType.STRING)
+  @Enumerated(EnumType.STRING) // Enum은 DB 저장 시 String 권장
   @Column(name = "status", length = 20)
-  private CourseStatus status = CourseStatus.OPEN; // 기본값 OPEN
+  private CourseStatus status = CourseStatus.OPEN;
 
   @CreatedDate
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -77,6 +82,27 @@ public class Course {
   }
 
   /**
+   * 수강 신청 시 호출: 인원 증가
+   * 정원이 꽉 찼다면 예외를 터뜨려서 신청을 막습니다.
+   */
+  public void increaseCurrentCount() {
+    // 1. 방어 로직: 이미 꽉 찼는지 확인
+    if (this.currentCount >= this.maxCapacity) {
+      throw new IllegalStateException("수강 정원이 초과되었습니다.");
+    }
+    // 2. 상태 변경
+    this.currentCount++;
+  }
+
+  /**
+   * 수강 취소 시 호출: 인원 감소
+   * 0명 미만으로 내려가지 않도록 보호합니다.
+   */
+  public void decreaseCurrentCount() {
+    if (this.currentCount > 0) {
+      this.currentCount--;
+    }
+  }
    * 강좌 정보 수정 메서드
    * <p>
    * 비즈니스 로직을 엔티티 내에 캡슐화하여,

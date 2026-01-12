@@ -14,23 +14,42 @@ import java.time.LocalDate;
 @Table(name = "tbl_academic_schedule")
 public class AcademicSchedule extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long scheduleId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long scheduleId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "academic_year_id")
-    private AcademicYear academicYear;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "academic_year_id")
+  private AcademicYear academicYear;
 
-    @Column(nullable = false)
-    private LocalDate scheduleDate;
+  @Column(nullable = false)
+  private LocalDate scheduleDate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ScheduleType scheduleType; // ENUM: START, EXAM, HOLIDAY
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private ScheduleType scheduleType; // ENUM: START, EXAM, HOLIDAY
 
-    @Column(nullable = false)
-    private String content; // 일정 내용 (예: "1학기 기말고사 시작")
+  @Column(nullable = false)
+  private String content; // 일정 내용 (예: "1학기 기말고사 시작")
 
-    private String targetGrade; // ENUM: 1, 2, 3, ALL
+  @Column(nullable = false)
+  private String targetGrade; // ENUM: 1, 2, 3, ALL
+
+  @Builder.Default
+  @Column(nullable = false)
+  private boolean isDeleted = false;
+
+  public void update(
+      LocalDate scheduleDate, ScheduleType scheduleType, String content, String targetGrade) {
+    this.scheduleDate = scheduleDate;
+    this.scheduleType = scheduleType;
+    this.content = content;
+    this.targetGrade = targetGrade;
+  }
+
+  public void delete() {
+    this.isDeleted = true;
+
+  }
+
 }
