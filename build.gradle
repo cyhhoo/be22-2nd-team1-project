@@ -13,25 +13,6 @@ java {
     }
 }
 
-sourceSets {
-    main {
-        java {
-            exclude 'com/mycompany/project/course/**'
-            exclude 'com/mycompany/project/enrollment/**'
-            exclude 'com/mycompany/project/attendance/**'
-            exclude 'com/mycompany/project/reservation/**'
-        }
-    }
-    test {
-        java {
-            exclude 'com/mycompany/project/course/**'
-            exclude 'com/mycompany/project/enrollment/**'
-            exclude 'com/mycompany/project/attendance/**'
-            exclude 'com/mycompany/project/reservation/**'
-        }
-    }
-}
-
 configurations {
     compileOnly {
         extendsFrom annotationProcessor

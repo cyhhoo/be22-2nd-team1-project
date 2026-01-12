@@ -17,10 +17,10 @@ public class ReservationService {
     private final ReservationMapper reservationMapper;
 
     public List<FacilityDTO> selectAvailableFacilities(LocalDateTime startTime) {
-        return reservationMapper.selectAvailableFacilities(startTime);
+        return reservationMapper.selectAvailableFacilities(startTime.toLocalDate(), startTime.toLocalTime());
     }
 
-    public List<ReservationDTO> selectMyReservations(int studentId, String status) {
+    public List<ReservationDTO> selectMyReservations(Long studentId, String status) {
         return reservationMapper.selectMyReservations(studentId, status);
     }
 }

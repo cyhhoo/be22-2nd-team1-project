@@ -2,7 +2,7 @@ package com.mycompany.project.auth.query.service;
 
 import com.mycompany.project.auth.query.dto.LoginRequest;
 import com.mycompany.project.auth.query.dto.TokenResponse;
-import com.mycompany.project.exception.AccountInactiveException;
+import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.jwtsecurity.JwtTokenProvider;
 import com.mycompany.project.user.command.domain.aggregate.Role;
 import com.mycompany.project.user.command.domain.aggregate.Token;
@@ -108,7 +108,7 @@ class AuthQueryServiceTest {
         given(userRepository.findByEmail(request.getEmail())).willReturn(Optional.of(inactiveUser));
 
         // When & Then
-        assertThrows(AccountInactiveException.class, () -> authQueryService.login(request));
+        assertThrows(BusinessException.class, () -> authQueryService.login(request));
     }
 
     @Test

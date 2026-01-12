@@ -1,7 +1,8 @@
 package com.mycompany.project.reservation.query.controller;
 
-import com.mycompany.project.reservation.command.repository.ReservationRepository;
+import com.mycompany.project.reservation.command.infrastructure.repository.ReservationRepository;
 import com.mycompany.project.reservation.query.service.ReservationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,14 +15,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "시설 예약 (Reservation)", description = "시설/상담 예약 및 승인 관리 API")
 @RestController
 @RequestMapping("/api/reservations")
+@RequiredArgsConstructor
 public class ReservationController {
+
     private final ReservationService reservationService;
     private final ReservationRepository reservationRepository;
 
-    public ReservationController(ReservationService reservationService, ReservationRepository reservationRepository) {
-        this.reservationService = reservationService;
-        this.reservationRepository = reservationRepository;
-    }
 
     /*
      * [구현 가이드: Service 의존성 주입]

@@ -40,7 +40,7 @@ public class EnrollmentCommandService {
     Course course = courseRepository.findByIdWithLock(request.getCourseId())
         .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
 
-    if (enrollmentRepository.existsByStudentDetailAndCourse(studentDetail, course)) {
+    if (enrollmentRepository.existsByStudentDetailIdAndCourse(studentDetail, course)) {
       throw new BusinessException(ErrorCode.ALREADY_ENROLLED);
     }
 
@@ -63,7 +63,7 @@ public class EnrollmentCommandService {
 
     // 2. 권한 확인 (본인의 신청 내역인지)
     // (Enrollment -> StudentDetail -> User(userId) 접근 경로가 있다고 가정)
-    Long studentUserId = enrollment.getStudentDetail().getUser().getUserId();
+    Long studentUserId = enrollment.getStudentDetailId().getUser().getUserId();
 
     if (!studentUserId.equals(userId)) {
       throw new BusinessException(ErrorCode.NOT_YOUR_ENROLLMENT);
@@ -75,7 +75,6 @@ public class EnrollmentCommandService {
     // 4. 수강 신청 내역 삭제 (Hard Delete)
     enrollmentRepository.delete(enrollment);
   }
-
 
   /**
    * 장바구니 기반 일괄 신청
@@ -105,7 +104,8 @@ public class EnrollmentCommandService {
     for (Long courseId : courseIds) {
       try {
         // 1. 수강 신청 시도
-        // DTO 생성자가 없다면 Builder 사용: EnrollmentApplyRequest.builder().courseId(courseId).build()
+        // DTO 생성자가 없다면 Builder 사용:
+        // EnrollmentApplyRequest.builder().courseId(courseId).build()
         register(userId, new EnrollmentApplyRequest(courseId));
 
         // 2. 성공 시 장바구니 삭제

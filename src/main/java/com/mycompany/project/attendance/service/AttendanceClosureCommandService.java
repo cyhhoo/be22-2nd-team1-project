@@ -11,6 +11,7 @@ import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
+import com.mycompany.project.enrollment.repository.EnrollmentMapper;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
 import com.mycompany.project.schedule.command.domain.aggregate.AcademicYear;
 import com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository;
@@ -48,7 +49,7 @@ public class AttendanceClosureCommandService {
     private final CourseRepository courseRepository;
 
     // 강좌에 등록된 학생(수강신청) 목록을 가져오기 위해 사용
-    private final EnrollmentRepository enrollmentRepository;
+    private final EnrollmentMapper enrollmentMapper;
 
     // 학년/반 필터가 있을 때 학생 상세에서 필터링하기 위해 사용
     private final StudentDetailRepository studentDetailRepository;
@@ -86,7 +87,7 @@ public class AttendanceClosureCommandService {
 
         // 3) 강좌 범위 → 수강신청(APPLIED) 학생들만 가져와서 대상 좁히기
         List<Enrollment> enrollments =
-                enrollmentRepository.findByCourseIdInAndStatus(courseIds, ENROLLMENT_STATUS_APPLIED);
+            enrollmentMapper.selectByCourseIdsAndStatus(courseIds,ENROLLMENT_STATUS_APPLIED.name());
 
         if (enrollments.isEmpty()) {
             // 수강신청이 없으면 마감할 출결도 없을 가능성이 큼
@@ -243,7 +244,7 @@ public class AttendanceClosureCommandService {
 
         // enrollment에서 학생ID만 뽑아서 student_detail 조회용 리스트로 만든다.
         List<Long> studentIds = enrollments.stream()
-                .map(enrollment -> enrollment.getStudentDetail().getId())
+                .map(enrollment -> enrollment.getStudentDetailId().getId())
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -279,7 +280,7 @@ public class AttendanceClosureCommandService {
 
         // 최종: enrollment 중에서 "조건에 맞는 학생"의 enrollmentId만 반환
         return enrollments.stream()
-                .filter(enrollment -> matchedStudentIds.contains(enrollment.getStudentDetail().getId()))
+                .filter(enrollment -> matchedStudentIds.contains(enrollment.getStudentDetailId().getId()))
                 .map(Enrollment::getEnrollmentId)
                 .collect(Collectors.toList());
     }
