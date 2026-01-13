@@ -22,6 +22,10 @@ public enum ErrorCode {
   INVALID_PASSWORD(HttpStatus.UNAUTHORIZED,"ACCOUNT_004" , "아이디 또는 비밀번호가 일치하지 않습니다."),
   INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "ACCOUNT_005", "유효하지 않은 Refresh Token 입니다." ),
   TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "ACCOUNT_006", "존재하지 않거나 만료된 Token 입니다." ),
+  LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "ACCOUNT_007", "로그인이 필요한 서비스 입니다." ),
+  ALREADY_ACTIVE_ACCOUNT(HttpStatus.BAD_REQUEST,"ACCOUNT_008", "이미 활성화된 계정입니다."),
+  USER_INFO_MISMATCH(HttpStatus.BAD_REQUEST,"ACCOUNT_009", "사용자 정보가 일치하지 않습니다."),
+  INVAID_AUTH_CODE(HttpStatus.UNAUTHORIZED,"ACCOUNT_010", "인증코드가 일치하지 않습니다"),
   
 
   // Attendance (ATT)
