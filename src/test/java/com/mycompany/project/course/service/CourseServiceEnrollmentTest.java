@@ -1,4 +1,3 @@
-/*
 package com.mycompany.project.course.service;
 
 import com.mycompany.project.course.dto.CourseCreateReqDTO;
@@ -174,4 +173,3 @@ class CourseServiceEnrollmentTest {
                 .orElseThrow();
     }
 }
-*/
