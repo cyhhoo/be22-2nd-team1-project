@@ -1,6 +1,7 @@
 package com.mycompany.project.jwtsecurity;
 
 import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.user.command.domain.aggregate.UserStatus;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -41,15 +42,15 @@ public class JwtTokenProvider {
   }
 
   // 토큰 생성
-  public String createAccessToken(String email, Role role) {
-    return createToken(email, role, ACCESS_TOKEN_VALIDITY);
+  public String createAccessToken(String email, Role role, UserStatus status) {
+    return createToken(email, role, status, ACCESS_TOKEN_VALIDITY);
   }
 
   public String createRefreshToken(String email) {
-    return createToken(email, null, REFRESH_TOKEN_VALIDITY);
+    return createToken(email, null , null , REFRESH_TOKEN_VALIDITY);
   }
 
-  private String createToken(String email, Role role, long validity) {
+  private String createToken(String email, Role role, UserStatus status, long validity) {
     Date now = new Date();
     Date validityDate = new Date(now.getTime() + validity);
 
@@ -61,6 +62,10 @@ public class JwtTokenProvider {
 
     if (role != null) {
       builder.claim("auth", role.name());
+    }
+
+    if (status != null){
+      builder.claim("status",status.name());
     }
 
     return builder.compact();
@@ -109,5 +114,15 @@ public class JwtTokenProvider {
         .parseSignedClaims(refreshToken)
         .getPayload();
     return claims.getSubject();
+  }
+
+  public String getStatusFromToken(String token){
+    try {
+      Claims claims = parseClaims(token);
+      return claims.get("status", String.class);
+    }
+    catch (Exception e){
+      return null;
+    }
   }
 }

@@ -1,5 +1,8 @@
 package com.mycompany.project.jwtsecurity;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mycompany.project.common.response.ApiResponse;
+import com.mycompany.project.exception.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +19,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtTokenProvider tokenProvider;
+  private final ObjectMapper objectMapper;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -26,6 +30,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // 2. 토큰 유효성 검사
     if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
+
+      String status = tokenProvider.getStatusFromToken(token);
+      String requestURI = request.getRequestURI();
+
+      // INACTIVE면서 계정 활성화 API가 아니라면 차단
+      if ("INACTIVE".equals(status) && !requestURI.startsWith("/api/auth/activate")) {
+        sendErrorResponse(response);
+        return;
+      }
+
       // 3. 유효하면 인증 정보(Authentication)를 가져와서 SecurityContext에 저장
       Authentication authentication = tokenProvider.getAuthentication(token);
       SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -42,5 +56,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return bearerToken.substring(7);
     }
     return null;
+  }
+
+  private void sendErrorResponse(HttpServletResponse response) throws IOException {
+    ApiResponse<?> apiResponse = ApiResponse.failure(ErrorCode.ACCOUNT_INACTIVE.getCode(),
+        ErrorCode.ACCOUNT_INACTIVE.getMessage());
+
+    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    response.setContentType("application/json;charset=UTF-8");
+    String json = objectMapper.writeValueAsString(apiResponse);
+    response.getWriter().write(json);
   }
 }

@@ -2,25 +2,30 @@ package com.mycompany.project.auth.command.service;
 
 import com.mycompany.project.auth.command.dto.AccountActivationRequest;
 import com.mycompany.project.auth.command.dto.UserRegisterRequest;
+import com.mycompany.project.auth.query.dto.TokenResponse;
 import com.mycompany.project.common.aop.SystemLoggable;
 import com.mycompany.project.common.entity.ChangeType;
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
+import com.mycompany.project.jwtsecurity.JwtTokenProvider;
+import com.mycompany.project.user.command.domain.aggregate.Token;
 import com.mycompany.project.user.command.domain.aggregate.User;
 import com.mycompany.project.user.command.domain.aggregate.UserStatus;
+import com.mycompany.project.user.command.domain.repository.TokenRepository;
 import com.mycompany.project.user.command.domain.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthCommandService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public AuthCommandService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenRepository tokenRepository;
 
     /**
      * 유저 개별 등록 하는 메서드
@@ -52,10 +57,10 @@ public class AuthCommandService {
     }
 
     @Transactional
-    public void activateAccount(AccountActivationRequest request) {
+    public TokenResponse activateAccount(AccountActivationRequest request) {
         // 1. 사용자 조회
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사람 입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         // 2. 이미 활성화 된 경우
         if (user.getStatus() == UserStatus.ACTIVE) {
@@ -77,5 +82,17 @@ public class AuthCommandService {
 
         // 5. 저장
         userRepository.save(user);
+
+        // 활성화 된 상태로 바로 즉시 토큰 발급
+        String accessToken = jwtTokenProvider.createAccessToken(
+            user.getEmail(), user.getRole(), user.getStatus()); // 이제 ACTIVE 상태가 담김
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
+        // DB에 리프레시 토큰 저장 (로그인과 동일한 로직)
+        Token tokenEntity = Token.builder()
+            .token(refreshToken)
+            .email(user.getEmail())
+            .build();
+        tokenRepository.save(tokenEntity);
+        return new TokenResponse(accessToken, refreshToken);
     }
 }
