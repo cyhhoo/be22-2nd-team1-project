@@ -1,24 +1,20 @@
 package com.mycompany.project.auth.command.service;
 
-import com.mycompany.project.auth.command.dto.AccountActivationRequest;
-import com.mycompany.project.auth.command.dto.UserRegisterRequest;
+import com.mycompany.project.auth.command.dto.*;
 import com.mycompany.project.auth.query.dto.TokenResponse;
 import com.mycompany.project.common.aop.SystemLoggable;
 import com.mycompany.project.common.entity.ChangeType;
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.jwtsecurity.JwtTokenProvider;
-import com.mycompany.project.user.command.domain.aggregate.Token;
-import com.mycompany.project.user.command.domain.aggregate.User;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
-import com.mycompany.project.user.command.domain.repository.TokenRepository;
-import com.mycompany.project.user.command.domain.repository.UserRepository;
+import com.mycompany.project.schedule.command.domain.aggregate.Subject;
+import com.mycompany.project.user.command.domain.aggregate.*;
+import com.mycompany.project.user.command.domain.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -29,25 +25,30 @@ public class AuthCommandService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenRepository tokenRepository;
+    private final StudentDetailRepository studentDetailRepository;
+    private final TeacherDetailRepository teacherDetailRepository;
+    private final AdminDetailRepository adminDetailRepository;
+    private final SubjectRepository subjectRepository;
 
     /**
      * 유저 개별 등록 하는 메서드
+     * - 역할에 따라 StudentDetail, TeacherDetail, AdminDetail 자동 생성
      */
     @Transactional
-    @SystemLoggable(type = ChangeType.CREATE, tableCodeId = 1) // 1: tbl_user 임시 ID
+    @SystemLoggable(type = ChangeType.CREATE, tableCodeId = 1)
     public Long registerUser(UserRegisterRequest request) {
         // 1. 이메일 중복 검사
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
-        // 2. 초기 상태 설정 (일단 INACTIVE로 시작)
+        // 2. 초기 상태 설정 (INACTIVE로 시작)
         UserStatus initialStatus = UserStatus.INACTIVE;
 
         // 3. User 엔티티 생성
         User user = User.builder()
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword())) // 비밀번호 암호화 필수!
+                .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .role(request.getRole())
                 .status(initialStatus)
@@ -57,8 +58,73 @@ public class AuthCommandService {
                         : null)
                 .build();
 
-        // 4. 저장
-        return userRepository.save(user).getUserId();
+        // 4. User 저장
+        userRepository.save(user);
+
+        // 5. 역할별 상세 정보 생성
+        createRoleDetail(user, request);
+
+        return user.getUserId();
+    }
+
+    /**
+     * 역할에 따라 StudentDetail, TeacherDetail, AdminDetail 생성
+     */
+    private void createRoleDetail(User user, UserRegisterRequest request) {
+        switch (user.getRole()) {
+            case STUDENT:
+                createStudentDetail(user, request.getStudentDetail());
+                break;
+            case TEACHER:
+                createTeacherDetail(user, request.getTeacherDetail());
+                break;
+            case ADMIN:
+                createAdminDetail(user, request.getAdminDetail());
+                break;
+        }
+    }
+
+    private void createStudentDetail(User user, StudentDetailRequest detailReq) {
+        StudentDetail.StudentDetailBuilder builder = StudentDetail.builder().user(user);
+
+        if (detailReq != null) {
+            builder.grade(detailReq.getGrade())
+                    .classNo(detailReq.getClassNo())
+                    .studentNo(detailReq.getStudentNo());
+        }
+
+        studentDetailRepository.save(builder.build());
+    }
+
+    private void createTeacherDetail(User user, TeacherDetailRequest detailReq) {
+        TeacherDetail.TeacherDetailBuilder builder = TeacherDetail.builder().user(user);
+
+        if (detailReq != null) {
+            // 과목 조회
+            if (detailReq.getSubject() != null && !detailReq.getSubject().isEmpty()) {
+                Subject subject = subjectRepository.findByName(detailReq.getSubject()).orElse(null);
+                builder.subject(subject);
+            }
+            builder.homeroomGrade(detailReq.getHomeroomGrade())
+                    .homeroomClassNo(detailReq.getHomeroomClass());
+        }
+
+        teacherDetailRepository.save(builder.build());
+    }
+
+    private void createAdminDetail(User user, AdminDetailRequest detailReq) {
+        AdminLevel level = AdminLevel.LEVEL_5; // 기본값
+
+        if (detailReq != null && "1".equals(detailReq.getLevel())) {
+            level = AdminLevel.LEVEL_1;
+        }
+
+        AdminDetail adminDetail = AdminDetail.builder()
+                .user(user)
+                .level(level)
+                .build();
+
+        adminDetailRepository.save(adminDetail);
     }
 
     @Transactional
@@ -90,14 +156,16 @@ public class AuthCommandService {
 
         // 활성화 된 상태로 바로 즉시 토큰 발급
         String accessToken = jwtTokenProvider.createAccessToken(
-                user.getUserId(), user.getEmail(), user.getRole(), user.getStatus()); // 이제 ACTIVE 상태가 담김
+                user.getUserId(), user.getEmail(), user.getRole(), user.getStatus());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
-        // DB에 리프레시 토큰 저장 (로그인과 동일한 로직)
+
+        // DB에 리프레시 토큰 저장
         Token tokenEntity = Token.builder()
                 .token(refreshToken)
                 .email(user.getEmail())
                 .build();
         tokenRepository.save(tokenEntity);
+
         return new TokenResponse(accessToken, refreshToken);
     }
 }

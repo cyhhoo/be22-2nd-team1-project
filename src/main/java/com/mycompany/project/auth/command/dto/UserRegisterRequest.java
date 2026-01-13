@@ -16,4 +16,9 @@ public class UserRegisterRequest {
     private String name;
     private LocalDate birthDate;
     private Role role; // ADMIN, TEACHER, STUDENT
+
+    // 역할별 상세 정보 (Optional)
+    private StudentDetailRequest studentDetail;
+    private TeacherDetailRequest teacherDetail;
+    private AdminDetailRequest adminDetail;
 }
