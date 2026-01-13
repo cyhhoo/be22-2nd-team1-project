@@ -31,7 +31,7 @@ public class NotificationService {
 
         for (Enrollment enrollment : enrollments) {
             try {
-                User student = enrollment.getStudentDetailId().getUser();
+                User student = enrollment.getStudentDetail().getUser();
                 if (student != null) {
                     // 실제로는 student.getEmail(), student.getPhone() 등을 사용하여 발송
                     log.info(" > To: {} (ID:{}, Email:{}) | Message: {}",

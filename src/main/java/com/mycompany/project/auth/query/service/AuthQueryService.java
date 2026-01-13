@@ -32,7 +32,8 @@ public class AuthQueryService {
 
     // 토큰 생성 및 저장
     private TokenResponse generateAndSaveToken(User user) {
-        String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole(), user.getStatus());
+        String accessToken = jwtTokenProvider.createAccessToken(user.getUserId(), user.getEmail(), user.getRole(),
+                user.getStatus());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
 
         Token tokenEntity = Token.builder()
@@ -100,12 +101,12 @@ public class AuthQueryService {
     }
 
     @Transactional
-    public void logout(String refreshToken){
+    public void logout(String refreshToken) {
 
-      jwtTokenProvider.validateToken(refreshToken);
+        jwtTokenProvider.validateToken(refreshToken);
 
-      String email = jwtTokenProvider.getUserEmailFromJWT(refreshToken);
+        String email = jwtTokenProvider.getUserEmailFromJWT(refreshToken);
 
-      tokenRepository.deleteByEmail(email);
+        tokenRepository.deleteByEmail(email);
     }
 }
