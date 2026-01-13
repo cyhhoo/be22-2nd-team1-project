@@ -52,13 +52,23 @@ public class AuthQueryController {
 
   /* accessToken 과 refreshToken을 body와 쿠키에 담아 반환 */
   private ResponseEntity<ApiResponse<TokenResponse>> buildTokenResponse(TokenResponse tokenResponse) {
-    ResponseCookie cookie = createRefreshTokenCookie(tokenResponse.getRefreshToken()); // refreshToken 쿠키 생성
+
+    ResponseCookie accessTokenCookie = createAccessTokenCookie(tokenResponse.getAccessToken());
+    ResponseCookie refreshTokenCookie = createRefreshTokenCookie(tokenResponse.getRefreshToken()); // refreshToken 쿠키 생성
     return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+        .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
         .body(ApiResponse.success(tokenResponse));
   }
 
-  /* refreshToken 쿠키 삭제용 설정 */
+  private ResponseCookie createAccessTokenCookie(String accessToken) {
+    return ResponseCookie.from("AccessToken", accessToken)
+        .httpOnly(true)
+        .path("/")
+        .maxAge(Duration.ofMinutes(30)) // Access Token 만료 시간과 맞춤
+        .sameSite("Strict")
+        .build();
+  }
   private ResponseCookie createRefreshTokenCookie(String refreshToken) {
     return ResponseCookie.from("RefreshToken", refreshToken)
         .httpOnly(true) // HttpOnly 속성 설정 (JavaScript 에서 접근 불가)
@@ -69,6 +79,7 @@ public class AuthQueryController {
         .build();
   }
 
+  /* refreshToken 쿠키 삭제용 설정 */
   private ResponseCookie createDeleteRefreshTokenCookie() {
     return ResponseCookie.from("RefreshToken", "")
         .httpOnly(true) // HttpOnly 속성 설정 (JavaScript 에서 접근 불가)
