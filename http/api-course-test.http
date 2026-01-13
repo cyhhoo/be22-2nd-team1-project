@@ -2,8 +2,8 @@
 @host = http://localhost:8080
 @contentType = application/json
 @teacherUserId = 20
-@email = test3@example.com
-@password = pass3
+@email = teacher1@schoolmate.local
+@password = Passw0rd!
 @authCode = 05-01-01
 @name = Tester3
 @birthDate = 2005-01-01
@@ -23,13 +23,19 @@ Authorization: Bearer {{auth_token}}
 }
 
 ### 0. 로그인 (토큰 발급)
-POST {{host}}/api/auth/login
+POST {{host}}/api/v1/auth/login
 Content-Type: {{contentType}}
 
 {
   "email": "{{email}}",
   "password": "{{password}}"
 }
+
+
+#{
+#  "email": "admin1@schoolmate.local",
+#  "password": "Passw0rd!"
+#}
 
 > {%
 client.global.set("auth_token", response.body.data.accessToken);
@@ -48,7 +54,7 @@ Authorization: Bearer {{auth_token}}
   "tuition": 150000,
   "subjectId": 10,
   "academicYearId": 1,
-  "teacherDetailId": 200,
+  "teacherDetailId": 1001,
   "timeSlots": [
     {
       "dayOfWeek": "MON",
