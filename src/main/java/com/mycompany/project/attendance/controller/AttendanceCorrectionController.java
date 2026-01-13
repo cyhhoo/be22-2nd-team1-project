@@ -9,6 +9,7 @@ import com.mycompany.project.attendance.service.AttendanceCorrectionQueryService
 import com.mycompany.project.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,7 +32,8 @@ public class AttendanceCorrectionController {
     // 정정요청 조회(단건/목록) 담당
     private final AttendanceCorrectionQueryService attendanceCorrectionQueryService;
 
-    @PostMapping // POST /api/attendance/corrections
+    @PostMapping // POST /api/v1/attendance/corrections
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<ApiResponse<Void>> create(@RequestBody CorrectionCreateRequest request) {
         // 정정요청 생성 규칙(서비스에서 검증):
         // - 요청자는 교사여야 함(ROLE_TEACHER)
@@ -42,7 +44,8 @@ public class AttendanceCorrectionController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @PatchMapping("/{requestId}") // PATCH /api/attendance/corrections/{requestId}
+    @PatchMapping("/{requestId}") // PATCH /api/v1/attendance/corrections/{requestId}
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> decide(
             @PathVariable Long requestId,
             @RequestBody CorrectionDecideRequest request
@@ -62,7 +65,8 @@ public class AttendanceCorrectionController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @GetMapping("/{requestId}") // GET /api/attendance/corrections/{requestId}
+    @GetMapping("/{requestId}") // GET /api/v1/attendance/corrections/{requestId}
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<CorrectionResponse>> findById(@PathVariable Long requestId) {
         // 정정요청 단건 조회
         // (QueryService에서 필요한 조인/응답 매핑을 해서 Response DTO로 반환)
@@ -70,11 +74,12 @@ public class AttendanceCorrectionController {
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
-    @GetMapping // GET /api/attendance/corrections?... (검색 조건)
+    @GetMapping // GET /api/v1/attendance/corrections?... (검색 조건)
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<List<CorrectionResponse>>> search(@ModelAttribute CorrectionSearchRequest request) {
         // @ModelAttribute:
         // - GET 쿼리스트링 파라미터들을 CorrectionSearchRequest 필드에 자동 바인딩
-        // 예) /api/attendance/corrections?status=PENDING&courseId=1&from=2026-01-01&to=2026-01-31
+        // 예) /api/v1/attendance/corrections?status=PENDING&courseId=1&from=2026-01-01&to=2026-01-31
         List<CorrectionResponse> data = attendanceCorrectionQueryService.search(request);
         return ResponseEntity.ok(ApiResponse.success(data));
     }

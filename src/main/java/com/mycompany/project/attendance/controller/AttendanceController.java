@@ -18,6 +18,7 @@ import com.mycompany.project.attendance.service.AttendanceQueryService;         
 import com.mycompany.project.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;                                          // final 필드 생성자 자동 생성
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;                      // GET 요청 매핑
 import org.springframework.web.bind.annotation.ModelAttribute;                  // 쿼리스트링 → DTO 바인딩
 import org.springframework.web.bind.annotation.PatchMapping;                    // PATCH 요청 매핑
@@ -52,7 +53,8 @@ public class AttendanceController {
             summary = "출석부 자동 생성 (조회 겸 생성)",
             description = "특정 강좌의 해당 날짜/교시 출석 데이터를 조회하거나 없으면 자동 생성합니다."
     )
-    @PostMapping // POST /api/attendance
+    @PostMapping // POST /api/v1/attendance
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<ApiResponse<List<AttendanceListResponse>>> generateAttendanceSheet(
             @RequestBody AttendanceCreateRequest request
     ) {
@@ -68,7 +70,8 @@ public class AttendanceController {
             summary = "출결 저장(등록/수정)",
             description = "교사가 출결 정보를 저장하거나 수정합니다."
     )
-    @PatchMapping // PATCH /api/attendance
+    @PatchMapping // PATCH /api/v1/attendance
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<ApiResponse<Void>> saveAttendance(@RequestBody AttendanceUpdateRequest request) {
         // request.items에 여러 학생(enrollment) 출결이 들어올 수 있다.
         // 중요한 규칙:
@@ -82,7 +85,8 @@ public class AttendanceController {
             summary = "출결 확정",
             description = "담임/책임교사가 출결을 확정합니다."
     )
-    @PostMapping("/confirmations") // POST /api/attendance/confirmations
+    @PostMapping("/confirmations") // POST /api/v1/attendance/confirmations
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<ApiResponse<Void>> confirmAttendance(@RequestBody AttendanceConfirmRequest request) {
         // 확정은 "담임" 또는 정책상 허용된 권한만 가능해야 한다.
         // 또, 미입력 출결(해당 날짜/교시에 attendance가 없는 학생)이 있으면 확정이 막혀야 한다.
@@ -94,7 +98,8 @@ public class AttendanceController {
             summary = "출결 상세 조회",
             description = "출결 단건 상세를 조회합니다."
     )
-    @GetMapping("/{attendanceId}") // GET /api/attendance/{attendanceId}
+    @GetMapping("/{attendanceId}") // GET /api/v1/attendance/{attendanceId}
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<AttendanceResponse>> getAttendance(@PathVariable Long attendanceId) {
         // 경로로 들어온 attendanceId로 단건 조회한다.
         // (QueryService 쪽에서 MyBatis로 join해서 상세 응답을 만들 가능성이 높음)
@@ -106,7 +111,8 @@ public class AttendanceController {
             summary = "출결 목록 조회",
             description = "조건에 따라 출결 목록을 조회합니다."
     )
-    @GetMapping // GET /api/attendance?courseId=...&fromDate=...&toDate=...&period=...
+    @GetMapping // GET /api/v1/attendance?courseId=...&fromDate=...&toDate=...&period=...
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<List<AttendanceListResponse>>> search(@ModelAttribute AttendanceSearchRequest request) {
         // @ModelAttribute:
         // - GET 쿼리스트링 값을 AttendanceSearchRequest 필드에 자동으로 채워준다.
