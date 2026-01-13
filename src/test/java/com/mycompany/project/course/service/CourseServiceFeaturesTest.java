@@ -1,4 +1,4 @@
-/*
+
 package com.mycompany.project.course.service;
 
 import com.mycompany.project.course.dto.CourseUpdateReqDTO;
@@ -29,13 +29,13 @@ class CourseServiceFeaturesTest {
     @Autowired
     private CourseChangeRequestRepository courseChangeRequestRepository;
 
-    */
+
 /*
      * [성공 테스트]
      * 1. 강좌 개설 승인
      * 2. 강좌 개설 반려
      * 3. 강좌 변경 요청 (교사 변경) 및 승인
-     *//*
+     */
 
 
     @Test
@@ -102,13 +102,13 @@ class CourseServiceFeaturesTest {
         assertThat(updatedCourse.getTeacherDetailId()).isNotEqualTo(originalTeacherId);
     }
 
-    */
+
 /*
      * [실패 테스트]
      * 1. 존재하지 않는 강좌 승인
      * 2. 이미 승인된 강좌 다시 승인
      * 3. 대기 상태가 아닌 요청 승인
-     *//*
+     */
 
 
     @Test
@@ -170,4 +170,4 @@ class CourseServiceFeaturesTest {
         return courseRepository.save(course);
     }
 }
-*/
+

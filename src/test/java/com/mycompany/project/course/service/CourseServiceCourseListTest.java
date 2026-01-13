@@ -1,4 +1,3 @@
-/*
 package com.mycompany.project.course.service;
 
 import com.mycompany.project.course.dto.CourseListResDTO;
@@ -95,4 +94,3 @@ class CourseServiceCourseListTest {
         assertThat(result.getContent()).extracting("name").containsExactly("Math", "Science");
     }
 }
-*/
