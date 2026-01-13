@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/schedule")
+@RequestMapping("/api/v1/schedule")
 @RequiredArgsConstructor
 public class ScheduleCommandController {
 
@@ -19,14 +19,20 @@ public class ScheduleCommandController {
 
   // 1. 학년도 등록
   @PostMapping("/years")
-  public ApiResponse<Long> createAcademicYear(@RequestBody AcademicYearDTO request) {
-    return ApiResponse.success(scheduleCommandService.createAcademicYear(request));
+  public ResponseEntity<ApiResponse<Long>> createAcademicYear(@RequestBody AcademicYearDTO request) {
+    return ResponseEntity.ok(ApiResponse.success(scheduleCommandService.createAcademicYear(request)));
   }
 
   // 2. 일정 등록
   @PostMapping("/events")
-  public ApiResponse<Long> createSchedule(@RequestBody ScheduleCreateRequest request) {
-    return ApiResponse.success(scheduleCommandService.createSchedule(request));
+  public ResponseEntity<ApiResponse<Long>> createSchedule(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @RequestBody ScheduleCreateRequest request) {
+
+    Long adminId = userDetails.getUserId();
+    request.setAdminId(adminId);
+
+    return ResponseEntity.ok(ApiResponse.success(scheduleCommandService.createSchedule(request)));
   }
 
 }

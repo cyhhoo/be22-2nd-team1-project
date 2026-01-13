@@ -12,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -71,9 +73,11 @@ class CourseServiceStudentDetailTest {
         given(enrollmentRepository.findByCourseId(courseId)).willReturn(List.of()); // No enrollments
 
         // When & Then
+        // When & Then
         assertThatThrownBy(() -> courseService.getStudentDetail(courseId, studentId))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("수강생 정보를 찾을 수 없습니다");
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.COURSE_ENROLLMENT_NOT_FOUND);
     }
 
     @Test
@@ -104,8 +108,10 @@ class CourseServiceStudentDetailTest {
         given(enrollmentRepository.findByCourseId(courseId)).willReturn(List.of());
 
         // When & Then
+        // When & Then
         assertThatThrownBy(() -> courseService.updateStudentMemo(courseId, studentId, "Memo"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("수강생 정보를 찾을 수 없습니다");
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.COURSE_ENROLLMENT_NOT_FOUND);
     }
 }
