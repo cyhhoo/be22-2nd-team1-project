@@ -14,6 +14,8 @@ import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.user.command.domain.aggregate.Role;
 import com.mycompany.project.user.command.domain.aggregate.User;
 import com.mycompany.project.user.command.domain.repository.UserRepository;
@@ -59,13 +61,13 @@ public class AttendanceCorrectionCommandService {
 
         // 출결 존재 확인
         Attendance attendance = attendanceRepository.findById(request.getAttendanceId())
-                .orElseThrow(() -> new IllegalArgumentException("출결 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ATTENDANCE_NOT_FOUND));
 
         // ✅ 여기 로직은 메시지랑 조건이 살짝 헷갈릴 수 있음
         // - "확정 또는 마감된 출결만 가능"이라면 SAVED는 금지
         // - 즉, SAVED면 막는 게 맞다.
         if (attendance.getState() == AttendanceState.SAVED) {
-            throw new IllegalStateException("확정 또는 마감된 출결만 정정요청이 가능합니다.");
+            throw new BusinessException(ErrorCode.CORRECTION_ONLY_CONFIRMED_OR_CLOSED_ALLOWED);
         }
 
         // 과목 담당 교사인지 검증(출결 -> enrollment -> course -> teacher)
@@ -76,13 +78,15 @@ public class AttendanceCorrectionCommandService {
                 request.getAttendanceId(), CorrectionStatus.PENDING
         );
         if (exists) {
-            throw new IllegalStateException("이미 처리 중인 정정요청이 있습니다.");
+            throw new BusinessException(ErrorCode.CORRECTION_ALREADY_IN_PROGRESS);
         }
 
         // 요청한 출결 코드가 존재하고, 활성 상태인지 확인
-        attendanceCodeRepository.findById(request.getRequestedAttendanceCodeId())
-                .filter(AttendanceCode::isActive)
-                .orElseThrow(() -> new IllegalArgumentException("요청 출결코드가 존재하지 않습니다."));
+        AttendanceCode requestedCode = attendanceCodeRepository.findById(request.getRequestedAttendanceCodeId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.REQUESTED_ATTENDANCE_CODE_NOT_FOUND));
+        if (!requestedCode.isActive()) {
+            throw new BusinessException(ErrorCode.ATTENDANCE_CODE_INACTIVE);
+        }
 
         // 정정요청 엔티티 생성
         // - before: 현재 출결에 들어있는 코드
@@ -115,14 +119,14 @@ public class AttendanceCorrectionCommandService {
 
         // 정정요청 존재 확인
         AttendanceCorrectionRequest correctionRequest = correctionRequestRepository.findById(request.getRequestId())
-                .orElseThrow(() -> new IllegalArgumentException("정정요청이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CORRECTION_REQUEST_NOT_FOUND));
 
         if (request.isApproved()) {
             // 승인 시 출결 반영과 상태 변경을 하나의 트랜잭션으로 처리한다.
 
             // 출결 존재 확인
             Attendance attendance = attendanceRepository.findById(correctionRequest.getAttendanceId())
-                    .orElseThrow(() -> new IllegalArgumentException("출결 정보가 존재하지 않습니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.ATTENDANCE_NOT_FOUND));
 
             // 정정요청 상태를 APPROVED로 변경 + 처리자/코멘트 기록
             correctionRequest.approve(request.getAdminId(), request.getAdminComment());
@@ -136,7 +140,7 @@ public class AttendanceCorrectionCommandService {
         } else {
             // 반려면 사유 필수
             if (request.getAdminComment() == null || request.getAdminComment().isBlank()) {
-                throw new IllegalArgumentException("반려 사유는 필수입니다.");
+                throw new BusinessException(ErrorCode.REJECT_REASON_REQUIRED);
             }
 
             // 정정요청 상태를 REJECTED로 변경 + 처리자/코멘트 기록
@@ -154,10 +158,10 @@ public class AttendanceCorrectionCommandService {
         if (request == null
                 || request.getAttendanceId() == null
                 || request.getRequestedAttendanceCodeId() == null
-                || request.getRequestReason() == null
-                || request.getRequestReason().isBlank()
-                || request.getRequestedBy() == null) {
-            throw new IllegalArgumentException("필수 파라미터가 누락되었습니다.");
+            || request.getRequestReason() == null
+            || request.getRequestReason().isBlank()
+            || request.getRequestedBy() == null) {
+            throw new BusinessException(ErrorCode.ATTENDANCE_ITEM_INVALID_FORMAT);
         }
     }
 
@@ -166,7 +170,7 @@ public class AttendanceCorrectionCommandService {
      */
     private void validateDecideRequest(CorrectionDecideRequest request) {
         if (request == null || request.getRequestId() == null || request.getAdminId() == null) {
-            throw new IllegalArgumentException("필수 파라미터가 누락되었습니다.");
+            throw new BusinessException(ErrorCode.ATTENDANCE_STUDENT_LIST_EMPTY);
         }
     }
 
@@ -175,10 +179,10 @@ public class AttendanceCorrectionCommandService {
      */
     private void ensureAdmin(Long adminId) {
         User user = userRepository.findById(adminId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getRole() != Role.ADMIN) {
-            throw new IllegalStateException("관리자만 처리할 수 있습니다.");
+            throw new BusinessException(ErrorCode.CORRECTION_ADMIN_ONLY);
         }
     }
 
@@ -187,10 +191,10 @@ public class AttendanceCorrectionCommandService {
      */
     private void ensureTeacher(Long teacherId) {
         User user = userRepository.findById(teacherId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getRole() != Role.TEACHER) {
-            throw new IllegalStateException("교사만 정정요청을 생성할 수 있습니다.");
+            throw new BusinessException(ErrorCode.CORRECTION_TEACHER_ONLY_CREATE);
         }
     }
 
@@ -200,13 +204,13 @@ public class AttendanceCorrectionCommandService {
      */
     private void ensureCourseTeacher(Long teacherId, Long enrollmentId) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new IllegalArgumentException("수강신청 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENROLLMENT_NOT_FOUND));
 
         Course course = courseRepository.findById(enrollment.getCourse().getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("과목 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_INFO_NOT_FOUND));
 
         if (course.getTeacherDetail() == null || !course.getTeacherDetail().getId().equals(teacherId)) {
-            throw new IllegalStateException("과목 담당 교사만 정정요청을 생성할 수 있습니다.");
+            throw new BusinessException(ErrorCode.CORRECTION_ONLY_COURSE_TEACHER_CREATE);
         }
     }
 }

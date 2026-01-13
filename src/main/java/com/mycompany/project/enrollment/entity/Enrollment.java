@@ -48,7 +48,7 @@ public class Enrollment extends BaseEntity {
   private String memo;
   // 호환성 Getter (CourseService 등에서 getStudentDetail() 사용 시 지원)
   public StudentDetail getStudentDetail() {
-    return this.studentDetailId;
+    return this.studentDetail;
   }
 
 

@@ -15,7 +15,9 @@ import com.mycompany.project.attendance.service.AttendanceCommandService;       
 import com.mycompany.project.attendance.service.AttendanceQueryService;         // Read(조회) 담당: 상세/목록 조회
 
 // ====== 롬복/스프링 MVC ======
+import com.mycompany.project.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;                                          // final 필드 생성자 자동 생성
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;                      // GET 요청 매핑
 import org.springframework.web.bind.annotation.ModelAttribute;                  // 쿼리스트링 → DTO 바인딩
 import org.springframework.web.bind.annotation.PathVariable;                    // URL 경로 변수 바인딩
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.PostMapping;                     
 import org.springframework.web.bind.annotation.RequestBody;                     // JSON 바디 → DTO 바인딩
 import org.springframework.web.bind.annotation.RequestMapping;                  // 클래스 공통 URL 매핑
 import org.springframework.web.bind.annotation.RestController;                  // JSON 응답 컨트롤러(Controller + ResponseBody)
+
+import java.util.List;
 
 // ====== 스웨거(OpenAPI) ======
 import io.swagger.v3.oas.annotations.Operation;                                 // API 문서: 메서드 설명
@@ -48,14 +52,15 @@ public class AttendanceController {
             description = "특정 강좌의 해당 날짜/교시 출석 데이터를 조회하거나 없으면 자동 생성합니다."
     )
     @PostMapping("/generate") // POST /api/attendance/generate
-    public java.util.List<AttendanceListResponse> generateAttendanceSheet(
+    public ResponseEntity<ApiResponse<List<AttendanceListResponse>>> generateAttendanceSheet(
             @RequestBody AttendanceCreateRequest request
     ) {
         // request: courseId, classDate, period, userId(교사) 등이 들어온다.
         // 흐름:
         // 1) 이미 출결이 있으면 그대로 조회 결과를 반환
         // 2) 없으면 enrollment(수강신청) 기준으로 출결을 생성한 뒤 조회 결과를 반환
-        return attendanceCommandService.generateAttendances(request);
+        List<AttendanceListResponse> data = attendanceCommandService.generateAttendances(request);
+        return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @Operation(
@@ -63,12 +68,13 @@ public class AttendanceController {
             description = "교사가 출결 정보를 저장하거나 수정합니다."
     )
     @PostMapping("/save") // POST /api/attendance/save
-    public void saveAttendance(@RequestBody AttendanceUpdateRequest request) {
+    public ResponseEntity<ApiResponse<Void>> saveAttendance(@RequestBody AttendanceUpdateRequest request) {
         // request.items에 여러 학생(enrollment) 출결이 들어올 수 있다.
         // 중요한 규칙:
         // - CONFIRMED(확정) / CLOSED(마감) 상태는 수정이 막혀야 한다.
         // - 저장은 SAVED 상태로 남긴다(담임 확정 전 단계).
         attendanceCommandService.saveAttendances(request);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @Operation(
@@ -76,10 +82,11 @@ public class AttendanceController {
             description = "담임/책임교사가 출결을 확정합니다."
     )
     @PostMapping("/confirm") // POST /api/attendance/confirm
-    public void confirmAttendance(@RequestBody AttendanceConfirmRequest request) {
+    public ResponseEntity<ApiResponse<Void>> confirmAttendance(@RequestBody AttendanceConfirmRequest request) {
         // 확정은 "담임" 또는 정책상 허용된 권한만 가능해야 한다.
         // 또, 미입력 출결(해당 날짜/교시에 attendance가 없는 학생)이 있으면 확정이 막혀야 한다.
         attendanceCommandService.confirmAttendances(request);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @Operation(
@@ -87,10 +94,11 @@ public class AttendanceController {
             description = "출결 단건 상세를 조회합니다."
     )
     @GetMapping("/{attendanceId}") // GET /api/attendance/{attendanceId}
-    public AttendanceResponse getAttendance(@PathVariable Long attendanceId) {
+    public ResponseEntity<ApiResponse<AttendanceResponse>> getAttendance(@PathVariable Long attendanceId) {
         // 경로로 들어온 attendanceId로 단건 조회한다.
         // (QueryService 쪽에서 MyBatis로 join해서 상세 응답을 만들 가능성이 높음)
-        return attendanceQueryService.findById(attendanceId);
+        AttendanceResponse data = attendanceQueryService.findById(attendanceId);
+        return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @Operation(
@@ -98,10 +106,11 @@ public class AttendanceController {
             description = "조건에 따라 출결 목록을 조회합니다."
     )
     @GetMapping // GET /api/attendance?courseId=...&fromDate=...&toDate=...&period=...
-    public java.util.List<AttendanceListResponse> search(@ModelAttribute AttendanceSearchRequest request) {
+    public ResponseEntity<ApiResponse<List<AttendanceListResponse>>> search(@ModelAttribute AttendanceSearchRequest request) {
         // @ModelAttribute:
         // - GET 쿼리스트링 값을 AttendanceSearchRequest 필드에 자동으로 채워준다.
         // - 예: ?courseId=1&period=2&fromDate=2026-01-01&toDate=2026-01-31
-        return attendanceQueryService.search(request);
+        List<AttendanceListResponse> data = attendanceQueryService.search(request);
+        return ResponseEntity.ok(ApiResponse.success(data));
     }
 }
