@@ -1,10 +1,12 @@
 package com.mycompany.project.jwtsecurity;
 
 import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.user.command.domain.aggregate.UserStatus;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,15 +43,27 @@ public class JwtTokenProvider {
   }
 
   // 토큰 생성
-  public String createAccessToken(String email, Role role) {
-    return createToken(email, role, ACCESS_TOKEN_VALIDITY);
+  public String createAccessToken(Long userId, String email, Role role, UserStatus status) {
+    Date now = new Date();
+    Date validityDate = new Date(now.getTime() + ACCESS_TOKEN_VALIDITY);
+
+    return Jwts.builder()
+        .setSubject(email)
+        .claim("userId", userId)
+        .claim("auth", role.name())
+        .claim("status", status.name())
+        .setIssuedAt(now)
+        .setExpiration(validityDate)
+        .signWith(key)
+        .compact();
+
   }
 
   public String createRefreshToken(String email) {
-    return createToken(email, null, REFRESH_TOKEN_VALIDITY);
+    return createToken(email, null, null, REFRESH_TOKEN_VALIDITY);
   }
 
-  private String createToken(String email, Role role, long validity) {
+  private String createToken(String email, Role role, UserStatus status, long validity) {
     Date now = new Date();
     Date validityDate = new Date(now.getTime() + validity);
 
@@ -63,6 +77,10 @@ public class JwtTokenProvider {
       builder.claim("auth", role.name());
     }
 
+    if (status != null) {
+      builder.claim("status", status.name());
+    }
+
     return builder.compact();
   }
 
@@ -70,17 +88,24 @@ public class JwtTokenProvider {
   public Authentication getAuthentication(String token) {
     Claims claims = parseClaims(token);
 
-    // 권한 정보가 없으면 빈 권한 목록
-    Collection<? extends GrantedAuthority> authorities = Collections.emptyList();
+    Object userIdObj = claims.get("userId");
+    Object authObj = claims.get("auth");
+    Object statusObj = claims.get("status");
 
-    if (claims.get("auth") != null) {
-      authorities = Arrays.stream(claims.get("auth").toString().split(","))
-          .map(SimpleGrantedAuthority::new)
-          .collect(Collectors.toList());
-    }
+    // refresh token 인 경우, 해당 클레임이 null이라서 안전하게 처리함
+    CustomUserDetails userdetails = CustomUserDetails.builder()
+        .userId(userIdObj != null ? Long.valueOf(userIdObj.toString()) : null)
+        .email(claims.getSubject())
+        .role(authObj != null ? Role.valueOf(authObj.toString()) : null)
+        .status(statusObj != null ? UserStatus.valueOf(statusObj.toString()) : null)
+        .build();
 
-    UserDetails principal = new User(claims.getSubject(), "", authorities);
-    return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+    // 권한 목록 가져오기, role이 null인 경우 빈 리스트 반환해서 getAuthorities() 호출 안됨으로 NPE 에러 방지
+    Collection<? extends GrantedAuthority> authorities = (userdetails.getRole() != null)
+        ? userdetails.getAuthorities()
+        : Collections.emptyList();
+
+    return new UsernamePasswordAuthenticationToken(userdetails, "", authorities);
   }
 
   // 토큰 유효성 검증
@@ -109,5 +134,14 @@ public class JwtTokenProvider {
         .parseSignedClaims(refreshToken)
         .getPayload();
     return claims.getSubject();
+  }
+
+  public String getStatusFromToken(String token) {
+    try {
+      Claims claims = parseClaims(token);
+      return claims.get("status", String.class);
+    } catch (Exception e) {
+      return null;
+    }
   }
 }

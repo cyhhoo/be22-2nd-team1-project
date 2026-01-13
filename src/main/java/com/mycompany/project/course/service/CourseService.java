@@ -25,7 +25,6 @@ import com.mycompany.project.course.repository.CourseChangeRequestRepository;
 import com.mycompany.project.course.dto.StudentDetailResDTO;
 import com.mycompany.project.course.dto.CourseListResDTO;
 import com.mycompany.project.user.command.domain.repository.UserRepository;
-import com.mycompany.project.user.command.domain.aggregate.User;
 
 import com.mycompany.project.common.service.RefundService;
 import org.springframework.data.domain.Page;

@@ -1,11 +1,11 @@
 @baseUrl = http://localhost:8080
-@email = test@example.com
+@email = test2@example.com
 @password = Password123!
 @name = Test User
 @birthDate = 2005-01-01
+@authCode = 050101
 @role = STUDENT
 # registerUser() uses birthDate.substring(2), so 2005-01-01 -> 05-01-01
-@authCode = 05-01-01
 @accessToken =
 @refreshToken =
 @teacherEmail = teacher@schoolmate.test
