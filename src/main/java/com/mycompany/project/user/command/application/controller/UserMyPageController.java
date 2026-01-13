@@ -1,10 +1,12 @@
 package com.mycompany.project.user.command.application.controller;
 
 import com.mycompany.project.common.response.ApiResponse;
+import com.mycompany.project.jwtsecurity.CustomUserDetails;
 import com.mycompany.project.user.command.application.dto.ChangePasswordRequest;
 import com.mycompany.project.user.command.application.service.UserMyPageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +21,7 @@ public class UserMyPageController {
   private final UserMyPageService userMyPageService;
 
   @PostMapping("/password")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ApiResponse<Void>> changePassword(
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestBody ChangePasswordRequest request) {
