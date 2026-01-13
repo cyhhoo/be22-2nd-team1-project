@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TeacherDetailRequest {
-    private String subject; // 담당 과목명
+    private Long subjectId; // 담당 과목 ID (tbl_subject.subject_id 참조)
     private Integer homeroomGrade; // 담임 학년
     private Integer homeroomClass; // 담임 반
 }

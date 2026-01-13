@@ -100,9 +100,9 @@ public class AuthCommandService {
         TeacherDetail.TeacherDetailBuilder builder = TeacherDetail.builder().user(user);
 
         if (detailReq != null) {
-            // 과목 조회
-            if (detailReq.getSubject() != null && !detailReq.getSubject().isEmpty()) {
-                Subject subject = subjectRepository.findByName(detailReq.getSubject()).orElse(null);
+            // 과목 조회 (subjectId로 조회)
+            if (detailReq.getSubjectId() != null) {
+                Subject subject = subjectRepository.findById(detailReq.getSubjectId()).orElse(null);
                 builder.subject(subject);
             }
             builder.homeroomGrade(detailReq.getHomeroomGrade())
