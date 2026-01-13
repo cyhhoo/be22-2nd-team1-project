@@ -22,6 +22,7 @@ public enum ErrorCode {
   INVALID_PASSWORD(HttpStatus.UNAUTHORIZED,"ACCOUNT_004" , "아이디 또는 비밀번호가 일치하지 않습니다."),
   INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "ACCOUNT_005", "유효하지 않은 Refresh Token 입니다." ),
   TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "ACCOUNT_006", "존재하지 않거나 만료된 Token 입니다." ),
+  
 
   // Attendance (ATT)
   REQUIRED_PARAMETER_MISSING(HttpStatus.CONFLICT, "ATT_001", "과목ID/수업일/교시/사용자ID는 필수입니다."),

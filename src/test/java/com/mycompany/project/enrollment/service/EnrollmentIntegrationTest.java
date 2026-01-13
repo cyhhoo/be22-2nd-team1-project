@@ -54,7 +54,7 @@ class EnrollmentIntegrationTest {
         .build();
     userRepository.save(studentUser);
 
-    StudentDetail student = StudentDetail.builder().user(studentUser).grade(1).build();
+    StudentDetail student = StudentDetail.builder().user(studentUser).grade(1).studentNo(1).build();
     studentDetailRepository.save(student);
     this.userId = studentUser.getUserId();
 
@@ -110,12 +110,12 @@ class EnrollmentIntegrationTest {
     cartRepository.save(new Cart(student, javaCourse));
 
     // When
-    List<BulkEnrollmentResult> results = enrollmentCommandService.bulkRegister(userId, List.of(courseId_Java));
+    List<BulkEnrollmentResult> results = enrollmentCommandService.bulkRegisterFromCart(userId);
 
     // Then
     assertThat(results).hasSize(1);
     assertThat(results.get(0).isSuccess()).isTrue();
-    assertThat(enrollmentRepository.existsByStudentDetailAndCourse(student, javaCourse)).isTrue();
+    assertThat(enrollmentRepository.existsByStudentDetailIdAndCourse(student, javaCourse)).isTrue();
     assertThat(cartRepository.existsByStudentDetailAndCourse(student, javaCourse)).isFalse();
   }
 
@@ -131,7 +131,7 @@ class EnrollmentIntegrationTest {
     cartRepository.save(new Cart(student, fullCourse));
 
     // When
-    List<BulkEnrollmentResult> results = enrollmentCommandService.bulkRegister(userId, List.of(courseId_Java, courseId_Full));
+    List<BulkEnrollmentResult> results = enrollmentCommandService.bulkRegisterFromCart(userId);
 
     // Then
     BulkEnrollmentResult resultJava = results.stream().filter(r -> r.getCourseId().equals(courseId_Java)).findFirst().get();
