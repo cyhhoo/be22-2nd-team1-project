@@ -10,6 +10,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 /**
  * 애플리케이션 기동 시 초기 데이터를 설정하는 클래스
  */
@@ -33,7 +35,7 @@ public class DataInitializer implements CommandLineRunner {
                     .name("시스템관리자")
                     .role(Role.ADMIN)
                     .status(UserStatus.ACTIVE) // 최초 관리자는 바로 활성 상태로 생성
-                    .birthDate("1990-01-01")
+                    .birthDate(LocalDate.parse("1990-01-01"))
                     .build();
 
             userRepository.save(admin);

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,6 +18,6 @@ public class UserResponse {
   private String name;
   private Role role;
   private UserStatus status;
-  private String birthDate;
+  private LocalDate birthDate;
 
 }

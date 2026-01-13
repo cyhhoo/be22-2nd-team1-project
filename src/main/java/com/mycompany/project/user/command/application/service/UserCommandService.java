@@ -15,6 +15,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +66,6 @@ public class UserCommandService {
           String name = getCsvValue(data, headers, "name");
           String password = getCsvValue(data, headers, "password");
           String roleStr = getCsvValue(data, headers, "roleStr");
-          String birthDate = getCsvValue(data, headers, "birthDate");
 
           // 엔티티 저장
 
@@ -77,16 +78,20 @@ public class UserCommandService {
           } catch (IllegalArgumentException | NullPointerException e) {
             role = Role.STUDENT; // 기본값
           }
-
-          // 인증코드 생성 (하이픈 제거 후 뒤 6자리)
-          // 2005-01-01 -> 050101
+          // birthDate 파싱 및 인증코드 생성
+          LocalDate birthDate = null;
           String authCode = null;
-          if (birthDate != null) {
-            String cleanDate = birthDate.replace("-", ""); // 20050101
-            if (cleanDate.length() >= 6) {
-              authCode = cleanDate.substring(cleanDate.length() - 6);
+          String birthDateStr = getCsvValue(data, headers, "birthdate");
+          if (birthDateStr != null && !birthDateStr.isEmpty()) {
+            try {
+              birthDate = LocalDate.parse(birthDateStr); // 기본 yyyy-MM-dd
+              // 인증코드 생성 (연도 뒤 2자리 + 월 2자리 + 일 2자리)
+              authCode = birthDate.format(DateTimeFormatter.ofPattern("yyMMdd"));
+            } catch (Exception e) {
+              // 파싱 실패 시 null 유지
             }
           }
+
           User user = User.builder()
               .email(email)
               .password(passwordEncoder.encode(password))
@@ -181,10 +186,10 @@ public class UserCommandService {
               // 1. CSV에서 관리자 관련 데이터 추출
               String levelStr = getCsvValue(data, headers, "adminLevel"); // 예: 1 or 5
 
-              // 2. Level 매핑 (기본값 설정 로직 등 필요)
-              AdminDetail.AdminLevel level = AdminDetail.AdminLevel.LEVEL_5; // 기본값
+              // 2. Level 매핑
+              AdminLevel level = AdminLevel.LEVEL_5; // 기본값
               if ("1".equals(levelStr)) {
-                level = AdminDetail.AdminLevel.LEVEL_1;
+                level = AdminLevel.LEVEL_1;
               }
 
               // 3. AdminDetail 생성 및 저장
@@ -274,7 +279,15 @@ public class UserCommandService {
 
           String name = getCsvValue(data, headers, "name");
           String roleStr = getCsvValue(data, headers, "role");
-          String birthDate = getCsvValue(data, headers, "birthDate");
+          LocalDate birthDate = null;
+          String birthDateStr = getCsvValue(data, headers, "birthdate");
+          if (birthDateStr != null && !birthDateStr.isEmpty()) {
+            try {
+              birthDate = LocalDate.parse(birthDateStr);
+            } catch (Exception e) {
+              // ignore
+            }
+          }
 
           Role role = null;
           if (roleStr != null) {

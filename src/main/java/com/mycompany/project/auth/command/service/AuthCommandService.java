@@ -18,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Service
 @RequiredArgsConstructor
 public class AuthCommandService {
@@ -49,7 +52,9 @@ public class AuthCommandService {
                 .role(request.getRole())
                 .status(initialStatus)
                 .birthDate(request.getBirthDate())
-                .authCode(request.getBirthDate().replace("-", "").substring(2)) // 생년월일 6자리로 임시 인증코드 생성
+                .authCode(request.getBirthDate() != null
+                        ? request.getBirthDate().format(DateTimeFormatter.ofPattern("yyMMdd"))
+                        : null)
                 .build();
 
         // 4. 저장
