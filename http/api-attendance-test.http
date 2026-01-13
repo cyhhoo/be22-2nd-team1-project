@@ -1,38 +1,48 @@
 @baseUrl = http://localhost:8080
 
 # === 공통 변수 ===
-@classDate = 2025-03-01
+@classDate = 2026-03-03
 @period = 1
-@courseId =
-@academicYearId =
-@scopeValue = 2025-03
-@attendanceId =
+@courseId = 1001
+@academicYearId = 1001
+@scopeValue = 2026-03
+@attendanceId = 4001
 @correctionRequestId =
-@presentCodeId =
-@lateCodeId =
-@enrollmentId1 =
-@enrollmentId2 =
+@presentCodeId = 1
+@lateCodeId = 2
+@enrollmentId1 = 3001
+@enrollmentId2 = 3002
 
 # === 교사 계정 ===
-@teacherEmail = teacher@schoolmate.test
-@teacherPassword = Password123!
-@teacherName = Test Teacher
-@teacherBirthDate = 1988-02-02
-@teacherAuthCode = 88-02-02
+@teacherEmail = teacher1@schoolmate.local
+@teacherPassword = Passw0rd!
+@teacherName = Teacher One
+@teacherBirthDate = 1990-01-01
+@teacherAuthCode = 90-01-01
 @teacherRole = TEACHER
-@teacherUserId =
-@teacherAccessToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyQHNjaG9vbG1hdGUudGVzdCIsImlhdCI6MTc2ODIxOTYxMiwiZXhwIjoxNzY4MjIxNDEyLCJhdXRoIjoiVEVBQ0hFUiJ9.6iENHRwlSDeCsvE9rI8LYJSJ47EdiPx4JcAumRM8gmETm9lhrSytjaekWC6egNesz2ZMWn5PCNZkTfLtfcQAwg
+@teacherUserId = 1001
+@teacherAccessToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMUBzY2hvb2xtYXRlLnRlc3QiLCJpYXQiOjE3NjgyNjIzNDQsImV4cCI6MTc2ODI2NDE0NCwiYXV0aCI6IlRFQUNIRVIiLCJzdGF0dXMiOiJBQ1RJVkUifQ.mtKd5fc0WWGVVQje9MebzoPHsGSIczhvj5VhHBfDLA0CF-jcA-y30vTHtdYq8JwZjYY6eoL7OQgz_ampc0W86g
 
 # === 관리자 계정 ===
-@adminEmail = admin@schoolmate.test
-@adminPassword = Password123!
-@adminName = Test Admin
+@adminEmail = admin1@schoolmate.local
+@adminPassword = Passw0rd!
+@adminName = Admin One
 @adminBirthDate = 1985-03-03
 @adminAuthCode = 85-03-03
 @adminRole = ADMIN
-@adminUserId =
-@adminAccessToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBzY2hvb2xtYXRlLnRlc3QiLCJpYXQiOjE3NjgyMTk2NDMsImV4cCI6MTc2ODIyMTQ0MywiYXV0aCI6IkFETUlOIn0.EEbxxYxvw_WIPilPxLpg4Js4mX4oSFAlMj5g0Lt4wMUGpGXut0kIGmoeOxk8iZsEziJiMrwxq8DXgxuaQdopHg
+@adminUserId = 9001
+@adminAccessToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZWFjaGVyMUBzY2hvb2xtYXRlLnRlc3QiLCJpYXQiOjE3NjgyMzIxNTYsImV4cCI6MTc2ODIzMzk1NiwiYXV0aCI6IlRFQUNIRVIiLCJzdGF0dXMiOiJBQ1RJVkUifQ.Oh1-A1kRP8UFnEnjefDkqjuldwq5kiRWctLPlEqdkke6DZs7gyjfj7P4F4CGxEIf4gJabaBQWgo_XtClmJauYg
 @refreshToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBzY2hvb2xtYXRlLnRlc3QiLCJpYXQiOjE3NjgyMTk2NDMsImV4cCI6MTc2ODgyNDQ0M30.15JgSEv-ZuSvuvGVt2lih7_fHV6Fi6VYD3p4ncN5vx9wnNu6mSyMwGb0XlYDFkM-OS1curztNUoLqjDJwQSljQ
+
+# === 학생 계정 ===
+@studentEmail = student1@schoolmate.local
+@studentPassword = Passw0rd!
+@studentName = Student One
+@studentBirthDate = 2008-05-05
+@studentAuthCode = 08-05-05
+@studentRole = STUDENT
+@studentUserId = 2001
+@studentAccessToken =
 
 ############################################################
 # 사전 준비
@@ -40,7 +50,7 @@
 # - 담임 테스트는 교사 상세(TeacherDetail)에 homeroom 정보가 있어야 함
 ############################################################
 
-### 교사 회원가입
+### 교사 회원가입 (샘플 데이터 사용 시 생략)
 POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
@@ -53,7 +63,7 @@ Content-Type: application/json
 }
 > {% client.global.set("teacherUserId", response.body.data); %}
 
-### 교사 계정 활성화
+### 교사 계정 활성화 (샘플 데이터 사용 시 생략)
 POST {{baseUrl}}/api/auth/activate
 Content-Type: application/json
 
@@ -76,7 +86,7 @@ Content-Type: application/json
 > {% client.global.set("teacherAccessToken", response.body.data.accessToken); %}
 > {% client.global.set("refreshToken", response.body.data.refreshToken); %}
 
-### 관리자 회원가입
+### 관리자 회원가입 (샘플 데이터 사용 시 생략)
 POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
@@ -89,7 +99,7 @@ Content-Type: application/json
 }
 > {% client.global.set("adminUserId", response.body.data); %}
 
-### 관리자 계정 활성화
+### 관리자 계정 활성화 (샘플 데이터 사용 시 생략)
 POST {{baseUrl}}/api/auth/activate
 Content-Type: application/json
 
@@ -111,6 +121,41 @@ Content-Type: application/json
 }
 > {% client.global.set("adminAccessToken", response.body.data.accessToken); %}
 > {% client.global.set("refreshToken", response.body.data.refreshToken); %}
+
+### 학생 회원가입 (샘플 데이터 사용 시 생략)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{studentEmail}}",
+  "password": "{{studentPassword}}",
+  "name": "{{studentName}}",
+  "birthDate": "{{studentBirthDate}}",
+  "role": "{{studentRole}}"
+}
+> {% client.global.set("studentUserId", response.body.data); %}
+
+### 학생 계정 활성화 (샘플 데이터 사용 시 생략)
+POST {{baseUrl}}/api/auth/activate
+Content-Type: application/json
+
+{
+  "email": "{{studentEmail}}",
+  "name": "{{studentName}}",
+  "birthDate": "{{studentBirthDate}}",
+  "authCode": "{{studentAuthCode}}",
+  "newPassword": "{{studentPassword}}"
+}
+
+### 학생 로그인
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{studentEmail}}",
+  "password": "{{studentPassword}}"
+}
+> {% client.global.set("studentAccessToken", response.body.data.accessToken); %}
 
 ############################################################
 # 출결 기능 테스트
@@ -161,7 +206,7 @@ Content-Type: application/json
 }
 
 ### 출결 마감 (관리자)
-POST {{baseUrl}}/api/attendance/closures
+POST {{baseUrl}}/api/v1/attendance/closures/
 Authorization: Bearer {{adminAccessToken}}
 Content-Type: application/json
 
