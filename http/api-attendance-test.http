@@ -1,4 +1,5 @@
 @baseUrl = http://localhost:8080
+<<<<<<< HEAD
 @email = test2@example.com
 @password = Password123!
 @name = Test User
@@ -8,6 +9,23 @@
 # registerUser() uses birthDate.substring(2), so 2005-01-01 -> 05-01-01
 @accessToken =
 @refreshToken =
+=======
+
+# === 공통 변수 ===
+@classDate = 2025-03-01
+@period = 1
+@courseId =
+@academicYearId =
+@scopeValue = 2025-03
+@attendanceId =
+@correctionRequestId =
+@presentCodeId =
+@lateCodeId =
+@enrollmentId1 =
+@enrollmentId2 =
+
+# === 교사 계정 ===
+>>>>>>> 12bdbd7019ed9d1c8bb720bed18c21dcaad9c902
 @teacherEmail = teacher@schoolmate.test
 @teacherPassword = Password123!
 @teacherUserId = 10

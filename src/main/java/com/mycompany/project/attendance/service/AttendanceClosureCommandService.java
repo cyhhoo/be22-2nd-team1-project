@@ -12,6 +12,12 @@ import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.repository.EnrollmentMapper;
+<<<<<<< HEAD
+=======
+import com.mycompany.project.enrollment.repository.EnrollmentRepository;
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
+>>>>>>> 12bdbd7019ed9d1c8bb720bed18c21dcaad9c902
 import com.mycompany.project.schedule.command.domain.aggregate.AcademicYear;
 import com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository;
 import com.mycompany.project.user.command.domain.aggregate.Role;
