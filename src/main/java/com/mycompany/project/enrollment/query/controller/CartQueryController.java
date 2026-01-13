@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,7 @@ public class CartQueryController {
 
   @Operation(summary = "내 장바구니 목록 조회", description = "내가 담은 수강 신청 장바구니 목록을 조회합니다.")
   @GetMapping
+  @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<List<CartListResponse>>> getMyCartList() {
     Long userId = getCurrentUserId();
     return ResponseEntity.ok(ApiResponse.success(cartQueryService.getMyCartList(userId)));
