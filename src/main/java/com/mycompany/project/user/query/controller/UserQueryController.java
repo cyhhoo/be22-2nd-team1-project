@@ -9,8 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,10 +21,10 @@ public class UserQueryController {
   private final UserQueryService userQueryService;
 
   @GetMapping("/me")
-  public ResponseEntity<ApiResponse<UserResponse>> getMyInfo() {
+  public ResponseEntity<ApiResponse<UserResponse>> getMyInfo(
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String email = authentication.getName();
+    String email = userDetails.getEmail();
 
     UserResponse response = userQueryService.getMyInfo(email);
 

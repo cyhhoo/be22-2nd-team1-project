@@ -49,7 +49,7 @@ public class AuthCommandService {
                 .role(request.getRole())
                 .status(initialStatus)
                 .birthDate(request.getBirthDate())
-                .authCode(request.getBirthDate().substring(2)) // 생년월일 6자리로 임시 인증코드 생성
+                .authCode(request.getBirthDate().replace("-", "").substring(2)) // 생년월일 6자리로 임시 인증코드 생성
                 .build();
 
         // 4. 저장
