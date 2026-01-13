@@ -215,7 +215,7 @@ class AttendanceFlowIntegrationTest {
             .userId(teacher.getUserId())
             .build();
 
-        mockMvc.perform(post("/api/attendance")
+        mockMvc.perform(post("/api/v1/attendance")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(generateRequest)))
             .andExpect(status().isOk())
@@ -223,7 +223,7 @@ class AttendanceFlowIntegrationTest {
             .andExpect(jsonPath("$.data").isArray())
             .andExpect(jsonPath("$.data[0].attendanceCodeName").value("Present"));
 
-        mockMvc.perform(get("/api/attendance/codes"))
+        mockMvc.perform(get("/api/v1/attendance/codes"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data[*].code", hasItem("PRESENT")));
@@ -235,7 +235,7 @@ class AttendanceFlowIntegrationTest {
             .userId(teacher.getUserId())
             .build();
 
-        mockMvc.perform(post("/api/attendance/confirmations")
+        mockMvc.perform(post("/api/v1/attendance/confirmations")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(confirmRequest)))
             .andExpect(status().isOk());
@@ -253,7 +253,7 @@ class AttendanceFlowIntegrationTest {
             .userId(admin.getUserId())
             .build();
 
-        mockMvc.perform(post("/api/attendance/closures")
+        mockMvc.perform(post("/api/v1/attendance/closures")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(closureRequest)))
             .andExpect(status().isOk());
@@ -269,7 +269,7 @@ class AttendanceFlowIntegrationTest {
             .requestedBy(teacher.getUserId())
             .build();
 
-        mockMvc.perform(post("/api/attendance/corrections")
+        mockMvc.perform(post("/api/v1/attendance/corrections")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(correctionCreateRequest)))
             .andExpect(status().isOk());
@@ -284,7 +284,7 @@ class AttendanceFlowIntegrationTest {
             .adminId(admin.getUserId())
             .build();
 
-        mockMvc.perform(patch("/api/attendance/corrections/{requestId}", correctionRequest.getId())
+        mockMvc.perform(patch("/api/v1/attendance/corrections/{requestId}", correctionRequest.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(decideRequest)))
             .andExpect(status().isOk());

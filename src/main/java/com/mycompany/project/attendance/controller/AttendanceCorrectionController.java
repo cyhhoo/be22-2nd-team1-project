@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController // JSON으로 요청/응답 처리하는 컨트롤러
 @RequiredArgsConstructor // final 필드 생성자 주입(Autowired 대신)
-@RequestMapping("/api/attendance/corrections") // 정정요청 API 공통 경로
+@RequestMapping("/api/v1/attendance/corrections") // 정정요청 API 공통 경로
 public class AttendanceCorrectionController {
 
     // 정정요청 생성/처리(승인/반려) 같은 "상태가 바뀌는 작업" 담당

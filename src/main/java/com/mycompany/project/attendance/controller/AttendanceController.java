@@ -39,7 +39,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;                                  
 ) // Swagger에서 이 컨트롤러를 하나의 그룹으로 묶어준다.
 @RestController
 @RequiredArgsConstructor // final 필드(서비스)들을 생성자로 주입하기 위해 사용
-@RequestMapping("/api/attendance") // 이 컨트롤러의 기본 주소(공통 prefix)
+@RequestMapping("/api/v1/attendance") // 이 컨트롤러의 기본 주소(공통 prefix)
 public class AttendanceController {
 
     // "쓰기" 로직 담당 서비스(JPA 기반 Command).
