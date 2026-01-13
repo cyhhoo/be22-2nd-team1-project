@@ -37,7 +37,7 @@
         JOIN tbl_course c ON e.course_id = c.course_id
         JOIN tbl_course_time_slot cts ON c.course_id = cts.course_id
         WHERE c.academic_year_id = #{academicYearId}
-          AND e.user_id = #{studentId}
+          AND e.student_detail_id = #{studentId}
           AND cts.day_of_week = #{dayOfWeek}
           AND cts.period = #{period}
           AND e.status = 'APPLIED'

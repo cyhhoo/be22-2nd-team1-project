@@ -5,22 +5,12 @@
 @email = teacher1@schoolmate.local
 @password = Passw0rd!
 @authCode = 05-01-01
-@name = Tester3
-@birthDate = 2005-01-01
-@role = ADMIN
+@name = Teacher1
+@birthDate = 1980-01-01
+@role = TEACHER
 
-### 0. 회원가입 (테스트 계정 생성)
-POST {{host}}/api/auth/signup
-Content-Type: {{contentType}}
-Authorization: Bearer {{auth_token}}
-
-{
-  "email": "{{email}}",
-  "password": "{{password}}",
-  "name": "{{name}}",
-  "birthDate": "{{birthDate}}",
-  "role": "{{role}}"
-}
+// admin@test.com
+// teacher1@schoolmate.local
 
 ### 0. 로그인 (토큰 발급)
 POST {{host}}/api/v1/auth/login
@@ -30,12 +20,6 @@ Content-Type: {{contentType}}
   "email": "{{email}}",
   "password": "{{password}}"
 }
-
-
-#{
-#  "email": "admin1@schoolmate.local",
-#  "password": "Passw0rd!"
-#}
 
 > {%
 client.global.set("auth_token", response.body.data.accessToken);
@@ -70,7 +54,6 @@ Authorization: Bearer {{auth_token}}
 }
 
 ### 2. 강좌 승인 (PENDING -> OPEN)
-# Course ID를 실제 생성된 ID로 변경하여 테스트하세요.
 POST {{host}}/api/v1/courses/1/approve
 Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
@@ -86,7 +69,7 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
 ### 5. 강좌 목록 조회 (교사별)
-GET {{host}}/api/v1/courses/teacher/200?page=0&size=10
+GET {{host}}/api/v1/courses/teacher/1001?page=0&size=10
 Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
@@ -96,7 +79,7 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
 ### 7. 교사 주간 시간표 조회
-GET {{host}}/api/v1/courses/teacher/200/timetable?semester=1
+GET {{host}}/api/v1/courses/teacher/1001/timetable?semester=1
 Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
@@ -111,7 +94,6 @@ Authorization: Bearer {{auth_token}}
 }
 
 ### 9. 강좌 변경 요청 승인
-# Request ID를 실제 생성된 ID로 변경하세요.
 POST {{host}}/api/v1/courses/requests/1/approve
 Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
@@ -122,7 +104,8 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
 ### 11. 담당 교사 변경
-POST {{host}}/api/v1/courses/1/change-teacher?newTeacherId=201
+# newTeacherId는 QueryParma
+POST {{host}}/api/v1/courses/1/change-teacher?newTeacherId=1002
 Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
