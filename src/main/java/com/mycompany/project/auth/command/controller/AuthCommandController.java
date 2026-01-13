@@ -7,6 +7,9 @@ import com.mycompany.project.auth.query.dto.TokenResponse;
 import com.mycompany.project.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +23,7 @@ public class AuthCommandController {
     private final AuthCommandService authCommandService;
 
     @PostMapping("/register")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Long>> register(@RequestBody UserRegisterRequest request) {
         return ResponseEntity.ok(ApiResponse.success(authCommandService.registerUser(request)));
     }

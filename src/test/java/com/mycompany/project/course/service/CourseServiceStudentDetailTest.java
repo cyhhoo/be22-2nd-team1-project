@@ -1,5 +1,6 @@
 package com.mycompany.project.course.service;
 
+import com.mycompany.project.attendance.repository.AttendanceRepository;
 import com.mycompany.project.course.dto.StudentDetailResDTO;
 import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
@@ -52,7 +53,7 @@ class CourseServiceStudentDetailTest {
 
         given(enrollmentRepository.findByCourseId(courseId)).willReturn(List.of(enrollment));
         given(attendanceRepository.countByEnrollmentIdAndStatus(eq(enrollmentId), any())).willReturn(3L); // Simplified
-                                                                                                          // count
+        // count
 
         // When
         StudentDetailResDTO result = courseService.getStudentDetail(courseId, studentId);

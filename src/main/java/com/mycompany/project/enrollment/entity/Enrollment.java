@@ -49,7 +49,7 @@ public class Enrollment extends BaseEntity {
 
   // 호환성 Getter (CourseService 등에서 getStudentDetail() 사용 시 지원)
   public StudentDetail getStudentDetail() {
-    return this.studentDetailId;
+    return this.studentDetail;
   }
 
   // Setter 대신 메서드로 상태를 변경합니다.
