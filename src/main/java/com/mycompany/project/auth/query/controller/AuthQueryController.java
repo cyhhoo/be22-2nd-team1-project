@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -26,6 +27,7 @@ public class AuthQueryController {
   }
 
   @PostMapping("/reissue")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ApiResponse<TokenResponse>> reissue(
       @CookieValue(value = "RefreshToken", required = true) String refreshToken) {
     TokenResponse response = authQueryService.reissue(refreshToken);
@@ -33,6 +35,7 @@ public class AuthQueryController {
   }
 
   @PostMapping("/logout")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ApiResponse<Void>> logout(
       @CookieValue(value = "RefreshToken", required = false) String refreshToken) {
 
