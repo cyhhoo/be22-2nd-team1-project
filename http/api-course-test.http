@@ -1,21 +1,13 @@
-@baseUrl = http://localhost:8080
-@email = test@example.com
-@password = Password123!
-@name = Test User
+### 전역 변수 설정 (환경에 맞게 변경하세요)
+@host = http://localhost:8080
+@contentType = application/json
+@teacherUserId = 20
+@email = test3@example.com
+@password = pass3
+@authCode = 05-01-01
+@name = Tester3
 @birthDate = 2005-01-01
 @role = STUDENT
-# registerUser() uses birthDate.substring(2), so 2005-01-01 -> 05-01-01
-@authCode = 05-01-01
-@accessToken =
-@refreshToken =
-@teacherEmail = teacher@schoolmate.test
-@teacherPassword = Password123!
-@teacherUserId = 10
-@teacherAccessToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNzY4MTM2ODIxLCJleHAiOjE3NjgxMzg2MjEsImF1dGgiOiJTVFVERU5UIn0.pK21IhEeBd_6QcI6pkZHQwaV3_mHYqJcfAlHxvTz0_d975X9Dn7OqfeMq8iKSXu8ewNwlaFT_hYEGQHEMrwAdg
-@adminEmail = admin@schoolmate.test
-@adminPassword = Password123!
-@adminUserId = 1
-@adminAccessToken =
 
 
 ### 0. 회원가입 (테스트 계정 생성)
@@ -23,11 +15,11 @@ POST http://localhost:8080/api/auth/signup
 Content-Type: application/json
 
 {
-  "email": "teacher200@school.com",
-  "password": "password123",
-  "name": "Teacher Kim",
-  "birthDate": "19901010",
-  "role": "TEACHER"
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "name": "{{name}}",
+  "birthDate": "{{birthDate}}",
+  "role": "{{role}}}"
 }
 
 ### 0. 로그인 (토큰 발급)
@@ -35,8 +27,8 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "teacher200@school.com",
-  "password": "password123"
+  "email": "{{email}}",
+  "password": "{{password}}"
 }
 
 > {%

@@ -33,7 +33,7 @@ class CourseServiceTeacherChangeTest {
         Long oldTeacherId = 100L;
         Long newTeacherId = 200L;
         Course course = createCourseWithTeacher(oldTeacherId, "MON", 1);
-        Long courseId = course.getId();
+        Long courseId = course.getCourseId();
 
         // When
         courseService.changeTeacher(courseId, newTeacherId);
@@ -55,7 +55,7 @@ class CourseServiceTeacherChangeTest {
         Course targetCourse = createCourseWithTeacher(300L, "MON", 1);
 
         // When & Then
-        assertThatThrownBy(() -> courseService.changeTeacher(targetCourse.getId(), 200L))
+        assertThatThrownBy(() -> courseService.changeTeacher(targetCourse.getCourseId(), 200L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("이미 수업이 있습니다");
     }
