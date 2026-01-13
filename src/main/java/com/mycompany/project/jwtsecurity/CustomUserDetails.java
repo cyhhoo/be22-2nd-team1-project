@@ -22,7 +22,7 @@ public class CustomUserDetails implements UserDetails {
     // --- UserDetails 필수 구현 메서드 ---
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(role.name()));
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
