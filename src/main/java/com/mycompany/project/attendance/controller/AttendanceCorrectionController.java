@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ import java.util.List;
 
 @RestController // JSON으로 요청/응답 처리하는 컨트롤러
 @RequiredArgsConstructor // final 필드 생성자 주입(Autowired 대신)
-@RequestMapping("/api/attendance/corrections") // 정정요청 API 공통 경로
+@RequestMapping("/api/v1/attendance/corrections") // 정정요청 API 공통 경로
 public class AttendanceCorrectionController {
 
     // 정정요청 생성/처리(승인/반려) 같은 "상태가 바뀌는 작업" 담당
@@ -41,14 +42,23 @@ public class AttendanceCorrectionController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @PostMapping("/decide") // POST /api/attendance/corrections/decide
-    public ResponseEntity<ApiResponse<Void>> decide(@RequestBody CorrectionDecideRequest request) {
+    @PatchMapping("/{requestId}") // PATCH /api/attendance/corrections/{requestId}
+    public ResponseEntity<ApiResponse<Void>> decide(
+            @PathVariable Long requestId,
+            @RequestBody CorrectionDecideRequest request
+    ) {
         // 정정요청 처리 규칙(서비스에서 검증):
         // - 관리자가 처리해야 함(ROLE_ADMIN)
         // - 승인(approved=true)이면 출결(attendance)의 출결코드를 즉시 반영
         // - 반려(approved=false)이면 adminComment(반려 사유) 필수
         // - 처리 결과는 정정요청 상태(APPROVED/REJECTED)로 저장
-        attendanceCorrectionCommandService.decideCorrectionRequest(request);
+        CorrectionDecideRequest normalizedRequest = CorrectionDecideRequest.builder()
+                .requestId(requestId)
+                .approved(request.isApproved())
+                .adminComment(request.getAdminComment())
+                .adminId(request.getAdminId())
+                .build();
+        attendanceCorrectionCommandService.decideCorrectionRequest(normalizedRequest);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 

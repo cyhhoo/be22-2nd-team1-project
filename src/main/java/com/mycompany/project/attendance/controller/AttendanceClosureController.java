@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController // 이 클래스는 REST API 컨트롤러다. (View가 아니라 JSON 응답을 반환)
 @RequiredArgsConstructor // final 필드들을 생성자로 자동 주입한다. (생성자 DI)
-@RequestMapping("/api/attendance/closures") // 이 컨트롤러의 공통 URL 시작 경로
+@RequestMapping("/api/v1/attendance/closures") // 이 컨트롤러의 공통 URL 시작 경로
 public class AttendanceClosureController {
 
     private final AttendanceClosureCommandService attendanceClosureCommandService;
