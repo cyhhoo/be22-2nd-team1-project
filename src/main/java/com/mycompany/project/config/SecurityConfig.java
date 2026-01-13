@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity // @PreAuthorize, @PostAuthorize 활성화
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -46,7 +48,7 @@ public class SecurityConfig {
             // Swagger UI는 누구나 접근 가능
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
             // 로그인/회원가입,활성화 API는 누구나 접근 가능
-            .requestMatchers("/api/auth/**", "/api/auth/activate").permitAll()
+            .requestMatchers("/api/v1/auth/**", "/api/v1/auth/activate").permitAll()
             // 업로드된 파일 접근 허용
             .requestMatchers("/uploads/**").permitAll()
             // 그 외 모든 요청은 인증 필요

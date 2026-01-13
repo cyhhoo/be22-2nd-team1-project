@@ -6,14 +6,17 @@ import com.mycompany.project.reservation.command.application.dto.request.Reserva
 import com.mycompany.project.reservation.command.application.dto.request.ReservationCreateRequest;
 import com.mycompany.project.reservation.command.application.dto.response.ReservationCommandResponse;
 import com.mycompany.project.reservation.command.application.service.ReservationCommandService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = " 시설 예약 ")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/reservation")
+@RequestMapping("/api/v1/reservation")
 public class ReservationCommandController {
 
     private final ReservationCommandService reservationCommandService;
@@ -21,6 +24,7 @@ public class ReservationCommandController {
     private Long mockStudent() { return 1L; }
 
     /* 시설 예약*/
+    @Operation(summary = "시설 예약")
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationCommandResponse>> createReservation(
             @RequestParam Long studentId,
@@ -33,7 +37,8 @@ public class ReservationCommandController {
 
 
     /* 시설 예약 취소 */
-    @DeleteMapping("/{reservationId}")
+    @Operation(summary = "시설 예약 취소")
+    @DeleteMapping("{reservationId}")
     public ResponseEntity<ApiResponse<Void>> cancelReservation(
             @PathVariable Long reservationId,
             @RequestParam Long studentId
@@ -42,7 +47,8 @@ public class ReservationCommandController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
     /* 시설 예약 변경 */
-    @PutMapping("/{reservationId}")
+    @Operation(summary = "시설 예약 변경")
+    @PutMapping("{reservationId}")
     public ResponseEntity<ApiResponse<Void>> changeReservation(
             @PathVariable Long reservationId,
             @RequestParam Long studentId,
@@ -53,7 +59,8 @@ public class ReservationCommandController {
     }
 
     /* 시설 예약 승인, 거부 */
-    @PutMapping("/{reservationId}/approve")
+    @Operation(summary = "시설 예약 승인, 거부")
+    @PutMapping("{reservationId}/approve")
     public ResponseEntity<ApiResponse<Void>> approveReservation(
             @PathVariable Long reservationId,
             @RequestParam Long adminId,

@@ -63,7 +63,7 @@ public class EnrollmentCommandService {
 
     // 2. 권한 확인 (본인의 신청 내역인지)
     // (Enrollment -> StudentDetail -> User(userId) 접근 경로가 있다고 가정)
-    Long studentUserId = enrollment.getStudentDetailId().getUser().getUserId();
+    Long studentUserId = enrollment.getStudentDetail().getUser().getUserId();
 
     if (!studentUserId.equals(userId)) {
       throw new BusinessException(ErrorCode.NOT_YOUR_ENROLLMENT);
@@ -79,16 +79,16 @@ public class EnrollmentCommandService {
   /**
    * 장바구니 기반 일괄 신청
    */
-  public List<BulkEnrollmentResult> bulkRegisterFromCart(Long userId) {
+  public List<BulkEnrollmentResult> bulkRegisterFromCart(Long studentId) {
     // 1. 장바구니 조회 (MyBatis)
-    List<Long> courseIdsInCart = cartMapper.findCourseIdsByStudentId(userId);
+    List<Long> courseIdsInCart = cartMapper.findCourseIdsByStudentId(studentId);
 
     if (courseIdsInCart.isEmpty()) {
       throw new BusinessException(ErrorCode.CART_EMPTY);
     }
 
     // 2. 일괄 처리 로직 위임
-    return this.processBulkEnrollment(userId, courseIdsInCart);
+    return this.processBulkEnrollment(studentId, courseIdsInCart);
   }
 
   /**

@@ -12,9 +12,6 @@ import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.repository.EnrollmentMapper;
-import com.mycompany.project.enrollment.repository.EnrollmentRepository;
-import com.mycompany.project.exception.BusinessException;
-import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.schedule.command.domain.aggregate.AcademicYear;
 import com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository;
 import com.mycompany.project.user.command.domain.aggregate.Role;
@@ -121,7 +118,7 @@ public class AttendanceClosureCommandService {
                 );
 
         if (hasUnconfirmed) {
-            throw new BusinessException(ErrorCode.CLOSURE_CANNOT_CLOSE_WITH_UNCONFIRMED);
+            throw new IllegalStateException("확정되지 않은 출결이 있어 마감할 수 없습니다.");
         }
 
         // 7) CONFIRMED인 출결만 CLOSED로 상태 전환
@@ -162,7 +159,7 @@ public class AttendanceClosureCommandService {
                 || request.getScopeType() == null
                 || request.getScopeValue() == null
                 || request.getUserId() == null) {
-            throw new BusinessException(ErrorCode.ATTENDANCE_DATE_OUT_OF_RANGE);
+            throw new IllegalArgumentException("필수 파라미터가 누락되었습니다.");
         }
     }
 
@@ -172,10 +169,10 @@ public class AttendanceClosureCommandService {
      */
     private void ensureAdmin(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         if (user.getRole() != Role.ADMIN) {
-            throw new BusinessException(ErrorCode.CLOSURE_ADMIN_ONLY);
+            throw new IllegalStateException("관리자만 마감 처리할 수 있습니다.");
         }
     }
 
@@ -192,7 +189,7 @@ public class AttendanceClosureCommandService {
         }
 
         AcademicYear academicYear = academicYearRepository.findById(request.getAcademicYearId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACADEMIC_TERM_INFO_MISSING));
+                .orElseThrow(() -> new IllegalArgumentException("학년도/학기 정보가 없습니다."));
 
         return academicYear.getStartDate();
     }
@@ -209,7 +206,7 @@ public class AttendanceClosureCommandService {
         }
 
         AcademicYear academicYear = academicYearRepository.findById(request.getAcademicYearId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACADEMIC_TERM_INFO_MISSING));
+                .orElseThrow(() -> new IllegalArgumentException("학년도/학기 정보가 없습니다."));
 
         return academicYear.getEndDate();
     }
@@ -246,7 +243,7 @@ public class AttendanceClosureCommandService {
 
         // enrollment에서 학생ID만 뽑아서 student_detail 조회용 리스트로 만든다.
         List<Long> studentIds = enrollments.stream()
-                .map(enrollment -> enrollment.getStudentDetailId().getId())
+                .map(enrollment -> enrollment.getStudentDetail().getId())
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -282,7 +279,7 @@ public class AttendanceClosureCommandService {
 
         // 최종: enrollment 중에서 "조건에 맞는 학생"의 enrollmentId만 반환
         return enrollments.stream()
-                .filter(enrollment -> matchedStudentIds.contains(enrollment.getStudentDetailId().getId()))
+                .filter(enrollment -> matchedStudentIds.contains(enrollment.getStudentDetail().getId()))
                 .map(Enrollment::getEnrollmentId)
                 .collect(Collectors.toList());
     }
