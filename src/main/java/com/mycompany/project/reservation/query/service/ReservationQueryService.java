@@ -1,5 +1,7 @@
 package com.mycompany.project.reservation.query.service;
 
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.reservation.query.dto.FacilityDTO;
 import com.mycompany.project.reservation.query.dto.ReservationDTO;
 import com.mycompany.project.reservation.query.mapper.ReservationMapper;
@@ -36,10 +38,11 @@ public class ReservationQueryService {
 
     private void validateTimeRules(LocalTime startTime) {
         if (startTime.getMinute() != 0 || startTime.getSecond() != 0) {
-            throw new IllegalStateException("예약은 1시간 단위(정각)로만 가능합니다.");
+            throw new BusinessException(ErrorCode.INVALID_RESERVATION_TIME);
+
         }
         if (startTime.isBefore(LocalTime.of(6, 0)) || startTime.isAfter(LocalTime.of(20, 0))) {
-            throw new IllegalStateException("예약 가능 시간은 06:00~21:00이며 시작은 20:00까지 가능합니다.");
+          throw new BusinessException(ErrorCode. RESERVATION_TIME_OUT_OF_RANGE);
         }
     }
 }

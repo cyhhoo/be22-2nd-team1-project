@@ -5,6 +5,8 @@ import com.mycompany.project.common.response.ApiResponse;
 import com.mycompany.project.reservation.query.dto.FacilityDTO;
 import com.mycompany.project.reservation.query.dto.ReservationDTO;
 import com.mycompany.project.reservation.query.service.ReservationQueryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,19 +14,19 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-
+@Tag(name = "예약 가능 시설 조회")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/reservation")
+@RequestMapping("/api/v1/reservation")
 public class ReservationQueryController {
 
     private final ReservationQueryService reservationQueryService;
 
     /**
-     * [RES-02] 예약 가능 시설 조회
-     * 예) GET /reservation/available?reservationDate=2026-01-15&startTime=10:00
+     * 예약 가능 시설 조회
      */
-    @GetMapping("/available")
+    @Operation(summary = "예약 가능 시설 조회")
+    @GetMapping("available")
     public ResponseEntity<ApiResponse<List<FacilityDTO>>> availableFacilities(
             @RequestParam LocalDate reservationDate,
             @RequestParam LocalTime startTime
@@ -35,11 +37,10 @@ public class ReservationQueryController {
     }
 
     /**
-     * [RES-05] 나의 예약 조회
-     * 예) GET /reservation/my?studentId=1
-     * 예) GET /reservation/my?studentId=1&status=WAITING
+     * 나의 예약 조회
      */
-    @GetMapping("/my")
+    @Operation(summary = "나의 예약 조회")
+    @GetMapping("my")
     public ResponseEntity<ApiResponse<List<ReservationDTO>>> myReservations(
             @RequestParam Long studentId,
             @RequestParam(required = false) String status
@@ -50,12 +51,10 @@ public class ReservationQueryController {
     }
 
     /**
-     * [RES-08] 관리자 예약 현황 조회
-     * 예) GET /reservation/admin/status?adminId=1
-     * 예) GET /reservation/admin/status?adminId=1&reservationDate=2026-01-15
-     * 예) GET /reservation/admin/status?adminId=1&status=WAITING
+     관리자 예약 현황 조회
      */
-    @GetMapping("/admin/status")
+    @Operation(summary = "관리자 예약 현황 조회")
+    @GetMapping("admin/status")
     public ResponseEntity<ApiResponse<List<ReservationDTO>>> adminStatus(
             @RequestParam Long adminId,
             @RequestParam(required = false) LocalDate reservationDate,

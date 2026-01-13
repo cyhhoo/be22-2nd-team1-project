@@ -1,5 +1,8 @@
-### 예약 신청
-POST http://localhost:8080/reservation
+### =========================
+### 시설 예약
+### =========================
+POST http://localhost:8080/reservations?studentId=1
+Authorization: Basic dGVzdDoxMjM0
 Content-Type: application/json
 
 {
@@ -8,8 +11,10 @@ Content-Type: application/json
   "startTime": "10:00"
 }
 
-### 예약 변경
-PUT http://localhost:8080/reservation/1
+### =========================
+### 시설 예약 변경
+### =========================
+PUT http://localhost:8080/reservations/1?studentId=1
 Content-Type: application/json
 
 {
@@ -17,11 +22,16 @@ Content-Type: application/json
   "startTime": "11:00"
 }
 
-### 예약 취소
-DELETE http://localhost:8080/reservation/1
+### =========================
+### 시설 예약 취소
+### =========================
+DELETE http://localhost:8080/reservations/1?studentId=1
 
-### 예약 승인
-PUT http://localhost:8080/reservation/1/approve
+
+### =========================
+### 시설 예약 승인
+### =========================
+PUT http://localhost:8080/reservations/1/approve?adminId=99
 Content-Type: application/json
 
 {
@@ -29,9 +39,10 @@ Content-Type: application/json
   "rejectionReason": null
 }
 
-
-###  예약 거부
-PUT http://localhost:8080/reservation/1/approve
+### =========================
+### 시설 예약 거부
+### =========================
+PUT http://localhost:8080/reservations/1/approve?adminId=99
 Content-Type: application/json
 
 {
