@@ -1,5 +1,7 @@
 package com.mycompany.project.reservation.command.domain.aggregate;
 
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -53,7 +55,7 @@ public class Reservation {
   /* 취소 */
   public void cancel() {
     if (status == ReservationStatus.APPROVED) {
-      throw new IllegalStateException("승인된 예약은 취소할 수 없습니다.");
+      throw new BusinessException(ErrorCode.RESERVATION_APPROVED_CANNOT_CANCEL);
     }
     this.status = ReservationStatus.CANCELED;
   }
@@ -61,7 +63,7 @@ public class Reservation {
   /* 변경 */
   public void change(LocalDate date, LocalTime startTime) {
     if (status != ReservationStatus.WAITING) {
-      throw new IllegalStateException("대기 상태만 변경 가능합니다.");
+      throw new BusinessException(ErrorCode.RESERVATION_ONLY_WAITING_CAN_CHANGE);
     }
     this.reservationDate = date;
     this.startTime = startTime;
@@ -71,7 +73,7 @@ public class Reservation {
   /* 승인 */
   public void approve() {
     if (status != ReservationStatus.WAITING) {
-      throw new IllegalStateException("이미 처리된 예약입니다.");
+      throw new BusinessException(ErrorCode.RESERVATION_ALREADY_PROCESSED);
     }
     this.status = ReservationStatus.APPROVED;
   }
@@ -79,7 +81,7 @@ public class Reservation {
   /* 거부 */
   public void reject(String reason) {
     if (status != ReservationStatus.WAITING) {
-      throw new IllegalStateException("이미 처리된 예약입니다.");
+      throw new BusinessException(ErrorCode.RESERVATION_ALREADY_PROCESSED);
     }
     this.status = ReservationStatus.REJECTED;
     this.rejectionReason = reason;

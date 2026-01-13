@@ -12,11 +12,11 @@ import java.util.List;
 @Mapper
 public interface ReservationMapper {
 
-    // 예약 가능 시설 조회
-    List<FacilityDTO> selectAvailableFacilities(
-            @Param("reservationDate") LocalDate reservationDate,
-            @Param("startTime") LocalTime startTime
-    );
+  // 예약 가능 시설 조회
+  List<FacilityDTO> selectAvailableFacilities(
+      @Param("reservationDate") LocalDate reservationDate,
+      @Param("startTime") LocalTime startTime
+  );
 
     // 나의 예약 조회
     List<ReservationDTO> selectMyReservations(

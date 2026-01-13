@@ -16,10 +16,13 @@ import java.util.List;
 public class ReservationService {
     private final ReservationMapper reservationMapper;
 
+    //
     public List<FacilityDTO> selectAvailableFacilities(LocalDateTime startTime) {
         return reservationMapper.selectAvailableFacilities(startTime.toLocalDate(), startTime.toLocalTime());
     }
 
+
+    // 나의 예약 조회
     public List<ReservationDTO> selectMyReservations(Long studentId, String status) {
         return reservationMapper.selectMyReservations(studentId, status);
     }
