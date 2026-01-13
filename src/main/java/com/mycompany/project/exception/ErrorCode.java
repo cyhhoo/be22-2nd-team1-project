@@ -101,7 +101,10 @@ public enum ErrorCode {
   RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RES_201", "예약 없음"),
   NOT_RESERVATION_OWNER(HttpStatus.FORBIDDEN, "RES_202", "본인 예약만 취소/변경 가능"),
   RESERVED_TIME_CONFLICT(HttpStatus.CONFLICT, "RES_301", "이미 예약된 시간입니다."),
-  ALREADY_APPROVED_RESERVATION(HttpStatus.CONFLICT, "RES_302", "동일 시간에 이미 승인된 예약이 존재합니다.")
+  ALREADY_APPROVED_RESERVATION(HttpStatus.CONFLICT, "RES_302", "동일 시간에 이미 승인된 예약이 존재합니다."),
+  RESERVATION_APPROVED_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "RES_401","승인된 예약은 취소할 수 없습니다."),
+  RESERVATION_ONLY_WAITING_CAN_CHANGE(HttpStatus.BAD_REQUEST,"RES_402","대기 상태만 변경 가능합니다."),
+  RESERVATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "RES_403", "이미 처리된 예약입니다.");
   ;
 
   private final HttpStatus status;
