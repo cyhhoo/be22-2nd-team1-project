@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -51,9 +52,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status;
 
-    @NotBlank
+    @NotNull
     @Column(nullable = false)
-    private String birthDate;
+    private LocalDate birthDate;
 
     private String authCode; // 인증 코드
 
@@ -100,12 +101,12 @@ public class User extends BaseEntity {
         return this.status == UserStatus.LOCKED;
     }
 
-    public void updateBatchInfo(String name, Role role, String birthDate) {
+    public void updateBatchInfo(String name, Role role, LocalDate birthDate) {
         if (name != null && !name.isEmpty())
             this.name = name;
         if (role != null)
             this.role = role;
-        if (birthDate != null && !birthDate.isEmpty())
+        if (birthDate != null)
             this.birthDate = birthDate;
     }
 

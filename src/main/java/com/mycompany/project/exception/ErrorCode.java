@@ -18,14 +18,13 @@ public enum ErrorCode {
   ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "ACCOUNT_001", "아이디 또는 비밀번호가 일치하지 않습니다."),
   ACCOUNT_INACTIVE(HttpStatus.FORBIDDEN, "ACCOUNT_002", "계정이 비활성화 상태입니다."),
   ACCOUNT_LOCKED(HttpStatus.FORBIDDEN, "ACCOUNT_003", "계정이 잠금되었습니다. 관리자에게 문의하세요."),
-  INVALID_PASSWORD(HttpStatus.UNAUTHORIZED,"ACCOUNT_004" , "아이디 또는 비밀번호가 일치하지 않습니다."),
-  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "ACCOUNT_005", "유효하지 않은 Refresh Token 입니다." ),
-  TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "ACCOUNT_006", "존재하지 않거나 만료된 Token 입니다." ),
-  LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "ACCOUNT_007", "로그인이 필요한 서비스 입니다." ),
-  ALREADY_ACTIVE_ACCOUNT(HttpStatus.BAD_REQUEST,"ACCOUNT_008", "이미 활성화된 계정입니다."),
-  USER_INFO_MISMATCH(HttpStatus.BAD_REQUEST,"ACCOUNT_009", "사용자 정보가 일치하지 않습니다."),
-  INVAID_AUTH_CODE(HttpStatus.UNAUTHORIZED,"ACCOUNT_010", "인증코드가 일치하지 않습니다"),
-  
+  INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "ACCOUNT_004", "아이디 또는 비밀번호가 일치하지 않습니다."),
+  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "ACCOUNT_005", "유효하지 않은 Refresh Token 입니다."),
+  TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "ACCOUNT_006", "존재하지 않거나 만료된 Token 입니다."),
+  LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "ACCOUNT_007", "로그인이 필요한 서비스 입니다."),
+  ALREADY_ACTIVE_ACCOUNT(HttpStatus.BAD_REQUEST, "ACCOUNT_008", "이미 활성화된 계정입니다."),
+  USER_INFO_MISMATCH(HttpStatus.BAD_REQUEST, "ACCOUNT_009", "사용자 정보가 일치하지 않습니다."),
+  INVAID_AUTH_CODE(HttpStatus.UNAUTHORIZED, "ACCOUNT_010", "인증코드가 일치하지 않습니다"),
 
   // Attendance (ATT)
   REQUIRED_PARAMETER_MISSING(HttpStatus.CONFLICT, "ATT_001", "과목ID/수업일/교시/사용자ID는 필수입니다."),
@@ -63,7 +62,8 @@ public enum ErrorCode {
   ATTENDANCE_REQUIRED_PARAMS_MISSING(HttpStatus.BAD_REQUEST, "ATT_033", "과목ID/수업일/교시/사용자ID/출결항목(items)은 필수입니다."),
   ATTENDANCE_ITEM_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "ATT_034", "출결ID, 변경요청 출결코드ID, 요청사유, 요청자ID는 필수입니다."),
   ATTENDANCE_STUDENT_LIST_EMPTY(HttpStatus.BAD_REQUEST, "ATT_035", "정정요청ID, 관리자ID는 필수입니다."),
-  ATTENDANCE_DATE_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "ATT_036", "학년도/학기 /범위타입(scopeType)/범위값(scopeValue)/사용자ID는 필수입니다."),
+  ATTENDANCE_DATE_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "ATT_036",
+      "학년도/학기 /범위타입(scopeType)/범위값(scopeValue)/사용자ID는 필수입니다."),
 
   // Course (COURSE)
   STUDENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COURSE_001", "존재하지 않는 학생입니다."),
@@ -79,7 +79,6 @@ public enum ErrorCode {
   COURSE_NOT_WAITING_APPROVAL(HttpStatus.BAD_REQUEST, "COURSE_011", "승인/반려 권한이 없습니다."),
   STUDENT_REQUIRED_COURSE_CONFLICT(HttpStatus.CONFLICT, "COURSE_012", "해당 학생은 해당 시간에 이미 필수과목이 있어 등록할 수 없습니다."),
   STUDENT_MEMO_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "COURSE_013", "메모 불가능한 학생입니다."),
-
 
   // Enrollment (ENROLL)
   ALREADY_ENROLLED(HttpStatus.BAD_REQUEST, "ENROLL_001", "이미 수강 신청된 과목입니다."),
@@ -105,10 +104,17 @@ public enum ErrorCode {
   NOT_RESERVATION_OWNER(HttpStatus.FORBIDDEN, "RES_202", "본인 예약만 취소/변경 가능"),
   RESERVED_TIME_CONFLICT(HttpStatus.CONFLICT, "RES_301", "이미 예약된 시간입니다."),
   ALREADY_APPROVED_RESERVATION(HttpStatus.CONFLICT, "RES_302", "동일 시간에 이미 승인된 예약이 존재합니다."),
-  RESERVATION_APPROVED_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "RES_401","승인된 예약은 취소할 수 없습니다."),
-  RESERVATION_ONLY_WAITING_CAN_CHANGE(HttpStatus.BAD_REQUEST,"RES_402","대기 상태만 변경 가능합니다."),
-  RESERVATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "RES_403", "이미 처리된 예약입니다.");
-  ;
+  RESERVATION_APPROVED_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "RES_401", "승인된 예약은 취소할 수 없습니다."),
+  RESERVATION_ONLY_WAITING_CAN_CHANGE(HttpStatus.BAD_REQUEST, "RES_402", "대기 상태만 변경 가능합니다."),
+  RESERVATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "RES_403", "이미 처리된 예약입니다."),
+
+  // Subject (SUBJECT)
+  SUBJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "SUBJECT_001", "존재하지 않는 과목입니다."),
+  SUBJECT_ALREADY_EXISTS(HttpStatus.CONFLICT, "SUBJECT_002", "이미 존재하는 과목명입니다."),
+
+  // Schedule (SCHEDULE)
+  SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCHEDULE_001", "존재하지 않는 일정입니다."),
+  SCHEDULE_ACADEMIC_YEAR_NOT_FOUND(HttpStatus.NOT_FOUND, "SCHEDULE_002", "존재하지 않는 학년도입니다.");
 
   private final HttpStatus status;
   private final String code;

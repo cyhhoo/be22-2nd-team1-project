@@ -1,5 +1,7 @@
 package com.mycompany.project.schedule.command.application.service;
 
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.schedule.command.application.dto.AcademicYearDTO;
 import com.mycompany.project.schedule.command.application.dto.ScheduleCreateRequest;
 import com.mycompany.project.schedule.command.domain.aggregate.AcademicSchedule;
@@ -34,7 +36,7 @@ public class ScheduleCommandService {
   @Transactional
   public Long createSchedule(ScheduleCreateRequest request) {
     AcademicYear academicYear = academicYearRepository.findById(request.getAcademicYearId())
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 학년도입니다."));
+        .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_ACADEMIC_YEAR_NOT_FOUND));
 
     AcademicSchedule schedule = AcademicSchedule.builder()
         .academicYear(academicYear)
@@ -52,21 +54,20 @@ public class ScheduleCommandService {
   public void updateSchedule(Long scheduleId, ScheduleCreateRequest request) {
 
     AcademicSchedule schedule = academicScheduleRepository.findById(scheduleId)
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일정 입니다."));
+        .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
 
     schedule.update(
         request.getScheduleDate(),
         request.getScheduleType(),
         request.getContent(),
-        request.getTargetGrade()
-    );
+        request.getTargetGrade());
   }
 
   // 4. 일정 삭제 (Soft Delete)
   @Transactional
   public void deleteSchedule(Long scheduleId) {
     AcademicSchedule schedule = academicScheduleRepository.findById(scheduleId)
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일정입니다."));
+        .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
 
     // Soft Delete: 상태만 변경
     schedule.delete();
