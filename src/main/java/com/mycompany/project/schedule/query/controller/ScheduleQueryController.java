@@ -4,6 +4,8 @@ import com.mycompany.project.common.response.ApiResponse;
 import com.mycompany.project.schedule.query.dto.ScheduleDTO;
 import com.mycompany.project.schedule.query.service.ScheduleQueryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -18,6 +20,7 @@ public class ScheduleQueryController {
 
   // 월별 일정 조회
   @GetMapping("/events/monthly")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ApiResponse<List<ScheduleDTO>>> getMonthlySchedules(
       @RequestParam int year,
       @RequestParam int month) {
@@ -30,6 +33,7 @@ public class ScheduleQueryController {
 
   // 주간 일정 조회
   @GetMapping("/events/weekly")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ApiResponse<List<ScheduleDTO>>> getWeeklySchedules(
       @RequestParam LocalDate startDate,
       @RequestParam LocalDate endDate) {

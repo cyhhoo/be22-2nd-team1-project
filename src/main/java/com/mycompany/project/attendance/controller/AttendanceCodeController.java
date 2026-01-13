@@ -2,7 +2,9 @@ package com.mycompany.project.attendance.controller;
 
 import com.mycompany.project.attendance.dto.response.AttendanceCodeResponse;
 import com.mycompany.project.attendance.service.AttendanceCodeQueryService;
+import com.mycompany.project.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,20 +22,22 @@ public class AttendanceCodeController {
     // 출결 코드(출석/지각/결석 등) "조회(읽기)" 작업을 담당하는 서비스
 
     @GetMapping("/{attendanceCodeId}") // GET /api/attendance/codes/{attendanceCodeId}
-    public AttendanceCodeResponse findById(@PathVariable Long attendanceCodeId) {
+    public ResponseEntity<ApiResponse<AttendanceCodeResponse>> findById(@PathVariable Long attendanceCodeId) {
         // @PathVariable: URL 경로의 {attendanceCodeId} 값을 Long으로 받아온다.
         // 단건 조회 로직은 QueryService에 위임하고 결과를 DTO로 반환한다.
-        return attendanceCodeQueryService.findById(attendanceCodeId);
+        AttendanceCodeResponse data = attendanceCodeQueryService.findById(attendanceCodeId);
+        return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @GetMapping // GET /api/attendance/codes
-    public List<AttendanceCodeResponse> findAll(@RequestParam(required = false) Boolean activeOnly) {
+    public ResponseEntity<ApiResponse<List<AttendanceCodeResponse>>> findAll(@RequestParam(required = false) Boolean activeOnly) {
         // @RequestParam: 쿼리스트링 파라미터를 받는다.
         // required=false: 파라미터가 없어도 요청이 에러가 나지 않는다(null로 들어옴)
         // activeOnly=true면 사용 중인 코드만 반환한다.
         // 예: /api/attendance/codes?activeOnly=true
 
-        return attendanceCodeQueryService.findAll(activeOnly);
+        List<AttendanceCodeResponse> data = attendanceCodeQueryService.findAll(activeOnly);
+        return ResponseEntity.ok(ApiResponse.success(data));
         // 전체 목록 또는 활성 코드만 조회하는 로직을 서비스에 위임하고 리스트를 반환한다.
     }
 }
