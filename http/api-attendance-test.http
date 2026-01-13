@@ -34,6 +34,16 @@
 @adminAccessToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBzY2hvb2xtYXRlLnRlc3QiLCJpYXQiOjE3NjgyMTk2NDMsImV4cCI6MTc2ODIyMTQ0MywiYXV0aCI6IkFETUlOIn0.EEbxxYxvw_WIPilPxLpg4Js4mX4oSFAlMj5g0Lt4wMUGpGXut0kIGmoeOxk8iZsEziJiMrwxq8DXgxuaQdopHg
 @refreshToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBzY2hvb2xtYXRlLnRlc3QiLCJpYXQiOjE3NjgyMTk2NDMsImV4cCI6MTc2ODgyNDQ0M30.15JgSEv-ZuSvuvGVt2lih7_fHV6Fi6VYD3p4ncN5vx9wnNu6mSyMwGb0XlYDFkM-OS1curztNUoLqjDJwQSljQ
 
+# === 학생 계정 ===
+@studentEmail = student@schoolmate.test
+@studentPassword = Password123!
+@studentName = Test Student
+@studentBirthDate = 2008-05-05
+@studentAuthCode = 08-05-05
+@studentRole = STUDENT
+@studentUserId =
+@studentAccessToken =
+
 ############################################################
 # 사전 준비
 # - courseId, academicYearId, enrollmentId, attendanceCodeId는 DB에 존재해야 함
@@ -111,6 +121,41 @@ Content-Type: application/json
 }
 > {% client.global.set("adminAccessToken", response.body.data.accessToken); %}
 > {% client.global.set("refreshToken", response.body.data.refreshToken); %}
+
+### 학생 회원가입
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{studentEmail}}",
+  "password": "{{studentPassword}}",
+  "name": "{{studentName}}",
+  "birthDate": "{{studentBirthDate}}",
+  "role": "{{studentRole}}"
+}
+> {% client.global.set("studentUserId", response.body.data); %}
+
+### 학생 계정 활성화
+POST {{baseUrl}}/api/auth/activate
+Content-Type: application/json
+
+{
+  "email": "{{studentEmail}}",
+  "name": "{{studentName}}",
+  "birthDate": "{{studentBirthDate}}",
+  "authCode": "{{studentAuthCode}}",
+  "newPassword": "{{studentPassword}}"
+}
+
+### 학생 로그인
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{studentEmail}}",
+  "password": "{{studentPassword}}"
+}
+> {% client.global.set("studentAccessToken", response.body.data.accessToken); %}
 
 ############################################################
 # 출결 기능 테스트
