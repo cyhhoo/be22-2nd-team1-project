@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/schedule")
+@RequestMapping("/api/v1/schedule")
 @RequiredArgsConstructor
 public class ScheduleQueryController {
 
@@ -18,23 +18,23 @@ public class ScheduleQueryController {
 
   // 월별 일정 조회
   @GetMapping("/events/monthly")
-  public ApiResponse<List<ScheduleDTO>> getMonthlySchedules(
-          @RequestParam int year,
-          @RequestParam int month) {
+  public ResponseEntity<ApiResponse<List<ScheduleDTO>>> getMonthlySchedules(
+      @RequestParam int year,
+      @RequestParam int month) {
 
-    List<ScheduleDTO> schedules = scheduleQueryService.getMonthlySchedules(year,month);
+    List<ScheduleDTO> schedules = scheduleQueryService.getMonthlySchedules(year, month);
 
-    return ApiResponse.success(schedules);
+    return ResponseEntity.ok(ApiResponse.success(schedules));
 
   }
 
   // 주간 일정 조회
   @GetMapping("/events/weekly")
-  public ApiResponse<List<ScheduleDTO>> getWeeklySchedules(
+  public ResponseEntity<ApiResponse<List<ScheduleDTO>>> getWeeklySchedules(
       @RequestParam LocalDate startDate,
       @RequestParam LocalDate endDate) {
 
     List<ScheduleDTO> schedules = scheduleQueryService.getWeeklySchedules(startDate, endDate);
-    return ApiResponse.success(schedules);
+    return ResponseEntity.ok(ApiResponse.success(schedules));
   }
 }

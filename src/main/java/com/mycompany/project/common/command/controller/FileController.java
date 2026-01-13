@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/common/files")
+@RequestMapping("/api/v1/common/files")
 @RequiredArgsConstructor
 public class FileController {
 
@@ -21,8 +21,8 @@ public class FileController {
 
     @Operation(summary = "파일 업로드", description = "이미지 등 파일을 업로드하고 URL을 반환받습니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<FileResponse> uploadFile(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<ApiResponse<FileResponse>> uploadFile(@RequestPart("file") MultipartFile file) {
         FileResponse fileDto = fileService.uploadFile(file);
-        return ApiResponse.success(fileDto);
+        return ResponseEntity.ok(ApiResponse.success(fileDto));
     }
 }

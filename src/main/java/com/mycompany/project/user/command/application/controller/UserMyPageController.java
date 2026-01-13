@@ -6,7 +6,6 @@ import com.mycompany.project.user.command.application.service.UserMyPageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,22 +13,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/users/mypage")
+@RequestMapping("/api/v1/users/mypage")
 public class UserMyPageController {
 
   private final UserMyPageService userMyPageService;
 
   @PostMapping("/password")
   public ResponseEntity<ApiResponse<Void>> changePassword(
-      @AuthenticationPrincipal UserDetails userDetails,
-      @RequestBody ChangePasswordRequest request ){
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @RequestBody ChangePasswordRequest request) {
 
-    String email = userDetails.getUsername();
+    String email = userDetails.getEmail();
 
-    userMyPageService.changePassword(email,request);
+    userMyPageService.changePassword(email, request);
 
     return ResponseEntity.ok(ApiResponse.success(null));
   }
-
 
 }

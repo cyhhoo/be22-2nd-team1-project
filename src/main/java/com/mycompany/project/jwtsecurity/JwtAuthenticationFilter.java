@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String requestURI = request.getRequestURI();
 
       // INACTIVE면서 계정 활성화 API가 아니라면 차단
-      if ("INACTIVE".equals(status) && !requestURI.startsWith("/api/auth/activate")) {
+      if ("INACTIVE".equals(status) && !requestURI.startsWith("/api/v1/auth/activate")) {
         sendErrorResponse(response);
         return;
       }
