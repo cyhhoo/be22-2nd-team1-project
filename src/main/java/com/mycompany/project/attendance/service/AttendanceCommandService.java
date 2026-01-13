@@ -366,7 +366,7 @@ public class AttendanceCommandService {
 
         // 학생ID만 추출
         List<Long> studentIds = enrollments.stream()
-                .map(enrollment -> enrollment.getStudentDetailId().getId())
+                .map(enrollment -> enrollment.getStudentDetail().getId())
                 .collect(Collectors.toList());
 
         // 담임의 학년/반과 학생들이 완전히 일치하는지 확인
