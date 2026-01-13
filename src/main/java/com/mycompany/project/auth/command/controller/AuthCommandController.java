@@ -5,6 +5,8 @@ import com.mycompany.project.auth.command.dto.UserRegisterRequest;
 import com.mycompany.project.auth.command.service.AuthCommandService; // Refactored dependency
 import com.mycompany.project.auth.query.dto.TokenResponse;
 import com.mycompany.project.common.response.ApiResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

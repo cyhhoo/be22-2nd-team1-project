@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = " 시설 예약 ")
@@ -26,6 +27,7 @@ public class ReservationCommandController {
     /* 시설 예약*/
     @Operation(summary = "시설 예약", description = "ex) reservationId=1, studentId =1")
     @PostMapping
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<ReservationCommandResponse>> createReservation(
             @RequestParam Long studentId,
             @RequestBody @Valid ReservationCreateRequest request
@@ -39,6 +41,8 @@ public class ReservationCommandController {
     /* 시설 예약 취소 */
     @Operation(summary = "시설 예약 취소",description = "ex) reservationId = 1, studentId = 1")
     @DeleteMapping("{reservationId}")
+
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<Void>> cancelReservation(
             @PathVariable Long reservationId,
             @RequestParam Long studentId
@@ -49,6 +53,7 @@ public class ReservationCommandController {
     /* 시설 예약 변경 */
     @Operation(summary = "시설 예약 변경",description = "ex) ")
     @PutMapping("{reservationId}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<Void>> changeReservation(
             @PathVariable Long reservationId,
             @RequestParam Long studentId,
@@ -61,6 +66,7 @@ public class ReservationCommandController {
     /* 시설 예약 승인, 거부 */
     @Operation(summary = "시설 예약 승인, 거부")
     @PutMapping("{reservationId}/approve")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> approveReservation(
             @PathVariable Long reservationId,
             @RequestParam Long adminId,
