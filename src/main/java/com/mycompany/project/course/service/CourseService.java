@@ -7,6 +7,8 @@ import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.repository.EnrollmentRepository;
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
 import com.mycompany.project.user.command.domain.repository.StudentDetailRepository;
 import com.mycompany.project.user.command.domain.repository.TeacherDetailRepository;
@@ -60,7 +62,7 @@ public class CourseService {
     public void createCourse(CourseCreateReqDTO dto) {
         // 1. 유효성 검증
         if (dto.getMaxCapacity() <= 0) {
-            throw new IllegalArgumentException("최대 수강 인원은 1명 이상이어야 합니다.");
+            throw new BusinessException(ErrorCode.COURSE_BAD_REQUEST); // 수강 정원은 0보다 커야 합니다.
         }
 
         // 2. 강좌 엔티티 생성 (Status = PENDING)
@@ -89,7 +91,7 @@ public class CourseService {
                         slotDto.getPeriod());
 
                 if (teacherConflictCount > 0) {
-                    throw new IllegalStateException("해당 시간에 담당 교사의 다른 수업이 존재합니다.");
+                    throw new BusinessException(ErrorCode.INSTRUCTOR_TIMETABLE_CONFLICT); // 해당 시간에 담당 교사의 다른 수업이 존재합니다.
                 }
 
                 // 강의실 중복 검증 (MyBatis)
@@ -100,7 +102,7 @@ public class CourseService {
                         slotDto.getPeriod());
 
                 if (classroomConflictCount > 0) {
-                    throw new IllegalStateException("해당 시간에 강의실이 이미 사용 중입니다.");
+                    throw new BusinessException(ErrorCode.ALREADY_APPROVED_RESERVATION); // 해당 시간에 강의실이 이미 사용 중입니다.
                 }
 
                 // 시간표 엔티티 생성 및 추가
@@ -122,10 +124,10 @@ public class CourseService {
     @Transactional
     public void approveCourse(Long courseId) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND)); // 존재하지 않는 강좌입니다.
 
         if (course.getStatus() != CourseStatus.PENDING) {
-            throw new IllegalStateException("승인 대기 상태의 강좌만 승인할 수 있습니다.");
+            throw new BusinessException(ErrorCode.COURSE_CONDITION_MISMATCH); // 승인 대기 상태의 강좌만 승인할 수 있습니다.
         }
 
         course.update(null, null, null, null, null, null, null, CourseStatus.OPEN);
@@ -140,10 +142,10 @@ public class CourseService {
     @Transactional
     public void refuseCourse(Long courseId, String reason) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND)); // 존재하지 않는 강좌입니다.
 
         if (course.getStatus() != CourseStatus.PENDING) {
-            throw new IllegalStateException("승인 대기 상태의 강좌만 반려할 수 있습니다.");
+            throw new BusinessException(ErrorCode.COURSE_CONDITION_MISMATCH); // 승인 대기 상태의 강좌만 반려할 수 있습니다.
         }
 
         course.setRejectionReason(reason);
@@ -159,7 +161,7 @@ public class CourseService {
     @Transactional
     public void updateCourse(Long courseId, CourseUpdateReqDTO dto) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다. ID: " + courseId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND)); // 존재하지 않는 강좌입니다.
 
         // 엔티티의 update 메서드를 호출하여 변경 감지(Dirty Checking)를 통해 DB 업데이트
         course.update(
@@ -184,7 +186,7 @@ public class CourseService {
     @Transactional
     public Long requestCourseUpdate(Long courseId, CourseUpdateReqDTO dto, String reason) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND)); // 존재하지 않는 강좌입니다.
 
         CourseChangeRequest request = CourseChangeRequest.builder()
                 .course(course)
@@ -204,10 +206,10 @@ public class CourseService {
     @Transactional
     public void approveChangeRequest(Long requestId) {
         CourseChangeRequest request = courseChangeRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_CHANGE_REQUEST_NOT_FOUND)); // 존재하지 않는 요청입니다.
 
         if (request.getRequestStatus() != CourseChangeRequest.RequestStatus.PENDING) {
-            throw new IllegalStateException("대기 상태인 요청만 승인할 수 있습니다.");
+            throw new BusinessException(ErrorCode.COURSE_CONDITION_MISMATCH); // 대기 상태인 요청만 승인할 수 있습니다.
         }
 
         // 요청 데이터로 Course 업데이트 (핵심 데이터만 예시)
@@ -234,10 +236,10 @@ public class CourseService {
     @Transactional
     public void rejectChangeRequest(Long requestId, String reason) {
         CourseChangeRequest request = courseChangeRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_CHANGE_REQUEST_NOT_FOUND)); // 존재하지 않는 요청입니다.
 
         if (request.getRequestStatus() != CourseChangeRequest.RequestStatus.PENDING) {
-            throw new IllegalStateException("대기 상태인 요청만 반려할 수 있습니다.");
+            throw new BusinessException(ErrorCode.COURSE_CONDITION_MISMATCH); // 대기 상태인 요청만 반려할 수 있습니다.
         }
 
         request.reject(reason);
@@ -261,7 +263,7 @@ public class CourseService {
     @Transactional
     public void changeTeacher(Long courseId, Long newTeacherId) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND)); // 존재하지 않는 강좌입니다.
 
         // 1. 유효성 검증: 새 담당 교사의 스케줄 중복 확인
         List<CourseTimeSlot> timeSlots = course.getTimeSlots();
@@ -273,8 +275,7 @@ public class CourseService {
                     slot.getPeriod());
 
             if (conflictCount > 0) {
-                throw new IllegalStateException(
-                        String.format("해당 교사는 %s %d교시에 이미 수업이 있습니다.", slot.getDayOfWeek(), slot.getPeriod()));
+                throw new BusinessException(ErrorCode.INSTRUCTOR_TIMETABLE_CONFLICT); // 해당 교사는 해당 시간에 이미 수업이 있습니다.
             }
         }
 
@@ -299,7 +300,7 @@ public class CourseService {
     @Transactional
     public void enrollStudents(Long courseId, List<Long> studentIds, boolean force) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND)); // 존재하지 않는 강좌입니다.
 
         // 1. 정원 초과 체크 (force=true이면 무시)
         if (!force) {
@@ -307,7 +308,7 @@ public class CourseService {
                     .filter(e -> e.getStatus() == EnrollmentStatus.APPLIED)
                     .count();
             if (currentCount + studentIds.size() > course.getMaxCapacity()) {
-                throw new IllegalStateException("수강 정원이 초과되었습니다.");
+                throw new BusinessException(ErrorCode.COURSE_CAPACITY_FULL); // 수강 정원이 초과되었습니다.
             }
         }
 
@@ -318,7 +319,7 @@ public class CourseService {
             List<Long> missingIds = studentIds.stream()
                     .filter(id -> !foundIds.contains(id))
                     .collect(Collectors.toList());
-            throw new IllegalArgumentException("존재하지 않는 학생 ID가 포함되어 있습니다: " + missingIds);
+            throw new BusinessException(ErrorCode.STUDENT_NOT_FOUND); // 존재하지 않는 학생 ID가 포함되어 있습니다.
         }
 
         // 학생 ID(User ID)로 빠르게 조회하기 위해 Map으로 변환
@@ -347,9 +348,8 @@ public class CourseService {
                     Long existingEnrollmentId = (Long) conflict.get("enrollmentId");
 
                     if (existingType == CourseType.MANDATORY) {
-                        throw new IllegalStateException(String.format(
-                                "학생(ID:%d)은 해당 시간에 이미 필수 과목[%s]이 있어 등록할 수 없습니다.",
-                                studentId, conflict.get("courseName")));
+                        throw new BusinessException(ErrorCode.STUDENT_REQUIRED_COURSE_CONFLICT); // 학생은 해당 시간에 이미 필수 과목이
+                                                                                                 // 있어 등록할 수 없습니다.
                     } else {
                         // 선택 과목이면 자동 취소
                         Enrollment existingEnrollment = enrollmentRepository
@@ -376,7 +376,7 @@ public class CourseService {
     @Transactional
     public void deleteCourse(Long courseId, String reason) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND)); // 존재하지 않는 강좌입니다.
 
         // 1. 강좌 상태 변경 (CANCELED)
         course.changeStatus(CourseStatus.CANCELED);
@@ -385,9 +385,10 @@ public class CourseService {
         List<Enrollment> enrollments = getEnrollmentsByCourseId(courseId);
         for (Enrollment enrollment : enrollments) {
             if (enrollment.getStatus() == EnrollmentStatus.APPLIED) {
-                enrollment.cancel(); // Force cancel via entity not supported
+                // [변경] cancel() -> forceCancel(reason) 호출하여 사유 저장
+                enrollment.forceCancel("강좌 폐강: " + reason);
                 // 환불 로직 호출
-                refundService.processRefund(enrollment.getStudentDetailId().getUser().getUserId(), courseId,
+                refundService.processRefund(enrollment.getStudentDetail().getUser().getUserId(), courseId,
                         "강좌 폐강: " + reason);
             }
         }
@@ -402,39 +403,38 @@ public class CourseService {
     @Transactional
     public void forceCancelStudent(Long courseId, Long studentId, String reason) {
         if (reason == null || reason.trim().isEmpty()) {
-            throw new IllegalArgumentException("취소 사유는 필수 입력 값입니다.");
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE); // 강제 취소 사유는 필수입니다.
         }
 
         Enrollment enrollment = getEnrollmentsByCourseId(courseId)
                 .stream()
-                .filter(e -> e.getStudentDetailId().getUser().getUserId().equals(studentId))
+                .filter(e -> e.getStudentDetail().getUser().getUserId().equals(studentId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("해당 학생의 수강 신청 내역이 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_ENROLLMENT_NOT_FOUND)); // 해당 강좌의 수강생 정보를 찾을 수
+                                                                                                  // 없습니다.
 
-        enrollment.cancel(); // Reason ignored as entity doesn't support it
+        // [변경] forceCancel 호출
+        enrollment.forceCancel(reason);
     }
 
     @Transactional(readOnly = true)
     public StudentDetailResDTO getStudentDetail(Long courseId, Long studentId) {
         Enrollment enrollment = getEnrollmentsByCourseId(courseId)
                 .stream()
-                .filter(e -> e.getStudentDetailId().getUser().getUserId().equals(studentId))
+                .filter(e -> e.getStudentDetail().getUser().getUserId().equals(studentId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("수강생 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_ENROLLMENT_NOT_FOUND)); // 해당 강좌의 수강생 정보를 찾을 수
+                                                                                                  // 없습니다.
 
-        // [NOTE] AttendanceRepository does not currently support
-        // countByEnrollmentIdAndStatus
-        // and using AttendanceStatus enum which may be incorrect.
-        // Stubbing these values to 0 to fix compilation within stricter bounds of
-        // modifying only CourseService.
-        long presentCount = 0;
+        long presentCount = 0; // TODO: 실제 출결 카운트 로직 적용 필요
         long lateCount = 0;
         long absentCount = 0;
 
         return StudentDetailResDTO.builder()
                 .studentId(studentId)
-                .studentName(enrollment.getStudentDetailId().getUser().getName())
-                .memo(null) // Entity does not support memo
+                .studentName(enrollment.getStudentDetail().getUser().getName())
+                // [변경] 실제 메모 조회
+                .memo(enrollment.getMemo())
                 .attendancePresent(presentCount)
                 .attendanceLate(lateCount)
                 .attendanceAbsent(absentCount)
@@ -445,7 +445,14 @@ public class CourseService {
 
     @Transactional
     public void updateStudentMemo(Long courseId, Long studentId, String memo) {
-        throw new UnsupportedOperationException("학생 메모 기능은 현재 지원되지 않습니다. (엔티티 수정 필요)");
+        Enrollment enrollment = getEnrollmentsByCourseId(courseId)
+                .stream()
+                .filter(e -> e.getStudentDetail().getUser().getUserId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_ENROLLMENT_NOT_FOUND)); // 해당 강좌의 수강생 정보를 찾을 수
+                                                                                                  // 없습니다.
+
+        enrollment.updateMemo(memo);
     }
 
     /**
@@ -485,11 +492,12 @@ public class CourseService {
     @Transactional
     public void changeCourseStatus(Long courseId, CourseStatus status) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강좌입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND)); // 존재하지 않는 강좌입니다.
 
         // 유효성 검증: 수동 변경은 OPEN, CLOSED 만 가능하도록 제한
         if (status != CourseStatus.OPEN && status != CourseStatus.CLOSED) {
-            throw new IllegalArgumentException("수동 상태 변경은 개설(OPEN) 또는 마감(CLOSED) 상태로만 가능합니다.");
+            throw new BusinessException(ErrorCode.COURSE_CONDITION_MISMATCH); // 수동 상태 변경은 개설(OPEN) 또는 마감(CLOSED) 상태로만
+                                                                              // 가능합니다.
         }
 
         course.changeStatus(status);
