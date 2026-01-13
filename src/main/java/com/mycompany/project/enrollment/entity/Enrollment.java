@@ -46,11 +46,11 @@ public class Enrollment extends BaseEntity {
 
   @Column(name = "memo", length = 500) // enrollment entity에 memo 컬럼추가 (메모)
   private String memo;
-
   // 호환성 Getter (CourseService 등에서 getStudentDetail() 사용 시 지원)
   public StudentDetail getStudentDetail() {
     return this.studentDetailId;
   }
+
 
   // Setter 대신 메서드로 상태를 변경합니다.
   public void cancel() {
