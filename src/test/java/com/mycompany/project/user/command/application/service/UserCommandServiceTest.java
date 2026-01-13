@@ -1,10 +1,7 @@
 package com.mycompany.project.user.command.application.service;
 
 import com.mycompany.project.schedule.command.domain.aggregate.Subject;
-import com.mycompany.project.user.command.domain.aggregate.AdminDetail;
-import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
-import com.mycompany.project.user.command.domain.aggregate.TeacherDetail;
-import com.mycompany.project.user.command.domain.aggregate.User;
+import com.mycompany.project.user.command.domain.aggregate.*;
 import com.mycompany.project.user.command.domain.repository.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -92,6 +89,6 @@ class UserCommandServiceTest {
     AdminDetail savedAdmin = adminCaptor.getValue();
 
     assertEquals("관리자1", savedAdmin.getUser().getName());
-    assertEquals(AdminDetail.AdminLevel.LEVEL_1, savedAdmin.getLevel()); // 1 -> LEVEL_1 매핑 확인
+    assertEquals(AdminLevel.LEVEL_1, savedAdmin.getLevel()); // 1 -> LEVEL_1 매핑 확인
   }
 }

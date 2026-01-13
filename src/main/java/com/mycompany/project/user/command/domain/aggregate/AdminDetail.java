@@ -23,16 +23,7 @@ public class AdminDetail {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "ENUM('1', '5') DEFAULT '5'")
+    @Column(nullable = false, columnDefinition = "ENUM('LEVEL_1', 'LEVEL_5') DEFAULT 'LEVEL_5'")
     private AdminLevel level; // Enum 필요 (LEVEL_1, LEVEL_5 등)
 
-    public enum AdminLevel {
-        LEVEL_1("1"), LEVEL_5("5");
-
-        private final String value;
-
-        AdminLevel(String value) {
-            this.value = value;
-        }
-    }
 }
