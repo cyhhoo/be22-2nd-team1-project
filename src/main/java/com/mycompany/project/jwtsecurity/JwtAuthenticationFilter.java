@@ -5,6 +5,7 @@ import com.mycompany.project.common.response.ApiResponse;
 import com.mycompany.project.exception.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -51,10 +53,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   // 헤더에서 "Bearer " 뒷부분의 토큰 값만 꺼내오는 메소드
   private String resolveToken(HttpServletRequest request) {
+
+    // 헤더에서 추출
     String bearerToken = request.getHeader("Authorization");
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
       return bearerToken.substring(7);
     }
+
+    // 2. 쿠키에서 추출(헤더에 없을 경우)
+    if (request.getCookies() != null) {
+      return Arrays.stream(request.getCookies())
+          .filter(cookie -> "AccessToken".equals(cookie.getName()))
+          .map(Cookie::getValue)
+          .findFirst()
+          .orElse(null);
+    }
+
     return null;
   }
 
