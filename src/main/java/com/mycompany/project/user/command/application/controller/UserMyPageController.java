@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/users/mypage")
+@RequestMapping("/api/v1/users/mypage")
 public class UserMyPageController {
 
   private final UserMyPageService userMyPageService;
@@ -22,14 +22,13 @@ public class UserMyPageController {
   @PostMapping("/password")
   public ResponseEntity<ApiResponse<Void>> changePassword(
       @AuthenticationPrincipal UserDetails userDetails,
-      @RequestBody ChangePasswordRequest request ){
+      @RequestBody ChangePasswordRequest request) {
 
     String email = userDetails.getUsername();
 
-    userMyPageService.changePassword(email,request);
+    userMyPageService.changePassword(email, request);
 
     return ResponseEntity.ok(ApiResponse.success(null));
   }
-
 
 }

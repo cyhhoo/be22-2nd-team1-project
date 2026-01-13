@@ -85,13 +85,13 @@ public class AuthCommandService {
 
         // 활성화 된 상태로 바로 즉시 토큰 발급
         String accessToken = jwtTokenProvider.createAccessToken(
-            user.getEmail(), user.getRole(), user.getStatus()); // 이제 ACTIVE 상태가 담김
+                user.getUserId(), user.getEmail(), user.getRole(), user.getStatus()); // 이제 ACTIVE 상태가 담김
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
         // DB에 리프레시 토큰 저장 (로그인과 동일한 로직)
         Token tokenEntity = Token.builder()
-            .token(refreshToken)
-            .email(user.getEmail())
-            .build();
+                .token(refreshToken)
+                .email(user.getEmail())
+                .build();
         tokenRepository.save(tokenEntity);
         return new TokenResponse(accessToken, refreshToken);
     }
