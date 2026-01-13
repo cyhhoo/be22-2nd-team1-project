@@ -67,10 +67,15 @@ public enum ErrorCode {
   COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "COURSE_003", "존재하지 않는 강좌입니다."),
   COURSE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "COURSE_004", "요청 내용을 고쳐서 다시 보내주세요."),
   COURSE_CONDITION_MISMATCH(HttpStatus.CONFLICT, "COURSE_005", "입력값은 맞지만, 현재 비즈니스 로직상 처리할 수 없습니다."),
-  TEACHER_NOT_FOUND(HttpStatus.BAD_REQUEST, "COURSE_007", "존재하지 않는 교사입니다."),
-  ACADEMIC_YEAR_NOT_FOUND(HttpStatus.BAD_REQUEST, "COURSE_008", "존재하지 않는 학년입니다."),
-  COURSE_ENROLLMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COURSE_009", "수강 신청 내역이 존재하지 않습니다."),
-  COURSE_CHANGE_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "COURSE_010", "존재하지 않는 변경 요청입니다."),
+  TEACHER_NOT_FOUND(HttpStatus.BAD_REQUEST, "COURSE_006", "존재하지 않는 교사입니다."),
+  ACADEMIC_YEAR_NOT_FOUND(HttpStatus.BAD_REQUEST, "COURSE_007", "존재하지 않는 학년입니다."),
+  COURSE_ENROLLMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COURSE_008", "수강 신청 내역이 존재하지 않습니다."),
+  COURSE_CHANGE_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "COURSE_009", "존재하지 않는 변경 요청입니다."),
+  INSTRUCTOR_TIMETABLE_CONFLICT(HttpStatus.CONFLICT, "COURSE_010", "해당 강사의 다른 수업이 존재합니다."),
+  COURSE_NOT_WAITING_APPROVAL(HttpStatus.BAD_REQUEST, "COURSE_011", "승인/반려 권한이 없습니다."),
+  STUDENT_REQUIRED_COURSE_CONFLICT(HttpStatus.CONFLICT, "COURSE_012", "해당 학생은 해당 시간에 이미 필수과목이 있어 등록할 수 없습니다."),
+  STUDENT_MEMO_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "COURSE_013", "메모 불가능한 학생입니다."),
+
 
   // Enrollment (ENROLL)
   ALREADY_ENROLLED(HttpStatus.BAD_REQUEST, "ENROLL_001", "이미 수강 신청된 과목입니다."),
