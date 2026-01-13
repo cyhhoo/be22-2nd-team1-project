@@ -83,12 +83,12 @@ public class AttendanceController {
 
     @Operation(
             summary = "출결 확정",
-            description = "담임/책임교사가 출결을 확정합니다."
+            description = "담임 교사가 출결을 확정합니다."
     )
     @PostMapping("/confirmations") // POST /api/v1/attendance/confirmations
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<ApiResponse<Void>> confirmAttendance(@RequestBody AttendanceConfirmRequest request) {
-        // 확정은 "담임" 또는 정책상 허용된 권한만 가능해야 한다.
+        // 확정은 담임 교사만 가능해야 한다.
         // 또, 미입력 출결(해당 날짜/교시에 attendance가 없는 학생)이 있으면 확정이 막혀야 한다.
         attendanceCommandService.confirmAttendances(request);
         return ResponseEntity.ok(ApiResponse.success(null));

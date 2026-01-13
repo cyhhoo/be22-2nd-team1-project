@@ -222,7 +222,7 @@ public class AttendanceCommandService {
 
     /**
      * 출결 확정(CONFIRMED)
-     * - 담당교사가 아닌 경우라도 "담임"이면 확정 가능
+     * - 담임만 가능
      * - 해당 날짜/교시에 미입력 출결이 있으면 확정 불가
      */
     @Transactional
@@ -236,8 +236,7 @@ public class AttendanceCommandService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND));
 
         // 권한 체크:
-        // 1) 과목 담당교사면 OK
-        // 2) 아니면 담임(학년/반 일치)인지 확인
+        // 2) 담임(학년/반 일치)인지 확인
         ensureConfirmAuthority(request.getUserId(), course);
 
         // 강좌에 속한 학생 목록(APPLIED) 조회
@@ -340,17 +339,11 @@ public class AttendanceCommandService {
 
     /**
      * 확정 권한 체크
-     * - 담당교사면 바로 통과
-     * - 아니면 담임인지 확인(학년/반 일치)
+     * - 담임인지 확인(학년/반 일치)
      */
     private void ensureConfirmAuthority(Long userId, Course course) {
 
-        // 담당교사면 확정 가능
-        if (Objects.equals(course.getTeacherDetail().getId(), userId)) {
-            return;
-        }
-
-        // 담당교사가 아니라면 담임 권한(학년/반)이 있어야 함
+        // 담임 권한(학년/반)이 있어야 함
         TeacherDetail teacherDetail = teacherDetailRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.HOMEROOM_PERMISSION_REQUIRED));
 
