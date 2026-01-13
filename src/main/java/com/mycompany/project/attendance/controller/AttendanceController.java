@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;                                          
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;                      // GET 요청 매핑
 import org.springframework.web.bind.annotation.ModelAttribute;                  // 쿼리스트링 → DTO 바인딩
+import org.springframework.web.bind.annotation.PatchMapping;                    // PATCH 요청 매핑
 import org.springframework.web.bind.annotation.PathVariable;                    // URL 경로 변수 바인딩
 import org.springframework.web.bind.annotation.PostMapping;                     // POST 요청 매핑
 import org.springframework.web.bind.annotation.RequestBody;                     // JSON 바디 → DTO 바인딩
@@ -51,7 +52,7 @@ public class AttendanceController {
             summary = "출석부 자동 생성 (조회 겸 생성)",
             description = "특정 강좌의 해당 날짜/교시 출석 데이터를 조회하거나 없으면 자동 생성합니다."
     )
-    @PostMapping("/generate") // POST /api/attendance/generate
+    @PostMapping // POST /api/attendance
     public ResponseEntity<ApiResponse<List<AttendanceListResponse>>> generateAttendanceSheet(
             @RequestBody AttendanceCreateRequest request
     ) {
@@ -67,7 +68,7 @@ public class AttendanceController {
             summary = "출결 저장(등록/수정)",
             description = "교사가 출결 정보를 저장하거나 수정합니다."
     )
-    @PostMapping("/save") // POST /api/attendance/save
+    @PatchMapping // PATCH /api/attendance
     public ResponseEntity<ApiResponse<Void>> saveAttendance(@RequestBody AttendanceUpdateRequest request) {
         // request.items에 여러 학생(enrollment) 출결이 들어올 수 있다.
         // 중요한 규칙:
@@ -81,7 +82,7 @@ public class AttendanceController {
             summary = "출결 확정",
             description = "담임/책임교사가 출결을 확정합니다."
     )
-    @PostMapping("/confirm") // POST /api/attendance/confirm
+    @PostMapping("/confirmations") // POST /api/attendance/confirmations
     public ResponseEntity<ApiResponse<Void>> confirmAttendance(@RequestBody AttendanceConfirmRequest request) {
         // 확정은 "담임" 또는 정책상 허용된 권한만 가능해야 한다.
         // 또, 미입력 출결(해당 날짜/교시에 attendance가 없는 학생)이 있으면 확정이 막혀야 한다.

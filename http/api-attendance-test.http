@@ -83,7 +83,7 @@ Content-Type: application/json
 }
 
 ### 출결 자동 생성 (인증 필요)
-POST {{baseUrl}}/api/attendance/generate
+POST {{baseUrl}}/api/attendance
 Authorization: Bearer {{teacherAccessToken}}
 Content-Type: application/json
 
@@ -95,7 +95,7 @@ Content-Type: application/json
 }
 
 ### 출결 저장 (임시로 인증 없이 허용됨)
-POST {{baseUrl}}/api/attendance/save
+PATCH {{baseUrl}}/api/attendance
 Content-Type: application/json
 
   {
@@ -113,7 +113,7 @@ Content-Type: application/json
 GET {{baseUrl}}/api/attendance/codes?activeOnly=true
 
 ### 출결 확정 (인증 필요)
-POST {{baseUrl}}/api/attendance/confirm
+POST {{baseUrl}}/api/attendance/confirmations
 Authorization: Bearer {{teacherAccessToken}}
 Content-Type: application/json
 
@@ -150,12 +150,11 @@ Content-Type: application/json
   }
 
 ### 출결 정정 승인 (인증 필요)
-POST {{baseUrl}}/api/attendance/corrections/decide
+PATCH {{baseUrl}}/api/attendance/corrections/1
 Authorization: Bearer {{adminAccessToken}}
 Content-Type: application/json
 
   {
-    "requestId": 1,
     "approved": true,
     "adminId": {{adminUserId}}
   }
