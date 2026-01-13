@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
 @Tag(name = "예약 가능 시설 조회")
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class ReservationQueryController {
     /**
      * 예약 가능 시설 조회
      */
-    @Operation(summary = "예약 가능 시설 조회")
+    @Operation(summary = "예약 가능 시설 조회", description = " ex) reservationDat = 2024-02-05, startTime = 2024-02-05T14:00:00")
     @GetMapping("available")
     public ResponseEntity<ApiResponse<List<FacilityDTO>>> availableFacilities(
             @RequestParam LocalDate reservationDate,
@@ -39,7 +40,7 @@ public class ReservationQueryController {
     /**
      * 나의 예약 조회
      */
-    @Operation(summary = "나의 예약 조회")
+    @Operation(summary = "나의 예약 조회" ,description = "ex) studentId = 1, status = APPROVE")
     @GetMapping("my")
     public ResponseEntity<ApiResponse<List<ReservationDTO>>> myReservations(
             @RequestParam Long studentId,
@@ -53,7 +54,7 @@ public class ReservationQueryController {
     /**
      관리자 예약 현황 조회
      */
-    @Operation(summary = "관리자 예약 현황 조회")
+    @Operation(summary = "관리자 예약 현황 조회", description = "ex) adminId=1, reservationDate=2024-02-05T14:00:00")
     @GetMapping("admin/status")
     public ResponseEntity<ApiResponse<List<ReservationDTO>>> adminStatus(
             @RequestParam Long adminId,

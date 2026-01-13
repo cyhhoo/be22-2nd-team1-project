@@ -24,7 +24,7 @@ public class ReservationCommandController {
     private Long mockStudent() { return 1L; }
 
     /* 시설 예약*/
-    @Operation(summary = "시설 예약")
+    @Operation(summary = "시설 예약", description = "ex) reservationId=1, studentId =1")
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationCommandResponse>> createReservation(
             @RequestParam Long studentId,
@@ -37,7 +37,7 @@ public class ReservationCommandController {
 
 
     /* 시설 예약 취소 */
-    @Operation(summary = "시설 예약 취소")
+    @Operation(summary = "시설 예약 취소",description = "ex) reservationId = 1, studentId = 1")
     @DeleteMapping("{reservationId}")
     public ResponseEntity<ApiResponse<Void>> cancelReservation(
             @PathVariable Long reservationId,
@@ -47,7 +47,7 @@ public class ReservationCommandController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
     /* 시설 예약 변경 */
-    @Operation(summary = "시설 예약 변경")
+    @Operation(summary = "시설 예약 변경",description = "ex) ")
     @PutMapping("{reservationId}")
     public ResponseEntity<ApiResponse<Void>> changeReservation(
             @PathVariable Long reservationId,
