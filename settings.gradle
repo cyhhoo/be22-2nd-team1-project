@@ -1,1 +1,13 @@
 rootProject.name = 'be22-2nd-team1-project'
+
+include 'common'
+include 'discovery-service'
+include 'config-service'
+include 'gateway-service'
+include 'auth-service'
+include 'user-service'
+include 'schedule-service'
+include 'enrollment-service'
+include 'course-service'
+include 'attendance-service'
+include 'reservation-service'
