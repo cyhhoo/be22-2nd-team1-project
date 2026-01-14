@@ -1,0 +1,15 @@
+server:
+  port: 8761
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    wait-time-in-ms-when-sync-empty: 0
+
+# Spring Boot 3.5.9 호환성 검사 비활성화
+spring:
+  cloud:
+    compatibility-verifier:
+      enabled: false

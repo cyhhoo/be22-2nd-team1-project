@@ -1,0 +1,9 @@
+dependencies {
+    implementation(project(':common')) {
+        // Gateway는 WebFlux 기반이므로 MVC 의존성 제거
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
+    }
+    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+}

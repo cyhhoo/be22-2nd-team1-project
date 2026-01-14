@@ -1,0 +1,83 @@
+### 0. 관리자 로그인
+POST http://localhost:8000/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@test.com",
+  "password": "admin1234"
+}
+
+> {%
+    client.global.set("admin_access_token", response.body.data.accessToken);
+    client.global.set("admin_refresh_token", response.body.data.refreshToken);
+%}
+
+### 1. 회원가입 (User Service)
+# 학생은 초기 등록 시 학년, 반, 번호 정보가 필수입니다.
+POST http://localhost:8000/user/register
+Content-Type: application/json
+Authorization: Bearer {{admin_access_token}}
+
+{
+  "email": "test5@student.com",
+  "password": "password123",
+  "name": "테스터",
+  "role": "STUDENT",
+  "birthDate": "2000-01-01",
+  "studentDetail": {
+    "grade": 1,
+    "classNo": "1",
+    "studentNo": 10
+  }
+}
+
+> {%
+    client.global.set("email", "test@student.com");
+    client.global.set("name", "테스터");
+    client.global.set("birthDate", "2000-01-01");
+    client.global.set("authCode", "000101"); // 2000-01-01 -> 000101
+%}
+
+### 2. 계정 활성화 (Auth Service)
+# 초기 등록 상태(INACTIVE)에서 활성화(ACTIVE)로 변경합니다.
+POST http://localhost:8000/auth/activate
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "name": "{{name}}",
+  "birthDate": "{{birthDate}}",
+  "authCode": "{{authCode}}",
+  "newPassword": "password1234!"
+}
+
+> {%
+    client.global.set("password", "password1234!");
+%}
+
+### 3. 로그인 (Auth Service)
+# 활성화된 계정으로 로그인을 시도합니다.
+POST http://localhost:8000/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.global.set("access_token", response.body.data.accessToken);
+    client.global.set("refresh_token", response.body.data.refreshToken);
+%}
+
+### 4. 내 정보 조회 (Gateway + User Service)
+GET http://localhost:8000/user/me
+Authorization: Bearer {{access_token}}
+
+### 5. 로그아웃 (Auth Service)
+POST http://localhost:8000/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refresh_token}}"
+}
