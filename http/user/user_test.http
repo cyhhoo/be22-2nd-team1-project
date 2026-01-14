@@ -1,0 +1,58 @@
+### Global Variables
+@host = http://localhost:8000
+
+### 1-1. 회원가입 (학생)
+POST {{host}}/user/register
+Content-Type: application/json
+Authorization: Bearer {{admin_access_token}}
+
+{
+  "email": "student_new@test.com",
+  "password": "password",
+  "name": "새학생",
+  "role": "STUDENT",
+  "birthDate": "2008-01-01",
+  "studentDetail": {
+    "grade": 1,
+    "classNo": "1",
+    "studentNo": 25
+  }
+}
+
+### 1-2. 회원가입 (교사)
+POST {{host}}/user/register
+Content-Type: application/json
+Authorization: Bearer {{admin_access_token}}
+
+{
+  "email": "teacher_new@test.com",
+  "password": "password",
+  "name": "새교사",
+  "role": "TEACHER",
+  "birthDate": "1985-05-05",
+  "teacherDetail": {
+    "subject": "MATH",
+    "homeroomGrade": 1,
+    "homeroomClass": 2
+  }
+}
+
+### 2. 내 정보 조회 (로그인 필요)
+GET {{host}}/user/me
+Content-Type: application/json
+Authorization: Bearer {{student_access_token}}
+
+### 3. 비밀번호 변경 (이력 저장 테스트)
+PUT {{host}}/user/password
+Content-Type: application/json
+Authorization: Bearer {{student_access_token}}
+
+{
+  "currentPassword": "password",
+  "newPassword": "newpassword123!"
+}
+
+### 4. 사용자 검색 (학생 - 관리자/교사용)
+GET {{host}}/user/students?grade=1&classNo=1
+Content-Type: application/json
+Authorization: Bearer {{teacher_access_token}}

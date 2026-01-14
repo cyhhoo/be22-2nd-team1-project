@@ -1,0 +1,25 @@
+### Global Variables
+@host = http://localhost:8080
+
+### 1. 강좌 개설 (교사)
+POST {{host}}/api/v1/courses
+Content-Type: application/json
+Authorization: Bearer {{access_token_teacher}}
+
+{
+  "subjectId": {{subject_id}},
+  "courseName": "재밌는 고급수학",
+  "scheduleDescription": "월/수 1교시",
+  "maxCapacity": 30,
+  "minCapacity": 5,
+  "credit": 3
+}
+
+> {%
+  client.global.set("course_id", response.body.data.id);
+%}
+
+### 2. 강좌 목록 조회 (학생/교사)
+GET {{host}}/api/v1/courses
+Content-Type: application/json
+Authorization: Bearer {{access_token_student}}
