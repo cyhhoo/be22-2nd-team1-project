@@ -1,0 +1,16 @@
+# 프로덕션 환경 민감 정보 예제
+# 이 파일을 복사해서 application-prd.yml 생성 후 실제 값으로 변경하세요
+
+spring:
+  datasource:
+    url: jdbc:mariadb://PRODUCTION_DB_HOST:3306/schoolmate_prod
+    username: ${DB_USERNAME}  # 환경 변수로 주입
+    password: ${DB_PASSWORD}  # 환경 변수로 주입
+
+jwt:
+  secret: ${JWT_SECRET}  # 환경 변수로 주입 (보안 강화)
+
+# 프로덕션 환경 변수 설정 예시:
+# export DB_USERNAME=prod_user
+# export DB_PASSWORD=strong_password_here
+# export JWT_SECRET=very_long_and_secure_jwt_secret_key
