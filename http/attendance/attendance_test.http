@@ -1,0 +1,42 @@
+### Global Variables
+@host = http://localhost:8080
+
+### 1. 출석 코드 생성 (교사) - *수업이 있어야 함*
+POST {{host}}/api/v1/attendance/codes
+Content-Type: application/json
+Authorization: Bearer {{access_token_teacher}}
+
+{
+  "courseId": {{course_id}},
+  "validMinutes": 10
+}
+
+> {%
+  client.global.set("attendance_code", response.body.data.code);
+%}
+
+### 2. 출석 체크 (학생)
+POST {{host}}/api/v1/attendance/check
+Content-Type: application/json
+Authorization: Bearer {{access_token_student}}
+
+{
+  "courseId": {{course_id}},
+  "authCode": "{{attendance_code}}"
+}
+
+### 3. 출석 정정 요청 (학생 -> 교사)
+POST {{host}}/api/v1/attendance/corrections
+Content-Type: application/json
+Authorization: Bearer {{access_token_student}}
+
+{
+  "enrollmentId": 1, 
+  "attendanceDate": "2026-04-01",
+  "reason": "병원 진료"
+}
+
+### 4. 출석 정정 승인 (교사)
+POST {{host}}/api/v1/attendance/corrections/1/approve
+Content-Type: application/json
+Authorization: Bearer {{access_token_teacher}}

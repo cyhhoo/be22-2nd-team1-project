@@ -1,0 +1,141 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: gateway-service
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      routes:
+        # Auth Service
+        - id: auth-service
+          uri: lb://SWCAMP-AUTH-SERVICE
+          predicates:
+            - Path=/auth/**, /auth
+          filters:
+            - RewritePath=/auth(?<segment>.*), /api/v1/auth${segment}
+        
+        # User Service
+        - id: user-service
+          uri: lb://SWCAMP-USER-SERVICE
+          predicates:
+            - Path=/user/**, /user
+          filters:
+            - JwtAuthentication
+            - RewritePath=/user(?<segment>.*), /api/v1/users${segment}
+        
+        # Schedule Service
+        - id: schedule-service
+          uri: lb://SWCAMP-SCHEDULE-SERVICE
+          predicates:
+            - Path=/schedule/**, /schedule, /subjects/**, /subjects
+          filters:
+            - JwtAuthentication
+            - RewritePath=/(?<segment>.*), /api/v1/${segment}
+        
+        # Enrollment Service
+        - id: enrollment-service
+          uri: lb://SWCAMP-ENROLLMENT-SERVICE
+          predicates:
+            - Path=/enrollments/**, /enrollments
+          filters:
+            - JwtAuthentication
+            - RewritePath=/enrollments(?<segment>.*), /api/v1/enrollments${segment}
+        
+        # Course Service
+        - id: course-service
+          uri: lb://SWCAMP-COURSE-SERVICE
+          predicates:
+            - Path=/courses/**, /courses
+          filters:
+            - JwtAuthentication
+            - RewritePath=/courses(?<segment>.*), /api/v1/courses${segment}
+
+        # Attendance Service
+        - id: attendance-service
+          uri: lb://SWCAMP-ATTENDANCE-SERVICE
+          predicates:
+            - Path=/attendance/**, /attendance
+          filters:
+            - JwtAuthentication
+            - RewritePath=/attendance(?<segment>.*), /api/v1/attendance${segment}
+        
+        # Reservation Service
+        - id: reservation-service
+          uri: lb://SWCAMP-RESERVATION-SERVICE
+          predicates:
+            - Path=/reservation/**, /reservation
+          filters:
+            - JwtAuthentication
+            - RewritePath=/reservation(?<segment>.*), /api/v1/reservation${segment}
+
+        # --- Swagger API Docs Routes ---
+        - id: openapi-auth
+          uri: lb://SWCAMP-AUTH-SERVICE
+          predicates:
+            - Path=/v3/api-docs/auth
+          filters:
+            - RewritePath=/v3/api-docs/auth, /v3/api-docs
+
+        - id: openapi-user
+          uri: lb://SWCAMP-USER-SERVICE
+          predicates:
+            - Path=/v3/api-docs/user
+          filters:
+            - RewritePath=/v3/api-docs/user, /v3/api-docs
+
+        - id: openapi-schedule
+          uri: lb://SWCAMP-SCHEDULE-SERVICE
+          predicates:
+            - Path=/v3/api-docs/schedule
+          filters:
+            - RewritePath=/v3/api-docs/schedule, /v3/api-docs
+
+        - id: openapi-enrollment
+          uri: lb://SWCAMP-ENROLLMENT-SERVICE
+          predicates:
+            - Path=/v3/api-docs/enrollment
+          filters:
+            - RewritePath=/v3/api-docs/enrollment, /v3/api-docs
+
+        - id: openapi-course
+          uri: lb://SWCAMP-COURSE-SERVICE
+          predicates:
+            - Path=/v3/api-docs/course
+          filters:
+            - RewritePath=/v3/api-docs/course, /v3/api-docs
+
+        - id: openapi-attendance
+          uri: lb://SWCAMP-ATTENDANCE-SERVICE
+          predicates:
+            - Path=/v3/api-docs/attendance
+          filters:
+            - RewritePath=/v3/api-docs/attendance, /v3/api-docs
+
+        - id: openapi-reservation
+          uri: lb://SWCAMP-RESERVATION-SERVICE
+          predicates:
+            - Path=/v3/api-docs/reservation
+          filters:
+            - RewritePath=/v3/api-docs/reservation, /v3/api-docs
+
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: Auth Service
+        url: /v3/api-docs/auth
+      - name: User Service
+        url: /v3/api-docs/user
+      - name: Schedule Service
+        url: /v3/api-docs/schedule
+      - name: Enrollment Service
+        url: /v3/api-docs/enrollment
+      - name: Course Service
+        url: /v3/api-docs/course
+      - name: Attendance Service
+        url: /v3/api-docs/attendance
+      - name: Reservation Service
+        url: /v3/api-docs/reservation
