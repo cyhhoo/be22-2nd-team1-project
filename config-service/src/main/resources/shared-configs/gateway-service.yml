@@ -39,10 +39,10 @@ spring:
         - id: enrollment-service
           uri: lb://SWCAMP-ENROLLMENT-SERVICE
           predicates:
-            - Path=/enrollments/**, /enrollments
+            - Path=/enrollments/**, /enrollments, /carts/**, /carts
           filters:
             - JwtAuthentication
-            - RewritePath=/enrollments(?<segment>.*), /api/v1/enrollments${segment}
+            - RewritePath=/(?<segment>.*), /api/v1/${segment}
         
         # Course Service
         - id: course-service
