@@ -1,0 +1,11 @@
+# 개발 환경 민감 정보 (Git에 올라가면 안 됨!)
+# .gitignore에 추가 필요: *-dev.yml
+
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/schoolmate
+    username: swcamp
+    password: swcamp
+
+jwt:
+  secret: your-very-long-secret-key-that-should-be-at-least-256-bits-for-hs256-algorithm-make-sure-this-is-secure-dev-environment

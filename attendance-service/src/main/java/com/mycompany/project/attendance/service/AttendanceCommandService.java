@@ -6,21 +6,20 @@ import com.mycompany.project.attendance.dto.request.AttendanceSearchRequest;
 import com.mycompany.project.attendance.dto.request.AttendanceUpdateItemRequest;
 import com.mycompany.project.attendance.dto.request.AttendanceUpdateRequest;
 import com.mycompany.project.attendance.dto.response.AttendanceListResponse;
+import com.mycompany.project.attendance.client.CourseClient;
+import com.mycompany.project.attendance.client.EnrollmentClient;
+import com.mycompany.project.attendance.client.UserClient;
+import com.mycompany.project.attendance.client.dto.InternalCourseResponse;
+import com.mycompany.project.attendance.client.dto.InternalEnrollmentResponse;
+import com.mycompany.project.attendance.client.dto.InternalTeacherResponse;
 import com.mycompany.project.attendance.entity.Attendance;
 import com.mycompany.project.attendance.entity.AttendanceCode;
 import com.mycompany.project.attendance.entity.enums.AttendanceState;
 import com.mycompany.project.attendance.repository.AttendanceCodeRepository;
 import com.mycompany.project.attendance.repository.AttendanceRepository;
-import com.mycompany.project.course.entity.Course;
-import com.mycompany.project.course.repository.CourseRepository;
-import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
-import com.mycompany.project.enrollment.repository.EnrollmentRepository;
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
-import com.mycompany.project.user.command.domain.aggregate.TeacherDetail;
-import com.mycompany.project.user.command.domain.repository.StudentDetailRepository;
-import com.mycompany.project.user.command.domain.repository.TeacherDetailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,20 +46,13 @@ public class AttendanceCommandService {
     // 출결 코드 조회(JPA) - 기본코드(PRESENT) 찾거나, 활성코드인지 검증할 때 사용
     private final AttendanceCodeRepository attendanceCodeRepository;
 
-    // 수강신청 조회(JPA) - 강좌에 등록된 학생 목록 뽑는 용도
-    private final EnrollmentRepository enrollmentRepository;
-
-    // 강좌 조회(JPA) - 담당교사/강좌 존재 여부 확인
-    private final CourseRepository courseRepository;
+    // External Service Clients (Feign)
+    private final EnrollmentClient enrollmentClient;
+    private final CourseClient courseClient;
+    private final UserClient userClient;
 
     // 조회는 MyBatis로 별도 서비스(읽기 모델)
     private final AttendanceQueryService attendanceQueryService;
-
-    // 담임 여부(학년/반) 확인용
-    private final TeacherDetailRepository teacherDetailRepository;
-
-    // 학생의 학년/반 확인용
-    private final StudentDetailRepository studentDetailRepository;
 
     /**
      * 출석부 자동 생성(없으면 생성 + 있으면 그대로 조회)
@@ -74,8 +66,10 @@ public class AttendanceCommandService {
         validateGenerateRequest(request);
 
         // 강좌 존재 확인
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND));
+        InternalCourseResponse course = courseClient.getInternalCourseInfo(request.getCourseId());
+        if (course == null) {
+            throw new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND);
+        }
 
         // 권한 체크: 과목 담당 교사만 생성 가능
         ensureCourseTeacher(request.getUserId(), course);
@@ -85,8 +79,8 @@ public class AttendanceCommandService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.DEFAULT_ATTENDANCE_CODE_NOT_FOUND));
 
         // 해당 강좌에 신청된 학생 목록(APPLIED) 조회
-        List<Enrollment> enrollments = enrollmentRepository.findByCourse_CourseIdAndStatus(
-                request.getCourseId(), ENROLLMENT_STATUS_APPLIED);
+        List<InternalEnrollmentResponse> enrollments = enrollmentClient.getInternalEnrollments(
+                request.getCourseId(), ENROLLMENT_STATUS_APPLIED.name());
         if (enrollments.isEmpty()) {
             // 수강신청이 없으면 생성할 출결도 없음
             return List.of();
@@ -96,7 +90,7 @@ public class AttendanceCommandService {
         List<Attendance> toSave = new ArrayList<>();
         byte period = request.getPeriod().byteValue();
 
-        for (Enrollment enrollment : enrollments) {
+        for (InternalEnrollmentResponse enrollment : enrollments) {
 
             // (enrollmentId + 날짜 + 교시) 기준으로 출결이 이미 있는지 확인
             Optional<Attendance> existing = attendanceRepository.findByEnrollmentIdAndClassDateAndPeriod(
@@ -144,18 +138,20 @@ public class AttendanceCommandService {
         validateSaveRequest(request);
 
         // 강좌 존재 확인
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND));
+        InternalCourseResponse course = courseClient.getInternalCourseInfo(request.getCourseId());
+        if (course == null) {
+            throw new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND);
+        }
 
         // 권한 체크: 과목 담당 교사만 저장 가능
         ensureCourseTeacher(request.getUserId(), course);
 
         // 과목에 등록된 수강신청 목록을 가져와서 "요청 enrollmentId가 이 강좌 소속인지" 검증한다.
-        List<Enrollment> enrollments = enrollmentRepository.findByCourse_CourseIdAndStatus(
-                request.getCourseId(), ENROLLMENT_STATUS_APPLIED);
+        List<InternalEnrollmentResponse> enrollments = enrollmentClient.getInternalEnrollments(
+                request.getCourseId(), ENROLLMENT_STATUS_APPLIED.name());
 
         List<Long> enrollmentIds = enrollments.stream()
-                .map(Enrollment::getEnrollmentId)
+                .map(InternalEnrollmentResponse::getEnrollmentId)
                 .collect(Collectors.toList());
 
         byte period = request.getPeriod().byteValue();
@@ -232,16 +228,18 @@ public class AttendanceCommandService {
         validateConfirmRequest(request);
 
         // 강좌 존재 확인
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND));
+        InternalCourseResponse course = courseClient.getInternalCourseInfo(request.getCourseId());
+        if (course == null) {
+            throw new BusinessException(ErrorCode.ATT_COURSE_NOT_FOUND);
+        }
 
         // 권한 체크:
         // 2) 담임(학년/반 일치)인지 확인
         ensureConfirmAuthority(request.getUserId(), course);
 
         // 강좌에 속한 학생 목록(APPLIED) 조회
-        List<Enrollment> enrollments = enrollmentRepository.findByCourse_CourseIdAndStatus(
-                request.getCourseId(), ENROLLMENT_STATUS_APPLIED);
+        List<InternalEnrollmentResponse> enrollments = enrollmentClient.getInternalEnrollments(
+                request.getCourseId(), ENROLLMENT_STATUS_APPLIED.name());
 
         if (enrollments.isEmpty()) {
             throw new BusinessException(ErrorCode.ATTENDANCE_NOTHING_TO_CONFIRM);
@@ -249,7 +247,7 @@ public class AttendanceCommandService {
 
         // enrollmentId 목록 추출
         List<Long> enrollmentIds = enrollments.stream()
-                .map(Enrollment::getEnrollmentId)
+                .map(InternalEnrollmentResponse::getEnrollmentId)
                 .collect(Collectors.toList());
 
         // 미입력 출결 체크:
@@ -331,8 +329,8 @@ public class AttendanceCommandService {
      * 과목 담당 교사 권한 체크
      * - 강좌에 저장된 담당교사(teacherDetailId)가 요청 userId와 같아야 한다.
      */
-    private void ensureCourseTeacher(Long userId, Course course) {
-        if (!Objects.equals(course.getTeacherDetail().getId(), userId)) {
+    private void ensureCourseTeacher(Long userId, InternalCourseResponse course) {
+        if (!Objects.equals(course.getTeacherDetailId(), userId)) {
             throw new BusinessException(ErrorCode.ONLY_COURSE_TEACHER_ALLOWED);
         }
     }
@@ -341,37 +339,39 @@ public class AttendanceCommandService {
      * 확정 권한 체크
      * - 담임인지 확인(학년/반 일치)
      */
-    private void ensureConfirmAuthority(Long userId, Course course) {
+    private void ensureConfirmAuthority(Long userId, InternalCourseResponse course) {
 
         // 담임 권한(학년/반)이 있어야 함
-        TeacherDetail teacherDetail = teacherDetailRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.HOMEROOM_PERMISSION_REQUIRED));
+        InternalTeacherResponse teacherDetail = userClient.getTeacherInfo(userId);
+        if (teacherDetail == null) {
+            throw new BusinessException(ErrorCode.HOMEROOM_PERMISSION_REQUIRED);
+        }
 
         if (teacherDetail.getHomeroomGrade() == null || teacherDetail.getHomeroomClassNo() == null) {
             throw new BusinessException(ErrorCode.HOMEROOM_PERMISSION_REQUIRED);
         }
 
         // 강좌에 속한 학생 목록 조회
-        List<Enrollment> enrollments = enrollmentRepository.findByCourse_CourseIdAndStatus(
-                course.getCourseId(), ENROLLMENT_STATUS_APPLIED);
+        List<InternalEnrollmentResponse> enrollments = enrollmentClient.getInternalEnrollments(
+                course.getCourseId(), ENROLLMENT_STATUS_APPLIED.name());
 
         if (enrollments.isEmpty()) {
             throw new BusinessException(ErrorCode.ATTENDANCE_NOTHING_TO_CONFIRM);
         }
 
-        // 학생ID만 추출
-        List<Long> studentIds = enrollments.stream()
-                .map(enrollment -> enrollment.getStudentDetail().getId())
+        // 학생상세ID만 추출
+        List<Long> studentDetailIds = enrollments.stream()
+                .map(InternalEnrollmentResponse::getStudentDetailId)
                 .collect(Collectors.toList());
 
         // 담임의 학년/반과 학생들이 완전히 일치하는지 확인
         String classNo = String.valueOf(teacherDetail.getHomeroomClassNo());
 
-        long matchedCount = studentDetailRepository.countByIdInAndGradeAndClassNo(
-                studentIds, teacherDetail.getHomeroomGrade(), classNo);
+        Long matchedCount = userClient.countMatchedStudents(
+                studentDetailIds, teacherDetail.getHomeroomGrade(), classNo);
 
         // 한 명이라도 학년/반이 다르면 "그 반 담임"이 아니라고 판단
-        if (matchedCount != studentIds.size()) {
+        if (matchedCount == null || matchedCount != studentDetailIds.size()) {
             throw new BusinessException(ErrorCode.HOMEROOM_PERMISSION_REQUIRED);
         }
     }

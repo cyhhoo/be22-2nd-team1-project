@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.project.schedule.query.mapper.ScheduleMapper">
+
+    <select id="selectMonthlySchedules" resultType="com.mycompany.project.schedule.query.dto.ScheduleDTO">
+        SELECT
+            schedule_id AS scheduleId,
+            schedule_date AS scheduleDate,
+            schedule_type AS scheduleType,
+            content AS content,
+            target_grade AS targetGrade
+        FROM tbl_academic_schedule
+        WHERE YEAR(schedule_date) = #{year}
+        AND MONTH(schedule_date) = #{month}
+        AND is_deleted = false
+        ORDER BY schedule_date ASC
+    </select>
+
+    <select id="selectWeeklySchedules" resultType="com.mycompany.project.schedule.query.dto.ScheduleDTO">
+        SELECT
+            schedule_id AS scheduleId,
+            schedule_date AS scheduleDate,
+            schedule_type AS scheduleType,
+            content AS content,
+            target_grade AS targetGrade
+        FROM tbl_academic_schedule
+        WHERE schedule_date BETWEEN #{startDate} AND #{endDate}
+        AND is_deleted = false
+        ORDER BY schedule_date ASC
+    </select>
+
+</mapper>

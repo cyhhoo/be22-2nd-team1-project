@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.project.attendance.mapper.AttendanceClosureQueryMapper">
+
+    <!-- 마감이력 상세 -->
+    <select id="findById" parameterType="long"
+            resultType="com.mycompany.project.attendance.dto.response.AttendanceClosureResponse">
+        SELECT
+        closure_id       AS closureId,
+        academic_year_id AS academicYearId,
+        scope_type       AS scopeType,
+        scope_value      AS scopeValue,
+        grade            AS grade,
+        class_no         AS classNo,
+        course_id        AS courseId,
+        closed_at        AS closedAt,
+        user_id          AS userId
+        FROM tbl_attendance_closure
+        WHERE closure_id = #{closureId}
+    </select>
+
+    <!-- 마감이력 목록/검색 -->
+    <select id="search"
+            parameterType="com.mycompany.project.attendance.dto.request.ClosureSearchRequest"
+            resultType="com.mycompany.project.attendance.dto.response.AttendanceClosureResponse">
+        SELECT
+        closure_id       AS closureId,
+        academic_year_id AS academicYearId,
+        scope_type       AS scopeType,
+        scope_value      AS scopeValue,
+        grade            AS grade,
+        class_no         AS classNo,
+        course_id        AS courseId,
+        closed_at        AS closedAt,
+        user_id          AS userId
+        FROM tbl_attendance_closure
+        <where>
+            <if test="academicYearId != null">
+                academic_year_id = #{academicYearId}
+            </if>
+            <if test="scopeType != null">
+                AND scope_type = #{scopeType}
+            </if>
+            <if test="scopeValue != null">
+                AND scope_value = #{scopeValue}
+            </if>
+            <if test="grade != null">
+                AND grade = #{grade}
+            </if>
+            <if test="classNo != null">
+                AND class_no = #{classNo}
+            </if>
+            <if test="courseId != null">
+                AND course_id = #{courseId}
+            </if>
+        </where>
+        ORDER BY closed_at DESC, closure_id DESC
+        <if test="limit != null and offset != null">
+            LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </select>
+
+    <!-- 총 개수 조회 -->
+    <select id="count"
+            parameterType="com.mycompany.project.attendance.dto.request.ClosureSearchRequest"
+            resultType="long">
+        SELECT COUNT(*)
+        FROM tbl_attendance_closure
+        <where>
+            <if test="academicYearId != null">
+                academic_year_id = #{academicYearId}
+            </if>
+            <if test="scopeType != null">
+                AND scope_type = #{scopeType}
+            </if>
+            <if test="scopeValue != null">
+                AND scope_value = #{scopeValue}
+            </if>
+            <if test="grade != null">
+                AND grade = #{grade}
+            </if>
+            <if test="classNo != null">
+                AND class_no = #{classNo}
+            </if>
+            <if test="courseId != null">
+                AND course_id = #{courseId}
+            </if>
+        </where>
+    </select>
+
+</mapper>

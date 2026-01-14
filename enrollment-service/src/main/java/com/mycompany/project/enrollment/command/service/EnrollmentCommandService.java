@@ -2,8 +2,6 @@ package com.mycompany.project.enrollment.command.service;
 
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
-import com.mycompany.project.course.entity.Course;
-import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.command.dto.BulkEnrollmentResult;
 import com.mycompany.project.enrollment.command.dto.EnrollmentApplyRequest;
 import com.mycompany.project.enrollment.entity.Enrollment;
@@ -19,13 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mycompany.project.enrollment.client.CourseClient;
+
 @Service
 @Transactional // 전체 메서드에 트랜잭션 적용
 @RequiredArgsConstructor
 public class EnrollmentCommandService {
 
   private final EnrollmentRepository enrollmentRepository;
-  private final CourseRepository courseRepository;
+  private final CourseClient courseClient;
   private final StudentDetailRepository studentDetailRepository;
   private final CartRepository cartRepository;
   private final CartMapper cartMapper;
@@ -37,17 +37,14 @@ public class EnrollmentCommandService {
     StudentDetail studentDetail = studentDetailRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
 
-    Course course = courseRepository.findByIdWithLock(request.getCourseId())
-        .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
-
-    if (enrollmentRepository.existsByStudentDetailIdAndCourse(studentDetail, course)) {
+    if (enrollmentRepository.existsByStudentDetailAndCourseId(studentDetail, request.getCourseId())) {
       throw new BusinessException(ErrorCode.ALREADY_ENROLLED);
     }
 
-    // 수강 인원 증가 (Dirty Checking)
-    course.increaseCurrentCount();
+    // 수강 인원 증가 API 호출 (성공 시 인원 증가)
+    courseClient.increaseEnrollment(request.getCourseId());
 
-    Enrollment enrollment = new Enrollment(studentDetail, course);
+    Enrollment enrollment = new Enrollment(studentDetail, request.getCourseId());
     enrollmentRepository.save(enrollment);
 
     return enrollment.getEnrollmentId();
@@ -69,8 +66,8 @@ public class EnrollmentCommandService {
       throw new BusinessException(ErrorCode.NOT_YOUR_ENROLLMENT);
     }
 
-    // 3. 수강 인원 감소 (Course 엔티티 메서드 호출)
-    enrollment.getCourse().decreaseCurrentCount();
+    // 3. 수강 인원 감소 API 호출
+    courseClient.decreaseEnrollment(enrollment.getCourseId());
 
     // 4. 수강 신청 내역 삭제 (Hard Delete)
     enrollmentRepository.delete(enrollment);
@@ -109,9 +106,7 @@ public class EnrollmentCommandService {
         register(userId, new EnrollmentApplyRequest(courseId));
 
         // 2. 성공 시 장바구니 삭제
-        // getReferenceById는 DB 조회 없이 프록시 객체만 가져옴 (성능 최적화)
-        Course courseRef = courseRepository.getReferenceById(courseId);
-        cartRepository.deleteByStudentDetailAndCourse(student, courseRef);
+        cartRepository.deleteByStudentDetailAndCourseId(student, courseId);
 
         results.add(new BulkEnrollmentResult(courseId, "성공", true, "신청 완료"));
 

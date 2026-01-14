@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.project.attendance.mapper.AttendanceQueryMapper">
+
+    <select id="findById" resultType="com.mycompany.project.attendance.dto.response.AttendanceResponse">
+        SELECT
+            a.attendance_id AS attendanceId,
+            a.class_date AS classDate,
+            a.period AS period,
+            a.reason AS reason,
+            a.state AS state,
+            a.saved_by AS savedBy,
+            a.saved_at AS savedAt,
+            a.confirmed_by AS confirmedBy,
+            a.confirmed_at AS confirmedAt,
+            a.closed_at AS closedAt,
+            a.attendance_code_id AS attendanceCodeId,
+            ac.code AS attendanceCode,
+            ac.name AS attendanceCodeName,
+            a.enrollment_id AS enrollmentId,
+            a.created_at AS createdAt,
+            a.updated_at AS updatedAt
+        FROM tbl_attendance a
+        LEFT JOIN tbl_attendance_code ac ON a.attendance_code_id = ac.attendance_code_id
+        WHERE a.attendance_id = #{attendanceId}
+    </select>
+
+    <select id="search" resultType="com.mycompany.project.attendance.dto.response.AttendanceListResponse">
+        SELECT
+            a.attendance_id AS attendanceId,
+            a.class_date AS classDate,
+            a.period AS period,
+            a.state AS state,
+            a.attendance_code_id AS attendanceCodeId,
+            ac.name AS attendanceCodeName,
+            a.enrollment_id AS enrollmentId,
+            a.confirmed_at AS confirmedAt,
+            a.closed_at AS closedAt
+        FROM tbl_attendance a
+        LEFT JOIN tbl_attendance_code ac ON a.attendance_code_id = ac.attendance_code_id
+        <where>
+            <if test="fromDate != null">
+                AND a.class_date &gt;= #{fromDate}
+            </if>
+            <if test="toDate != null">
+                AND a.class_date &lt;= #{toDate}
+            </if>
+             <if test="enrollmentId != null">
+                AND a.enrollment_id = #{enrollmentId}
+            </if>
+            <if test="attendanceCodeId != null">
+                AND a.attendance_code_id = #{attendanceCodeId}
+            </if>
+            <if test="state != null">
+                AND a.state = #{state}
+            </if>
+            <if test="period != null">
+               AND a.period = #{period}
+            </if>
+            <if test="enrollmentIds != null and !enrollmentIds.isEmpty()">
+                AND a.enrollment_id IN
+                <foreach item="item" index="index" collection="enrollmentIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY a.class_date DESC, a.period ASC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+        <if test="limit != null and offset != null">
+            OFFSET #{offset}
+        </if>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(*)
+        FROM tbl_attendance a
+        <where>
+            <if test="fromDate != null">
+                AND a.class_date &gt;= #{fromDate}
+            </if>
+            <if test="toDate != null">
+                AND a.class_date &lt;= #{toDate}
+            </if>
+             <if test="enrollmentId != null">
+                AND a.enrollment_id = #{enrollmentId}
+            </if>
+            <if test="attendanceCodeId != null">
+                AND a.attendance_code_id = #{attendanceCodeId}
+            </if>
+            <if test="state != null">
+                AND a.state = #{state}
+            </if>
+             <if test="period != null">
+               AND a.period = #{period}
+            </if>
+            <if test="enrollmentIds != null and !enrollmentIds.isEmpty()">
+                AND a.enrollment_id IN
+                <foreach item="item" index="index" collection="enrollmentIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>

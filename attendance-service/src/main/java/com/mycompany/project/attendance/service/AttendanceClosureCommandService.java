@@ -1,5 +1,10 @@
 package com.mycompany.project.attendance.service;
 
+import com.mycompany.project.attendance.client.CourseClient;
+import com.mycompany.project.attendance.client.EnrollmentClient;
+import com.mycompany.project.attendance.client.ScheduleClient;
+import com.mycompany.project.attendance.client.UserClient;
+import com.mycompany.project.attendance.client.dto.*;
 import com.mycompany.project.attendance.dto.request.AttendanceClosureRequest;
 import com.mycompany.project.attendance.entity.Attendance;
 import com.mycompany.project.attendance.entity.AttendanceClosure;
@@ -7,20 +12,8 @@ import com.mycompany.project.attendance.entity.enums.AttendanceState;
 import com.mycompany.project.attendance.entity.enums.ScopeType;
 import com.mycompany.project.attendance.repository.AttendanceClosureRepository;
 import com.mycompany.project.attendance.repository.AttendanceRepository;
-import com.mycompany.project.course.entity.Course;
-import com.mycompany.project.course.repository.CourseRepository;
-import com.mycompany.project.enrollment.entity.Enrollment;
-import com.mycompany.project.enrollment.entity.EnrollmentStatus;
-import com.mycompany.project.enrollment.repository.EnrollmentMapper;
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
-import com.mycompany.project.schedule.command.domain.aggregate.AcademicYear;
-import com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository;
-import com.mycompany.project.user.command.domain.aggregate.Role;
-import com.mycompany.project.user.command.domain.aggregate.User;
-import com.mycompany.project.user.command.domain.repository.StudentDetailRepository;
-import com.mycompany.project.user.command.domain.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AttendanceClosureCommandService {
 
-    // "수강신청이 정상(APPLIED)인 학생"만 출결 마감 대상으로 잡기 위한 상수
-    private static final EnrollmentStatus ENROLLMENT_STATUS_APPLIED = EnrollmentStatus.APPLIED;
+    private static final String ENROLLMENT_STATUS_APPLIED = "APPLIED";
 
     // 출결(Attendance) 데이터 접근(JPA) - 마감 처리 시 상태를 CLOSED로 바꿔야 함
     private final AttendanceRepository attendanceRepository;
@@ -43,20 +35,11 @@ public class AttendanceClosureCommandService {
     // 마감 이력(AttendanceClosure) 저장(JPA)
     private final AttendanceClosureRepository attendanceClosureRepository;
 
-    // 학년도/학기 범위(SEMESTER) 마감할 때 기간(start~end) 가져오기
-    private final AcademicYearRepository academicYearRepository;
-
-    // 특정 학년도에 속한 강좌 목록을 가져오기 위해 사용
-    private final CourseRepository courseRepository;
-
-    // 강좌에 등록된 학생(수강신청) 목록을 가져오기 위해 사용
-    private final EnrollmentMapper enrollmentMapper;
-
-    // 학년/반 필터가 있을 때 학생 상세에서 필터링하기 위해 사용
-    private final StudentDetailRepository studentDetailRepository;
-
-    // 요청자가 관리자(Role.ADMIN)인지 확인하기 위해 사용
-    private final UserRepository userRepository;
+    // Feign Clients
+    private final ScheduleClient scheduleClient;
+    private final CourseClient courseClient;
+    private final EnrollmentClient enrollmentClient;
+    private final UserClient userClient;
 
     /**
      * 출결 마감 처리
@@ -87,8 +70,11 @@ public class AttendanceClosureCommandService {
         }
 
         // 3) 강좌 범위 → 수강신청(APPLIED) 학생들만 가져와서 대상 좁히기
-        List<Enrollment> enrollments =
-            enrollmentMapper.selectByCourseIdsAndStatus(courseIds,ENROLLMENT_STATUS_APPLIED.name());
+        // EnrollmentClient call
+        EnrollmentSearchRequest searchReq = new EnrollmentSearchRequest();
+        searchReq.setCourseIds(courseIds);
+        searchReq.setStatus(ENROLLMENT_STATUS_APPLIED);
+        List<InternalEnrollmentResponse> enrollments = enrollmentClient.searchEnrollments(searchReq);
 
         if (enrollments.isEmpty()) {
             // 수강신청이 없으면 마감할 출결도 없을 가능성이 큼
@@ -102,8 +88,8 @@ public class AttendanceClosureCommandService {
         }
 
         // 5) 최종 대상 enrollmentId + 기간(from~to)에 해당하는 출결을 전부 조회한다.
-        List<Attendance> allAttendances =
-                attendanceRepository.findByEnrollmentIdInAndClassDateBetween(enrollmentIds, fromDate, toDate);
+        List<Attendance> allAttendances = attendanceRepository.findByEnrollmentIdInAndClassDateBetween(enrollmentIds,
+                fromDate, toDate);
 
         if (allAttendances.isEmpty()) {
             // 해당 기간에 출결 데이터가 없으면 마감할 게 없음
@@ -114,10 +100,8 @@ public class AttendanceClosureCommandService {
         // - 확정(CONFIRMED) 또는 이미 마감(CLOSED)된 것만 마감 가능
         // - SAVED 같은 상태가 끼어 있으면 마감 차단
         boolean hasUnconfirmed = allAttendances.stream()
-                .anyMatch(attendance ->
-                        attendance.getState() != AttendanceState.CONFIRMED
-                                && attendance.getState() != AttendanceState.CLOSED
-                );
+                .anyMatch(attendance -> attendance.getState() != AttendanceState.CONFIRMED
+                        && attendance.getState() != AttendanceState.CLOSED);
 
         if (hasUnconfirmed) {
             throw new BusinessException(ErrorCode.CLOSURE_CANNOT_CLOSE_WITH_UNCONFIRMED);
@@ -146,8 +130,7 @@ public class AttendanceClosureCommandService {
                 request.getGrade(),
                 request.getClassNo(),
                 request.getCourseId(),
-                request.getUserId()
-        );
+                request.getUserId());
         attendanceClosureRepository.save(closure);
     }
 
@@ -170,10 +153,12 @@ public class AttendanceClosureCommandService {
      * - user.role == ADMIN 인지 확인
      */
     private void ensureAdmin(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        UserResponse user = userClient.getUserInfo(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
 
-        if (user.getRole() != Role.ADMIN) {
+        if (!"ADMIN".equals(user.getRole())) {
             throw new BusinessException(ErrorCode.CLOSURE_ADMIN_ONLY);
         }
     }
@@ -190,8 +175,10 @@ public class AttendanceClosureCommandService {
             return yearMonth.atDay(1);
         }
 
-        AcademicYear academicYear = academicYearRepository.findById(request.getAcademicYearId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACADEMIC_TERM_INFO_MISSING));
+        InternalAcademicYearResponse academicYear = scheduleClient.getInternalAcademicYear(request.getAcademicYearId());
+        if (academicYear == null) {
+            throw new BusinessException(ErrorCode.ACADEMIC_TERM_INFO_MISSING);
+        }
 
         return academicYear.getStartDate();
     }
@@ -207,8 +194,10 @@ public class AttendanceClosureCommandService {
             return yearMonth.atEndOfMonth();
         }
 
-        AcademicYear academicYear = academicYearRepository.findById(request.getAcademicYearId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACADEMIC_TERM_INFO_MISSING));
+        InternalAcademicYearResponse academicYear = scheduleClient.getInternalAcademicYear(request.getAcademicYearId());
+        if (academicYear == null) {
+            throw new BusinessException(ErrorCode.ACADEMIC_TERM_INFO_MISSING);
+        }
 
         return academicYear.getEndDate();
     }
@@ -223,8 +212,8 @@ public class AttendanceClosureCommandService {
             return List.of(request.getCourseId());
         }
 
-        return courseRepository.findByAcademicYearId(request.getAcademicYearId()).stream()
-                .map(Course::getCourseId)
+        return courseClient.getInternalCoursesByAcademicYear(request.getAcademicYearId()).stream()
+                .map(InternalCourseResponse::getCourseId)
                 .collect(Collectors.toList());
     }
 
@@ -234,46 +223,33 @@ public class AttendanceClosureCommandService {
      * - grade만 있으면 해당 학년만
      * - 조건이 없으면 enrollments 전체를 그대로 사용
      */
-    private List<Long> filterEnrollmentIdsByClass(AttendanceClosureRequest request, List<Enrollment> enrollments) {
+    private List<Long> filterEnrollmentIdsByClass(AttendanceClosureRequest request,
+            List<InternalEnrollmentResponse> enrollments) {
 
         // 학년/반 필터가 없으면 전체 enrollmentId 반환
         if (request.getGrade() == null && request.getClassNo() == null) {
             return enrollments.stream()
-                    .map(Enrollment::getEnrollmentId)
+                    .map(InternalEnrollmentResponse::getEnrollmentId)
                     .collect(Collectors.toList());
         }
 
         // enrollment에서 학생ID만 뽑아서 student_detail 조회용 리스트로 만든다.
         List<Long> studentIds = enrollments.stream()
-                .map(enrollment -> enrollment.getStudentDetail().getId())
+                .map(InternalEnrollmentResponse::getStudentDetailId)
                 .distinct()
                 .collect(Collectors.toList());
 
         // student_detail에서 조건에 맞는 학생ID만 골라낸다.
-        List<Long> matchedStudentIds;
+        StudentSearchRequest searchReq = new StudentSearchRequest();
+        searchReq.setStudentIds(studentIds);
+        searchReq.setGrade(request.getGrade());
+        searchReq.setClassNo(request.getClassNo() != null ? String.valueOf(request.getClassNo()) : null);
 
-        if (request.getGrade() != null && request.getClassNo() != null) {
-            // 학년 + 반 둘 다 필터
-            String classNo = String.valueOf(request.getClassNo());
+        List<InternalStudentResponse> matchedStudents = userClient.searchStudents(searchReq);
 
-            matchedStudentIds = studentDetailRepository
-                    .findByIdInAndGradeAndClassNo(studentIds, request.getGrade(), classNo)
-                    .stream()
-                    .map(detail -> detail.getId()) // StudentDetail PK가 아니라 studentId를 반환해야 하는 구조일 수도 있음
-                    .collect(Collectors.toList());
-
-        } else if (request.getGrade() != null) {
-            // 학년만 필터
-            matchedStudentIds = studentDetailRepository
-                    .findByIdInAndGrade(studentIds, request.getGrade())
-                    .stream()
-                    .map(detail -> detail.getId())
-                    .collect(Collectors.toList());
-
-        } else {
-            // 반만 필터하는 케이스는 현재 미지원(필요하면 else if로 추가)
-            matchedStudentIds = List.of();
-        }
+        List<Long> matchedStudentIds = matchedStudents.stream()
+                .map(InternalStudentResponse::getId)
+                .collect(Collectors.toList());
 
         if (matchedStudentIds.isEmpty()) {
             return List.of();
@@ -281,8 +257,8 @@ public class AttendanceClosureCommandService {
 
         // 최종: enrollment 중에서 "조건에 맞는 학생"의 enrollmentId만 반환
         return enrollments.stream()
-                .filter(enrollment -> matchedStudentIds.contains(enrollment.getStudentDetail().getId()))
-                .map(Enrollment::getEnrollmentId)
+                .filter(enrollment -> matchedStudentIds.contains(enrollment.getStudentDetailId()))
+                .map(InternalEnrollmentResponse::getEnrollmentId)
                 .collect(Collectors.toList());
     }
 }

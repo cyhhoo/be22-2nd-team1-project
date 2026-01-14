@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.mycompany.project.course.dto.InternalCourseResponse;
 import com.mycompany.project.course.dto.StudentDetailResDTO;
 import com.mycompany.project.common.response.ApiResponse;
 
@@ -144,5 +145,28 @@ public class CourseController {
                                                                // app
         // semester 파라미터는 academicYearId로 가정 (실제로는 학기 서비스에서 현재 학기 ID를 가져와야 함)
         return ResponseEntity.ok(ApiResponse.success(courseService.getTeacherTimetable(teacherId, semester)));
+    }
+
+    @GetMapping("/internal/{courseId}")
+    public ResponseEntity<InternalCourseResponse> getInternalCourseInfo(@PathVariable Long courseId) {
+        return ResponseEntity.ok(courseService.getInternalCourseInfo(courseId));
+    }
+
+    @PostMapping("/internal/{courseId}/increase-enrollment")
+    public ResponseEntity<Void> increaseEnrollment(@PathVariable Long courseId) {
+        courseService.increaseEnrollment(courseId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/internal/{courseId}/decrease-enrollment")
+    public ResponseEntity<Void> decreaseEnrollment(@PathVariable Long courseId) {
+        courseService.decreaseEnrollment(courseId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/internal/courses/academic-year/{academicYearId}")
+    public ResponseEntity<java.util.List<InternalCourseResponse>> getInternalCoursesByAcademicYear(
+            @PathVariable Long academicYearId) {
+        return ResponseEntity.ok(courseService.getInternalCoursesByAcademicYear(academicYearId));
     }
 }

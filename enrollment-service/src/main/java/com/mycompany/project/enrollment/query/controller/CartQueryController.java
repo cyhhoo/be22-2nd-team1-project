@@ -5,8 +5,7 @@ import com.mycompany.project.enrollment.query.dto.CartListResponse;
 import com.mycompany.project.enrollment.query.service.CartQueryService;
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
-import com.mycompany.project.user.command.domain.aggregate.User;
-import com.mycompany.project.user.command.domain.repository.UserRepository;
+import com.mycompany.project.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ import java.util.List;
 public class CartQueryController {
 
   private final CartQueryService cartQueryService;
-  private final UserRepository userRepository;
 
   @Operation(summary = "내 장바구니 목록 조회", description = "내가 담은 수강 신청 장바구니 목록을 조회합니다.")
   @GetMapping
@@ -40,15 +38,10 @@ public class CartQueryController {
   private Long getCurrentUserId() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (authentication == null || authentication.getName() == null) {
+    if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
       throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
     }
 
-    String email = authentication.getName();
-
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-    return user.getUserId();
+    return ((CustomUserDetails) authentication.getPrincipal()).getUserId();
   }
 }

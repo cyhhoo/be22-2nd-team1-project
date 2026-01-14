@@ -2,6 +2,12 @@ package com.mycompany.project.attendance.service;
 
 import com.mycompany.project.attendance.dto.request.CorrectionCreateRequest;
 import com.mycompany.project.attendance.dto.request.CorrectionDecideRequest;
+import com.mycompany.project.attendance.client.CourseClient;
+import com.mycompany.project.attendance.client.EnrollmentClient;
+import com.mycompany.project.attendance.client.UserClient;
+import com.mycompany.project.attendance.client.dto.InternalCourseResponse;
+import com.mycompany.project.attendance.client.dto.InternalEnrollmentResponse;
+import com.mycompany.project.attendance.client.dto.UserResponse;
 import com.mycompany.project.attendance.entity.Attendance;
 import com.mycompany.project.attendance.entity.AttendanceCorrectionRequest;
 import com.mycompany.project.attendance.entity.AttendanceCode;
@@ -10,15 +16,8 @@ import com.mycompany.project.attendance.entity.enums.CorrectionStatus;
 import com.mycompany.project.attendance.repository.AttendanceCodeRepository;
 import com.mycompany.project.attendance.repository.AttendanceCorrectionRequestRepository;
 import com.mycompany.project.attendance.repository.AttendanceRepository;
-import com.mycompany.project.course.entity.Course;
-import com.mycompany.project.course.repository.CourseRepository;
-import com.mycompany.project.enrollment.entity.Enrollment;
-import com.mycompany.project.enrollment.repository.EnrollmentRepository;
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
-import com.mycompany.project.user.command.domain.aggregate.Role;
-import com.mycompany.project.user.command.domain.aggregate.User;
-import com.mycompany.project.user.command.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,14 +35,10 @@ public class AttendanceCorrectionCommandService {
     // 출결 코드 조회(JPA) - 요청한 출결 코드가 존재/활성인지 검증
     private final AttendanceCodeRepository attendanceCodeRepository;
 
-    // 사용자 조회(JPA) - 교사/관리자 권한 검사
-    private final UserRepository userRepository;
-
-    // 수강신청 조회(JPA) - 요청 출결이 어떤 과목(enrollment->course) 소속인지 확인
-    private final EnrollmentRepository enrollmentRepository;
-
-    // 강좌 조회(JPA) - 과목 담당 교사인지 확인
-    private final CourseRepository courseRepository;
+    // External Service Clients (Feign)
+    private final UserClient userClient;
+    private final EnrollmentClient enrollmentClient;
+    private final CourseClient courseClient;
 
     /**
      * 정정요청 생성
@@ -75,8 +70,7 @@ public class AttendanceCorrectionCommandService {
 
         // 동일 출결에 대해 처리중(PENDING) 요청이 있으면 중복 생성 불가
         boolean exists = correctionRequestRepository.existsByAttendanceIdAndStatus(
-                request.getAttendanceId(), CorrectionStatus.PENDING
-        );
+                request.getAttendanceId(), CorrectionStatus.PENDING);
         if (exists) {
             throw new BusinessException(ErrorCode.CORRECTION_ALREADY_IN_PROGRESS);
         }
@@ -96,8 +90,7 @@ public class AttendanceCorrectionCommandService {
                 attendance.getAttendanceCodeId(),
                 request.getRequestedAttendanceCodeId(),
                 request.getRequestReason(),
-                request.getRequestedBy()
-        );
+                request.getRequestedBy());
 
         // 정정요청 저장(PENDING 상태로 들어가는 구조가 보통)
         correctionRequestRepository.save(correctionRequest);
@@ -158,9 +151,9 @@ public class AttendanceCorrectionCommandService {
         if (request == null
                 || request.getAttendanceId() == null
                 || request.getRequestedAttendanceCodeId() == null
-            || request.getRequestReason() == null
-            || request.getRequestReason().isBlank()
-            || request.getRequestedBy() == null) {
+                || request.getRequestReason() == null
+                || request.getRequestReason().isBlank()
+                || request.getRequestedBy() == null) {
             throw new BusinessException(ErrorCode.ATTENDANCE_ITEM_INVALID_FORMAT);
         }
     }
@@ -178,10 +171,12 @@ public class AttendanceCorrectionCommandService {
      * 관리자 권한 체크
      */
     private void ensureAdmin(Long adminId) {
-        User user = userRepository.findById(adminId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        UserResponse user = userClient.getUserInfo(adminId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
 
-        if (user.getRole() != Role.ADMIN) {
+        if (!"ADMIN".equals(user.getRole())) {
             throw new BusinessException(ErrorCode.CORRECTION_ADMIN_ONLY);
         }
     }
@@ -190,10 +185,12 @@ public class AttendanceCorrectionCommandService {
      * 교사 권한 체크
      */
     private void ensureTeacher(Long teacherId) {
-        User user = userRepository.findById(teacherId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        UserResponse user = userClient.getUserInfo(teacherId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
 
-        if (user.getRole() != Role.TEACHER) {
+        if (!"TEACHER".equals(user.getRole())) {
             throw new BusinessException(ErrorCode.CORRECTION_TEACHER_ONLY_CREATE);
         }
     }
@@ -203,13 +200,20 @@ public class AttendanceCorrectionCommandService {
      * - enrollment -> course를 따라가서, course.teacherDetailId == teacherId 인지 확인한다.
      */
     private void ensureCourseTeacher(Long teacherId, Long enrollmentId) {
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENROLLMENT_NOT_FOUND));
+        // 1. Enrollment 조회하여 courseId 획득
+        InternalEnrollmentResponse enrollment = enrollmentClient.getInternalEnrollment(enrollmentId);
+        if (enrollment == null) {
+            throw new BusinessException(ErrorCode.ENROLLMENT_NOT_FOUND);
+        }
 
-        Course course = courseRepository.findById(enrollment.getCourse().getCourseId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_INFO_NOT_FOUND));
+        // 2. Course 조회
+        InternalCourseResponse course = courseClient.getInternalCourseInfo(enrollment.getCourseId());
+        if (course == null) {
+            throw new BusinessException(ErrorCode.COURSE_INFO_NOT_FOUND);
+        }
 
-        if (course.getTeacherDetail() == null || !course.getTeacherDetail().getId().equals(teacherId)) {
+        // 3. 교사 본인인지 확인
+        if (course.getTeacherDetailId() == null || !course.getTeacherDetailId().equals(teacherId)) {
             throw new BusinessException(ErrorCode.CORRECTION_ONLY_COURSE_TEACHER_CREATE);
         }
     }

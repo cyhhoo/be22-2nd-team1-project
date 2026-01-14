@@ -41,4 +41,11 @@ public class ScheduleQueryController {
     List<ScheduleDTO> schedules = scheduleQueryService.getWeeklySchedules(startDate, endDate);
     return ResponseEntity.ok(ApiResponse.success(schedules));
   }
+
+  // 내부 API용 학년도 단건 조회
+  @GetMapping("/internal/academic-years/{academicYearId}")
+  public ResponseEntity<com.mycompany.project.schedule.query.dto.InternalAcademicYearResponse> getInternalAcademicYear(
+      @PathVariable Long academicYearId) {
+    return ResponseEntity.ok(scheduleQueryService.getInternalAcademicYear(academicYearId));
+  }
 }

@@ -8,18 +8,21 @@ import java.util.List;
 
 public interface StudentDetailRepository extends JpaRepository<StudentDetail, Long> {
 
-    List<StudentDetail> findByIdInAndGradeAndClassNo(List<Long> studentIds,
-            Integer studentGrade,
-            String studentClassNo);
+        List<StudentDetail> findByIdInAndGradeAndClassNo(List<Long> studentIds,
+                        Integer studentGrade,
+                        String studentClassNo);
 
-    List<StudentDetail> findByIdInAndGrade(List<Long> studentIds,
-            Integer studentGrade);
+        List<StudentDetail> findByIdInAndGrade(List<Long> studentIds,
+                        Integer studentGrade);
 
-    long countByIdInAndGradeAndClassNo(List<Long> studentIds,
-            Integer studentGrade,
-            String studentClassNo);
+        long countByIdInAndGradeAndClassNo(List<Long> studentIds,
+                        Integer studentGrade,
+                        String studentClassNo);
 
-    default Optional<StudentDetail> findByUserId(Long userId) {
-        return findById(userId);
-    }
+        List<StudentDetail> findByGradeAndClassNo(Integer grade,
+                        String classNo);
+
+        default Optional<StudentDetail> findByUserId(Long userId) {
+                return findById(userId);
+        }
 }

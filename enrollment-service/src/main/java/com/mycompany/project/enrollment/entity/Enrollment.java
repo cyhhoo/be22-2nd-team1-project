@@ -1,7 +1,6 @@
 package com.mycompany.project.enrollment.entity;
 
 import com.mycompany.project.common.entity.BaseEntity;
-import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,7 +10,7 @@ import org.hibernate.annotations.Where;
 @Entity
 @Getter
 @Table(name = "tbl_enrollment", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_enrollment_student_course", columnNames = { "student_detail_id", "course_id" })
+    @UniqueConstraint(name = "uk_enrollment_student_course", columnNames = { "student_detail_id", "course" })
 })
 @SQLDelete(sql = "UPDATE tbl_enrollment SET status = 'CANCELLED' WHERE enrollment_id = ?")
 @Where(clause = "status = 'APPLIED'")
@@ -27,17 +26,16 @@ public class Enrollment extends BaseEntity {
   @JoinColumn(name = "student_detail_id", nullable = false)
   private StudentDetail studentDetail;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "course_id", nullable = false)
-  private Course course;
+  @Column(name = "course", nullable = false)
+  private Long courseId;
 
   @Enumerated(EnumType.STRING)
   private EnrollmentStatus status;
 
   @Builder
-  public Enrollment(StudentDetail studentDetail, Course course) {
+  public Enrollment(StudentDetail studentDetail, Long courseId) {
     this.studentDetail = studentDetail;
-    this.course = course;
+    this.courseId = courseId;
     this.status = EnrollmentStatus.APPLIED;
   }
 
