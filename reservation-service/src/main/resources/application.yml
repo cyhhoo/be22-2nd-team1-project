@@ -13,3 +13,8 @@ eureka:
 spring:
   application:
     name: swcamp-reservation-service
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true

@@ -20,16 +20,15 @@ public class SubjectCommandService {
      */
     @Transactional
     public Long createSubject(SubjectCreateRequest request) {
-        // 중복 체크
-        if (subjectRepository.findByName(request.getName()).isPresent()) {
-            throw new BusinessException(ErrorCode.SUBJECT_ALREADY_EXISTS);
-        }
-
-        Subject subject = Subject.builder()
-                .name(request.getName())
-                .build();
-
-        return subjectRepository.save(subject).getId();
+        // If subject already exists, return its ID (idempotent)
+        return subjectRepository.findByName(request.getName())
+                .map(Subject::getId)
+                .orElseGet(() -> {
+                    Subject subject = Subject.builder()
+                            .name(request.getName())
+                            .build();
+                    return subjectRepository.save(subject).getId();
+                });
     }
 
     /**

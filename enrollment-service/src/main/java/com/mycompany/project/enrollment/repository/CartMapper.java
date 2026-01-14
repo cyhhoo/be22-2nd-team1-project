@@ -13,6 +13,6 @@ public interface CartMapper {
   // 내 장바구니 목록 조회
   List<CartListResponse> selectCartListByUserId(@Param("userId") Long userId);
 
-  @Select("SELECT course_id FROM tbl_cart WHERE student_detail_id = #{studentId}")
+  @Select("SELECT course FROM tbl_cart WHERE student_detail_id = #{studentId}")
   List<Long> findCourseIdsByStudentId(@Param("studentId") Long studentId);
 }

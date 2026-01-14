@@ -1,4 +1,5 @@
 package com.mycompany.project.schedule.query.service;
+
 import com.mycompany.project.schedule.query.dto.ScheduleDTO;
 import com.mycompany.project.schedule.query.mapper.ScheduleMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ScheduleQueryService {
   private final ScheduleMapper scheduleMapper;
+  private final com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository academicYearRepository;
 
   // 월간 일정 조회 (MyBatis 사용)
   public List<ScheduleDTO> getMonthlySchedules(int year, int month) {
@@ -21,6 +23,22 @@ public class ScheduleQueryService {
 
   // 주간 일정 조회
   public List<ScheduleDTO> getWeeklySchedules(LocalDate startDate, LocalDate endDate) {
-    return scheduleMapper.selectWeeklySchedules(startDate,endDate);
+    return scheduleMapper.selectWeeklySchedules(startDate, endDate);
+  }
+
+  // 내부 API용 학년도 단건 조회
+  public com.mycompany.project.schedule.query.dto.InternalAcademicYearResponse getInternalAcademicYear(
+      Long academicYearId) {
+    return academicYearRepository.findById(academicYearId)
+        .map(ay -> {
+          com.mycompany.project.schedule.query.dto.InternalAcademicYearResponse res = new com.mycompany.project.schedule.query.dto.InternalAcademicYearResponse();
+          res.setAcademicYearId(ay.getAcademicYearId());
+          res.setName(ay.getYear() + "-" + ay.getSemester());
+          res.setStartDate(ay.getStartDate());
+          res.setEndDate(ay.getEndDate());
+          return res;
+        })
+        .orElseThrow(() -> new com.mycompany.project.exception.BusinessException(
+            com.mycompany.project.exception.ErrorCode.ACADEMIC_TERM_INFO_MISSING));
   }
 }
