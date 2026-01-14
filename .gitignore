@@ -61,6 +61,17 @@ application-dev.yaml
 application-prd.yaml
 src/main/resources/application-local.yaml
 
+# Config Server 민감 정보 파일 (Git에 올라가면 안 됨!)
+**/config/*-dev.yml
+**/config/*-prd.yml
+**/config/application-dev.yml
+**/config/application-prd.yml
+
+# 환경 변수 파일
+.env
+.env.local
+.env.*.local
+
 # OS별/사용자별 다를 수 있는 업로드 경로 등은 별도 관리 권장
 # 만약 application.yaml 자체를 공유하지 않으려면 아래 주석 해제
 # src/main/resources/application.yaml
