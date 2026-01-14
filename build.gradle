@@ -40,6 +40,9 @@ subprojects {
         // bootstrap.yml을 자동으로 인식하게 해주는 의존성 추가
         implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
         
+        // 서비스 간 호출을 위한 Feign Client 추가
+        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+        
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }

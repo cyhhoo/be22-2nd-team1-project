@@ -1,6 +1,5 @@
 package com.mycompany.project.enrollment.repository;
 
-import com.mycompany.project.course.entity.Course;
 import com.mycompany.project.enrollment.entity.Enrollment;
 import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
@@ -13,7 +12,7 @@ import java.util.Optional;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
-    List<Enrollment> findByCourse_CourseIdAndStatus(Long courseId, EnrollmentStatus status);
+    List<Enrollment> findByCourseIdAndStatus(Long courseId, EnrollmentStatus status);
 
-    boolean existsByStudentDetailIdAndCourse(StudentDetail studentDetail, Course course);
+    boolean existsByStudentDetailAndCourseId(StudentDetail studentDetail, Long courseId);
 }

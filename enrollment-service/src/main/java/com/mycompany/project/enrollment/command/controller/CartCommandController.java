@@ -5,8 +5,7 @@ import com.mycompany.project.enrollment.command.dto.CartAddRequest;
 import com.mycompany.project.enrollment.command.service.CartCommandService;
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
-import com.mycompany.project.user.command.domain.aggregate.User;
-import com.mycompany.project.user.command.domain.repository.UserRepository;
+import com.mycompany.project.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,15 +23,13 @@ import org.springframework.web.bind.annotation.*;
 public class CartCommandController {
 
   private final CartCommandService cartCommandService;
-  private final UserRepository userRepository;
 
   // 1. 장바구니 담기
   @Operation(summary = "장바구니 담기", description = "학생이 특정 강좌를 장바구니에 넣습니다.")
   @PostMapping
   @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<Long>> addCart(
-      @Valid @RequestBody CartAddRequest request
-  ) {
+      @Valid @RequestBody CartAddRequest request) {
     Long userId = getCurrentUserId();
     Long cartId = cartCommandService.addCart(userId, request);
     return ResponseEntity.status(201).body(ApiResponse.success(cartId));
@@ -43,8 +40,7 @@ public class CartCommandController {
   @DeleteMapping("/courses/{courseId}")
   @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<Void>> removeCart(
-      @PathVariable("courseId") Long courseId
-  ) {
+      @PathVariable("courseId") Long courseId) {
     Long userId = getCurrentUserId();
     cartCommandService.removeCart(userId, courseId);
     return ResponseEntity.ok(ApiResponse.success(null));
@@ -53,15 +49,10 @@ public class CartCommandController {
   private Long getCurrentUserId() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (authentication == null || authentication.getName() == null) {
+    if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
       throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
     }
 
-    String email = authentication.getName();
-
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-    return user.getUserId();
+    return ((CustomUserDetails) authentication.getPrincipal()).getUserId();
   }
 }

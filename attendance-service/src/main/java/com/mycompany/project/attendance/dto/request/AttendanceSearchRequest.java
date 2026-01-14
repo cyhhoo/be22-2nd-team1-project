@@ -1,6 +1,5 @@
 package com.mycompany.project.attendance.dto.request;
 
-
 import com.mycompany.project.attendance.entity.enums.AttendanceState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,7 +23,7 @@ public class AttendanceSearchRequest {
     // 조회 시작일(포함)
     private LocalDate fromDate;
 
-    //조회 종료일(포함)
+    // 조회 종료일(포함)
     private LocalDate toDate;
 
     // 특정 수강 기준 조회 (선택)
@@ -48,4 +47,10 @@ public class AttendanceSearchRequest {
     // 시작 위ㅏ치 (선택)
     private Integer offset;
 
+    // 내부 로직용: CourseId 검색 시 EnrollmentId 목록으로 변환하여 사용
+    private java.util.List<Long> enrollmentIds;
+
+    public void setEnrollmentIds(java.util.List<Long> enrollmentIds) {
+        this.enrollmentIds = enrollmentIds;
+    }
 }
