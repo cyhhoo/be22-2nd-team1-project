@@ -2,6 +2,7 @@ package com.mycompany.project.user.command.application.controller;
 
 import com.mycompany.project.common.response.ApiResponse;
 import com.mycompany.project.user.command.application.dto.UserRegisterRequest;
+import com.mycompany.project.user.command.application.dto.UserInternalActivateRequest;
 import com.mycompany.project.user.command.application.service.UserCommandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,5 +47,11 @@ public class UserCommandController {
   public ResponseEntity<ApiResponse<String>> updateUsersBatch(@RequestPart("file") MultipartFile file) {
     int count = userCommandService.updateUsersInBatch(file);
     return ResponseEntity.ok(ApiResponse.success(count + "명 수정 완료"));
+  }
+
+  @PostMapping("/internal/activate")
+  public ResponseEntity<Void> internalActivate(@RequestBody UserInternalActivateRequest request) {
+    userCommandService.internalActivate(request.getEmail(), request.getEncryptedPassword());
+    return ResponseEntity.ok().build();
   }
 }

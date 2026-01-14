@@ -13,3 +13,8 @@ eureka:
 spring:
   application:
     name: swcamp-schedule-service
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true

@@ -405,4 +405,12 @@ public class UserCommandService {
       throw new RuntimeException("CSV 처리 실패", e);
     }
   }
+
+  @Transactional
+  public void internalActivate(String email, String encryptedPassword) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    user.activate(encryptedPassword);
+    userRepository.save(user);
+  }
 }

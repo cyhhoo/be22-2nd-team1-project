@@ -1,6 +1,9 @@
 package com.mycompany.project.course.service;
 
 import com.mycompany.project.course.dto.TimeSlotDTO;
+import com.mycompany.project.course.dto.CourseCreateReqDTO;
+import com.mycompany.project.course.dto.StudentDetailResDTO;
+import com.mycompany.project.course.repository.CourseChangeRequestRepository;
 import com.mycompany.project.course.entity.*;
 import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.entity.Enrollment;
@@ -11,19 +14,17 @@ import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
 import com.mycompany.project.user.command.domain.repository.StudentDetailRepository;
 import com.mycompany.project.user.command.domain.repository.TeacherDetailRepository;
+import com.mycompany.project.user.command.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import com.mycompany.project.course.mapper.CourseMapper;
 
 import org.springframework.transaction.annotation.Transactional;
-import com.mycompany.project.course.dto.CourseUpdateReqDTO;
-
-import com.mycompany.project.course.dto.CourseCreateReqDTO;
-import com.mycompany.project.course.repository.CourseChangeRequestRepository;
-import com.mycompany.project.course.dto.StudentDetailResDTO;
 import com.mycompany.project.course.dto.CourseListResDTO;
-import com.mycompany.project.user.command.domain.repository.UserRepository;
+import com.mycompany.project.course.dto.CourseUpdateReqDTO;
+import com.mycompany.project.course.dto.InternalCourseResponse;
+import com.mycompany.project.course.entity.*;
 
 import com.mycompany.project.common.service.RefundService;
 import org.springframework.data.domain.Page;
@@ -58,8 +59,8 @@ public class CourseService {
     @Transactional
     public void createCourse(CourseCreateReqDTO dto) {
         // 1. 유효성 검증
-        if (dto.getMaxCapacity() <= 0) {
-            throw new BusinessException(ErrorCode.COURSE_BAD_REQUEST); // 수강 정원은 0보다 커야 합니다.
+        if (dto.getMaxCapacity() == null || dto.getMaxCapacity() <= 0) {
+            throw new BusinessException(ErrorCode.COURSE_BAD_REQUEST); // 수강 정원은 필수이며 0보다 커야 합니다.
         }
 
         // 2. 강좌 엔티티 생성 (Status = PENDING)
@@ -249,7 +250,7 @@ public class CourseService {
      */
     private List<Enrollment> getEnrollmentsByCourseId(Long courseId) {
         return enrollmentRepository.findAll().stream()
-                .filter(e -> e.getCourse().getCourseId().equals(courseId))
+                .filter(e -> e.getCourseId().equals(courseId))
                 .collect(Collectors.toList());
     }
 
@@ -359,7 +360,7 @@ public class CourseService {
             // 3-2. 수강 등록 (필드명 studentDetail로 수정)
             Enrollment enrollment = Enrollment.builder()
                     .studentDetail(student)
-                    .course(course)
+                    .courseId(course.getCourseId())
                     .build();
             enrollmentRepository.save(enrollment);
         }
@@ -522,7 +523,53 @@ public class CourseService {
                 .collect(Collectors.toList());
 
         return com.mycompany.project.course.dto.TeacherTimetableResDTO.builder()
-                .timeSlots(timeSlots)
                 .build();
+    }
+
+    public InternalCourseResponse getInternalCourseInfo(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null)
+            return null;
+
+        InternalCourseResponse response = new InternalCourseResponse();
+        response.setCourseId(course.getCourseId());
+        response.setName(course.getName());
+        response.setTeacherDetailId(course.getTeacherDetailId());
+        response.setAcademicYearId(course.getAcademicYearId());
+        response.setSubjectId(course.getSubjectId());
+        response.setCourseType(course.getCourseType());
+        response.setStatus(course.getStatus());
+        return response;
+    }
+
+    @Transactional
+    public void increaseEnrollment(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+        course.increaseCurrentCount();
+    }
+
+    @Transactional
+    public void decreaseEnrollment(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+        course.decreaseCurrentCount();
+    }
+
+    @Transactional(readOnly = true)
+    public List<InternalCourseResponse> getInternalCoursesByAcademicYear(Long academicYearId) {
+        return courseRepository.findByAcademicYearId(academicYearId).stream()
+                .map(course -> {
+                    InternalCourseResponse response = new InternalCourseResponse();
+                    response.setCourseId(course.getCourseId());
+                    response.setName(course.getName());
+                    response.setTeacherDetailId(course.getTeacherDetailId());
+                    response.setAcademicYearId(course.getAcademicYearId());
+                    response.setSubjectId(course.getSubjectId());
+                    response.setCourseType(course.getCourseType());
+                    response.setStatus(course.getStatus());
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 }

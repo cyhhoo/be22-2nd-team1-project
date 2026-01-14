@@ -1,0 +1,20 @@
+POST http://192.168.0.8:52268/api/v1/courses
+Content-Type: application/json
+# (필요 시 Authorization 헤더 추가)
+
+{
+  "name": "기초 수학 1",
+  "courseType": "MANDATORY",
+  "maxCapacity": 30,
+  "tuition": 200000,
+  "subjectId": 1,
+  "academicYearId": 1,
+  "teacherDetailId": 1,
+  "timeSlots": [
+    {
+      "dayOfWeek": "MONDAY",
+      "period": 1,
+      "classroom": "101호"
+    }
+  ]
+}

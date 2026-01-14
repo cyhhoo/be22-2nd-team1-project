@@ -6,8 +6,7 @@ import com.mycompany.project.enrollment.command.dto.EnrollmentApplyRequest;
 import com.mycompany.project.enrollment.command.service.EnrollmentCommandService;
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
-import com.mycompany.project.user.command.domain.aggregate.User;
-import com.mycompany.project.user.command.domain.repository.UserRepository;
+import com.mycompany.project.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,22 +26,16 @@ import java.util.List;
 public class EnrollmentCommandController {
 
   private final EnrollmentCommandService enrollmentCommandService;
-  private final UserRepository userRepository;
 
   // 1. 수강 신청
   @Operation(summary = "강좌 수강 신청", description = "학생이 특정 강좌를 수강 신청합니다.")
   @PostMapping
   @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<Long>> register(
-      @Valid @RequestBody EnrollmentApplyRequest request
-  ) {
+      @Valid @RequestBody EnrollmentApplyRequest request) {
     Long userId = getCurrentUserId();
     Long enrollmentId = enrollmentCommandService.register(userId, request);
     return ResponseEntity.status(201).body(ApiResponse.success(enrollmentId));
-
-  /*  return ResponseEntity.ok(
-        ApiResponse.success(enrollmentCommandService.register(userId, request))
-    );*/
   }
 
   // 2. 수강 취소
@@ -50,8 +43,7 @@ public class EnrollmentCommandController {
   @DeleteMapping("/{enrollmentId}")
   @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<Void>> cancel(
-      @PathVariable("enrollmentId") Long enrollmentId
-  ) {
+      @PathVariable("enrollmentId") Long enrollmentId) {
     Long userId = getCurrentUserId();
     enrollmentCommandService.cancel(userId, enrollmentId);
     return ResponseEntity.ok(ApiResponse.success(null));
@@ -70,15 +62,10 @@ public class EnrollmentCommandController {
   private Long getCurrentUserId() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (authentication == null || authentication.getName() == null) {
+    if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
       throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
     }
 
-    String email = authentication.getName();
-
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-    return user.getUserId();
+    return ((CustomUserDetails) authentication.getPrincipal()).getUserId();
   }
 }

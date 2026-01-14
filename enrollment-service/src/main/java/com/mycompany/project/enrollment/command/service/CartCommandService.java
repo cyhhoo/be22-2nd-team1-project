@@ -1,7 +1,5 @@
 package com.mycompany.project.enrollment.command.service;
 
-import com.mycompany.project.course.entity.Course;
-import com.mycompany.project.course.repository.CourseRepository;
 import com.mycompany.project.enrollment.command.dto.CartAddRequest;
 import com.mycompany.project.enrollment.entity.Cart;
 import com.mycompany.project.enrollment.repository.CartRepository;
@@ -13,13 +11,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.mycompany.project.enrollment.client.CourseClient;
+import com.mycompany.project.enrollment.client.InternalCourseResponse;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class CartCommandService {
 
   private final CartRepository cartRepository;
-  private final CourseRepository courseRepository;
+  private final CourseClient courseClient;
   private final StudentDetailRepository studentDetailRepository; // UserRepo 대신 사용
 
   public Long addCart(Long userId, CartAddRequest request) {
@@ -29,16 +30,18 @@ public class CartCommandService {
         .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
 
     // 2. 강좌 조회
-    Course course = courseRepository.findById(request.getCourseId())
-        .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+    InternalCourseResponse course = courseClient.getInternalCourseInfo(request.getCourseId());
+    if (course == null) {
+      throw new BusinessException(ErrorCode.COURSE_NOT_FOUND);
+    }
 
     // 3. 중복 체크
-    if (cartRepository.existsByStudentDetailAndCourse(student, course)) {
+    if (cartRepository.existsByStudentDetailAndCourseId(student, request.getCourseId())) {
       throw new BusinessException(ErrorCode.ALREADY_IN_CART);
     }
 
     // 4. 저장
-    Cart cart = new Cart(student, course);
+    Cart cart = new Cart(student, request.getCourseId());
     cartRepository.save(cart);
 
     return cart.getCartId();
@@ -48,9 +51,11 @@ public class CartCommandService {
     StudentDetail student = studentDetailRepository.findByUserId(userId)
         .orElseThrow(() -> new IllegalArgumentException("학생 정보를 찾을 수 없습니다."));
 
-    Course course = courseRepository.findById(courseId)
-        .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+    InternalCourseResponse course = courseClient.getInternalCourseInfo(courseId);
+    if (course == null) {
+      throw new BusinessException(ErrorCode.COURSE_NOT_FOUND);
+    }
 
-    cartRepository.deleteByStudentDetailAndCourse(student, course);
+    cartRepository.deleteByStudentDetailAndCourseId(student, courseId);
   }
 }

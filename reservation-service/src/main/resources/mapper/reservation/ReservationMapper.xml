@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.project.reservation.query.mapper.ReservationMapper">
+
+    <select id="selectAvailableFacilities" resultType="com.mycompany.project.reservation.query.dto.FacilityDTO">
+        SELECT
+            f.facility_id AS facilityId,
+            f.name AS name,
+            f.status AS status
+        FROM tbl_facility f
+        WHERE f.status = 'AVAILABLE'
+        AND f.open_time &lt;= #{startTime}
+        AND f.close_time &gt; #{startTime}
+        AND NOT EXISTS (
+            SELECT 1 FROM tbl_reservation r
+            WHERE r.facility_id = f.facility_id
+            AND r.reservation_date = #{reservationDate}
+            AND r.start_time = #{startTime}
+            AND r.status IN ('WAITING', 'APPROVED')
+        )
+    </select>
+
+    <select id="selectMyReservations" resultType="com.mycompany.project.reservation.query.dto.ReservationDTO">
+        SELECT
+            r.reservation_id AS reservationId,
+            r.facility_id AS facilityId,
+            r.student_id AS studentId,
+            r.reservation_date AS reservationDate,
+            r.start_time AS startTime,
+            r.end_time AS endTime,
+            r.status AS status,
+            r.created_at AS createdAt,
+            r.rejection_reason AS rejectionReason
+        FROM tbl_reservation r
+        WHERE r.student_id = #{studentId}
+        <if test="status != null and status != ''">
+            AND r.status = #{status}
+        </if>
+        ORDER BY r.reservation_date DESC, r.start_time DESC
+    </select>
+
+    <select id="selectAdminReservationStatus" resultType="com.mycompany.project.reservation.query.dto.ReservationDTO">
+        SELECT
+            r.reservation_id AS reservationId,
+            r.facility_id AS facilityId,
+            r.student_id AS studentId,
+            r.reservation_date AS reservationDate,
+            r.start_time AS startTime,
+            r.end_time AS endTime,
+            r.status AS status,
+            r.created_at AS createdAt,
+            r.rejection_reason AS rejectionReason
+        FROM tbl_reservation r
+        INNER JOIN tbl_facility f ON r.facility_id = f.facility_id
+        WHERE f.admin_id = #{adminId}
+        <if test="reservationDate != null">
+            AND r.reservation_date = #{reservationDate}
+        </if>
+        <if test="status != null and status != ''">
+            AND r.status = #{status}
+        </if>
+        ORDER BY r.start_time ASC
+    </select>
+
+</mapper>

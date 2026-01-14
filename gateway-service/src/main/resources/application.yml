@@ -15,3 +15,11 @@ spring:
     name: swcamp-gateway-service
   main:
     web-application-type: reactive
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: DEBUG   # 라우트 상세 로그
+    org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG   # 요청/응답 디버그
+  file:
+    name: logs/gateway.log
