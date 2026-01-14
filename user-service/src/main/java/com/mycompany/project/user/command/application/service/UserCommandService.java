@@ -110,9 +110,16 @@ public class UserCommandService {
     TeacherDetail.TeacherDetailBuilder builder = TeacherDetail.builder().user(user);
 
     if (detailReq != null) {
-      // Note: Subject will be set later through API
-      // MSA 구조에서 Subject는 schedule-service에서 관리
-      builder.homeroomGrade(detailReq.getHomeroomGrade())
+      // 과목 정보 설정
+      Subject subject = null;
+      if (detailReq.getSubjectId() != null) {
+        subject = subjectRepository.findById(detailReq.getSubjectId()).orElse(null);
+      } else if (detailReq.getSubject() != null && !detailReq.getSubject().isEmpty()) {
+        subject = subjectRepository.findByName(detailReq.getSubject()).orElse(null);
+      }
+
+      builder.subject(subject)
+          .homeroomGrade(detailReq.getHomeroomGrade())
           .homeroomClassNo(detailReq.getHomeroomClass());
     }
 

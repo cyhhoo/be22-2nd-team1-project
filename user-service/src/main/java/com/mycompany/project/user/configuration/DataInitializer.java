@@ -7,6 +7,7 @@ import com.mycompany.project.user.command.domain.aggregate.User;
 import com.mycompany.project.user.command.domain.aggregate.UserStatus;
 import com.mycompany.project.user.command.domain.repository.AdminDetailRepository;
 import com.mycompany.project.user.command.domain.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -28,6 +29,7 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public void run(String... args) {
         // 유저가 한 명도 없는 경우에만 초기 관리자 계정 생성
         if (userRepository.count() == 0) {
