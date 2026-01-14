@@ -43,4 +43,43 @@ public interface CourseMapper {
         List<Map<String, Object>> findTeacherTimetable(
                         @Param("academicYearId") Long academicYearId,
                         @Param("teacherDetailId") Long teacherDetailId);
+
+        /**
+         * 교사별 강좌 목록 조회 (페이징)
+         * 
+         * @return CourseListResDTO 목록
+         */
+        List<com.mycompany.project.course.dto.CourseListResDTO> findCourseListByTeacher(
+                        @Param("teacherId") Long teacherId,
+                        @Param("limit") int limit,
+                        @Param("offset") int offset);
+
+        /**
+         * 교사별 강좌 목록 전체 개수 조회 (페이징용)
+         */
+        long countCourseListByTeacher(@Param("teacherId") Long teacherId);
+
+        /**
+         * 전체 강좌 목록 조회 (관리자, 페이징)
+         * 
+         * @return CourseListResDTO 목록
+         */
+        List<com.mycompany.project.course.dto.CourseListResDTO> findAllCourseList(
+                        @Param("limit") int limit,
+                        @Param("offset") int offset);
+
+        /**
+         * 전체 강좌 목록 전체 개수 조회 (페이징용)
+         */
+        long countAllCourseList();
+
+        /**
+         * 수강생 상세 정보 조회 (강좌 ID + 학생 User ID)
+         * 출결 통계, 메모 등 포함
+         * 
+         * @return StudentDetailResDTO 또는 null
+         */
+        com.mycompany.project.course.dto.StudentDetailResDTO findStudentDetailByCourseAndStudent(
+                        @Param("courseId") Long courseId,
+                        @Param("studentId") Long studentId);
 }
