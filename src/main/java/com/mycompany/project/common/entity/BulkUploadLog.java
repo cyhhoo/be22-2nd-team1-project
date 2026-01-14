@@ -1,17 +1,20 @@
 package com.mycompany.project.common.entity;
 
-import com.mycompany.project.user.command.domain.aggregate.AdminDetail; // AdminDetail 위치에 맞게 import
+import com.mycompany.project.user.command.domain.aggregate.AdminDetail;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tbl_bulk_upload_log")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class BulkUploadLog {
 
@@ -25,7 +28,7 @@ public class BulkUploadLog {
     private AttachFile file;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id") // DB 컬럼명 확인 (admin_id로 변경됨)
+    @JoinColumn(name = "admin_id")
     private AdminDetail admin;
 
     @Enumerated(EnumType.STRING)
@@ -34,7 +37,7 @@ public class BulkUploadLog {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UploadStatus status; // PENDING, PROCESSING, COMPLETED, FAILED
+    private UploadStatus status;
 
     @Column(name = "total_count")
     private Integer totalCount;
@@ -55,7 +58,37 @@ public class BulkUploadLog {
     @Column(name = "finished_at")
     private LocalDateTime finishedAt;
 
+    @Builder.Default
     @Column(name = "request_id", nullable = false, length = 50)
-    private String requestId;
+    private String requestId = UUID.randomUUID().toString().substring(0, 36);
 
+    // ===== 비즈니스 메서드 =====
+
+    /**
+     * 처리 시작
+     */
+    public void startProcessing() {
+        this.status = UploadStatus.PROCESSING;
+    }
+
+    /**
+     * 처리 완료
+     */
+    public void complete(int successCount, int failCount, String errorLog) {
+        this.status = UploadStatus.COMPLETED;
+        this.successCount = successCount;
+        this.failCount = failCount;
+        this.totalCount = successCount + failCount;
+        this.errorLog = errorLog;
+        this.finishedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 처리 실패
+     */
+    public void fail(String errorLog) {
+        this.status = UploadStatus.FAILED;
+        this.errorLog = errorLog;
+        this.finishedAt = LocalDateTime.now();
+    }
 }

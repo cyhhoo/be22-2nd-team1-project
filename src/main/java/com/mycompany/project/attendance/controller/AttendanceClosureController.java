@@ -8,6 +8,7 @@ import com.mycompany.project.attendance.service.AttendanceClosureQueryService;
 import com.mycompany.project.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @RestController // 이 클래스는 REST API 컨트롤러다. (View가 아니라 JSON 응답을 반환)
 @RequiredArgsConstructor // final 필드들을 생성자로 자동 주입한다. (생성자 DI)
-@RequestMapping("/api/attendance/closures") // 이 컨트롤러의 공통 URL 시작 경로
+@RequestMapping("/api/v1/attendance/closures") // 이 컨트롤러의 공통 URL 시작 경로
 public class AttendanceClosureController {
 
     private final AttendanceClosureCommandService attendanceClosureCommandService;
@@ -29,7 +30,8 @@ public class AttendanceClosureController {
     private final AttendanceClosureQueryService attendanceClosureQueryService;
     // 출결 마감 관련 "조회(읽기)" 작업을 담당하는 서비스
 
-    @PostMapping // POST /api/attendance/closures
+    @PostMapping // POST /api/v1/attendance/closures
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> close(@RequestBody AttendanceClosureRequest request) {
         // @RequestBody: 요청 JSON 바디를 AttendanceClosureRequest DTO로 변환해서 받는다.
         // 마감 범위에 해당하는 출결(CONFIRMED)만 CLOSED로 전환하고 이력을 남긴다.
@@ -38,7 +40,8 @@ public class AttendanceClosureController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @GetMapping("/{closureId}") // GET /api/attendance/closures/{closureId}
+    @GetMapping("/{closureId}") // GET /api/v1/attendance/closures/{closureId}
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<AttendanceClosureResponse>> findById(@PathVariable Long closureId) {
         // @PathVariable: URL 경로의 {closureId} 값을 Long으로 받아온다.
         // 단건 조회 로직은 QueryService에 위임하고 결과를 DTO로 반환한다.
@@ -46,10 +49,11 @@ public class AttendanceClosureController {
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
-    @GetMapping // GET /api/attendance/closures
+    @GetMapping // GET /api/v1/attendance/closures
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<List<AttendanceClosureResponse>>> search(@ModelAttribute ClosureSearchRequest request) {
         // @ModelAttribute: 쿼리스트링 파라미터를 ClosureSearchRequest DTO로 바인딩한다.
-        // 예: /api/attendance/closures?fromDate=2026-01-01&toDate=2026-01-31&status=CLOSED
+        // 예: /api/v1/attendance/closures?fromDate=2026-01-01&toDate=2026-01-31&status=CLOSED
         // 검색/목록 조회 로직은 QueryService에 위임하고 결과 리스트를 반환한다.
         List<AttendanceClosureResponse> data = attendanceClosureQueryService.search(request);
         return ResponseEntity.ok(ApiResponse.success(data));

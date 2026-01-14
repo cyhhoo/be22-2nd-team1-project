@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,7 @@ public class EnrollmentCommandController {
   // 1. 수강 신청
   @Operation(summary = "강좌 수강 신청", description = "학생이 특정 강좌를 수강 신청합니다.")
   @PostMapping
+  @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<Long>> register(
       @Valid @RequestBody EnrollmentApplyRequest request
   ) {
@@ -46,6 +48,7 @@ public class EnrollmentCommandController {
   // 2. 수강 취소
   @Operation(summary = "수강 신청 취소", description = "학생이 신청한 강좌를 취소합니다.")
   @DeleteMapping("/{enrollmentId}")
+  @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<Void>> cancel(
       @PathVariable("enrollmentId") Long enrollmentId
   ) {
@@ -57,6 +60,7 @@ public class EnrollmentCommandController {
   // 3. 일괄 신청
   @Operation(summary = "장바구니 일괄 수강 신청", description = "내 장바구니에 있는 모든 과목을 신청합니다.")
   @PostMapping("/bulk")
+  @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<List<BulkEnrollmentResult>>> bulkRegister() {
     Long userId = getCurrentUserId();
     List<BulkEnrollmentResult> results = enrollmentCommandService.bulkRegisterFromCart(userId);
