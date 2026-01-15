@@ -13,27 +13,53 @@ import java.time.LocalTime;
 @Builder
 public class Facility {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "facility_id")
-    private Long facilityId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "facility_id")
+  private Long facilityId;
 
-    @Column(nullable = false, length = 50)
-    private String name;
+  @Column(nullable = false, length = 50)
+  private String name;
 
-    @Column(nullable = false, length = 20)
-    private String status; // AVAILABLE / UNAVAILABLE
+  // enum에서 검증된 값만 들어감
+  @Column(nullable = false, length = 20)
+  private String status;
 
-    @Column(name = "open_time", nullable = false)
-    private LocalTime openTime;
+  @Column(name = "open_time", nullable = false)
+  private LocalTime openTime;
 
-    @Column(name = "close_time", nullable = false)
-    private LocalTime closeTime;
+  @Column(name = "close_time", nullable = false)
+  private LocalTime closeTime;
 
-    @Column(name = "admin_id", nullable = false)
-    private Long adminId;
+  @Column(name = "admin_id", nullable = false)
+  private Long adminId;
 
-    public boolean isAvailable() {
-        return "AVAILABLE".equalsIgnoreCase(status);
-    }
+  @Column(nullable = false, length = 100)
+  private String location;
+
+  @Column(name = "facility_type", nullable = false, length = 50)
+  private String facilityType;
+
+  public boolean isAvailable() {
+    return FacilityStatus.AVAILABLE.name().equals(status);
+  }
+
+  // 수정용 메서드 (더티체킹)
+  public void update(
+      String name,
+      FacilityStatus status,
+      LocalTime openTime,
+      LocalTime closeTime,
+      String location,
+      String facilityType
+  ) {
+    this.name = name;
+    this.status = status.name(); // enum → String
+    this.openTime = openTime;
+    this.closeTime = closeTime;
+    this.location = location;
+    this.facilityType = facilityType;
+  }
 }
+
+

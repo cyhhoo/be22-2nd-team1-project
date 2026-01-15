@@ -12,7 +12,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "인증 조회 (Auth Query)", description = "로그인/로그아웃/토큰 재발급 API")
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class AuthQueryController {
 
   private final AuthQueryService authQueryService;
 
+  @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하여 Access Token과 Refresh Token을 발급받습니다.")
   @PostMapping("/login")
   @PreAuthorize("permitAll()")
   public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request) {
@@ -27,6 +31,7 @@ public class AuthQueryController {
     return buildTokenResponse(response);
   }
 
+  @Operation(summary = "토큰 재발급", description = "Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.")
   @PostMapping("/reissue")
   @PreAuthorize("permitAll()")
   public ResponseEntity<ApiResponse<TokenResponse>> reissue(
@@ -35,6 +40,7 @@ public class AuthQueryController {
     return buildTokenResponse(response);
   }
 
+  @Operation(summary = "로그아웃", description = "Refresh Token을 삭제하고 로그아웃 처리합니다.")
   @PostMapping("/logout")
   @PreAuthorize("permitAll()")
   public ResponseEntity<ApiResponse<Void>> logout(

@@ -87,6 +87,7 @@ public enum ErrorCode {
   MAX_CREDITS_EXCEEDED(HttpStatus.BAD_REQUEST, "ENROLL_004", "최대 수강 가능 학점을 초과했습니다."),
   NOT_YOUR_ENROLLMENT(HttpStatus.BAD_REQUEST, "ENROLL_005", "본인의 수강 내역만 취소할 수 있습니다."),
   ENROLL_NOT_FOUND(HttpStatus.NOT_FOUND, "ENROLL_006", "수강 신청 내역을 찾을 수 없습니다."),
+  ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "ENROLL_007", "이미 취소된 수강 내역입니다."),
 
   // Cart (CART)
   ALREADY_IN_CART(HttpStatus.BAD_REQUEST, "CART_001", "이미 장바구니에 담긴 과목입니다."),
@@ -102,11 +103,17 @@ public enum ErrorCode {
   RESERVATION_TIME_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "RES_102", "예약 가능 시간은 06:00~21:00이며 시작은 20:00까지 가능합니다."),
   RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RES_201", "예약 없음"),
   NOT_RESERVATION_OWNER(HttpStatus.FORBIDDEN, "RES_202", "본인 예약만 취소/변경 가능"),
+  NOT_MY_RESERVATION(HttpStatus.FORBIDDEN, "RES_203", "본인 예약 입니다."),
   RESERVED_TIME_CONFLICT(HttpStatus.CONFLICT, "RES_301", "이미 예약된 시간입니다."),
   ALREADY_APPROVED_RESERVATION(HttpStatus.CONFLICT, "RES_302", "동일 시간에 이미 승인된 예약이 존재합니다."),
   RESERVATION_APPROVED_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "RES_401", "승인된 예약은 취소할 수 없습니다."),
   RESERVATION_ONLY_WAITING_CAN_CHANGE(HttpStatus.BAD_REQUEST, "RES_402", "대기 상태만 변경 가능합니다."),
   RESERVATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "RES_403", "이미 처리된 예약입니다."),
+  FACILITY_NAME_DUPLICATED(HttpStatus.CONFLICT,"FAC_001","시설명은 중복될 수 없습니다."),
+  FACILITY_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN,"FAC_003","수정 권한이 없습니다."),
+  FACILITY_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN,"FAC_004","삭제 권한이 없습니다."),
+  INVALID_OPERATION_TIME(HttpStatus.BAD_REQUEST,"FAC_005","오픈 시간은 마감 시간보다 빨라야 합니다."),
+  INVALID_FACILITY_STATUS(HttpStatus.BAD_REQUEST,"FAC_006","상태는 AVAILABLE 또는 UNAVAILABLE만 가능합니다."),
 
   // Subject (SUBJECT)
   SUBJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "SUBJECT_001", "존재하지 않는 과목입니다."),

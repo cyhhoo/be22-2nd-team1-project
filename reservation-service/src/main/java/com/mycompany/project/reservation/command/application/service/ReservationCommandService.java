@@ -56,8 +56,7 @@ public class ReservationCommandService {
 
     // 5) 예약 생성/저장
     Reservation reservation = Reservation.create(
-        req.getFacilityId(), studentId, req.getReservationDate(), req.getStartTime()
-    );
+        req.getFacilityId(), studentId, req.getReservationDate(), req.getStartTime());
 
     // 6) 동시성 최종 방어
     try {
@@ -95,9 +94,22 @@ public class ReservationCommandService {
         .orElseThrow(() -> new BusinessException(ErrorCode.FACILITY_NOT_FOUND));
     validateFacilityOpenHours(facility, req.getStartTime());
 
-    if (reservationRepository.existsByFacilityIdAndReservationDateAndStartTime(
-        r.getFacilityId(), req.getReservationDate(), req.getStartTime())) {
-      throw new BusinessException(ErrorCode.RESERVED_TIME_CONFLICT);
+    // 변경 전과 동일한 날짜/시간인지 체크
+    boolean sameDateTime = Objects.equals(r.getReservationDate(), req.getReservationDate()) &&
+        Objects.equals(r.getStartTime(), req.getStartTime());
+
+    // 실제로 변경되는 경우에만 중복 체크
+    if (!sameDateTime) {
+      boolean duplicated = reservationRepository
+          .existsByFacilityIdAndReservationDateAndStartTimeAndReservationIdNot(
+              r.getFacilityId(),
+              req.getReservationDate(),
+              req.getStartTime(),
+              r.getReservationId());
+
+      if (duplicated) {
+        throw new BusinessException(ErrorCode.RESERVED_TIME_CONFLICT);
+      }
     }
 
     r.change(req.getReservationDate(), req.getStartTime());
@@ -118,8 +130,7 @@ public class ReservationCommandService {
     if (req.isApprove()) {
       boolean existsApproved = reservationRepository
           .existsByFacilityIdAndReservationDateAndStartTimeAndStatus(
-              r.getFacilityId(), r.getReservationDate(), r.getStartTime(), ReservationStatus.APPROVED
-          );
+              r.getFacilityId(), r.getReservationDate(), r.getStartTime(), ReservationStatus.APPROVED);
 
       if (existsApproved) {
         throw new BusinessException(ErrorCode.ALREADY_APPROVED_RESERVATION);
@@ -135,9 +146,9 @@ public class ReservationCommandService {
 
   private void validateRestriction(Long facilityId, LocalDate date) {
     boolean restricted = restrictionRepository.existsByFacilityIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
-        facilityId, date, date
-    );
-    if (restricted) throw new BusinessException(ErrorCode.FACILITY_RESTRICTED_PERIOD);
+        facilityId, date, date);
+    if (restricted)
+      throw new BusinessException(ErrorCode.FACILITY_RESTRICTED_PERIOD);
   }
 
   private void validateTimeRules(LocalTime startTime) {

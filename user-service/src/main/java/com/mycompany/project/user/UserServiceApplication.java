@@ -1,5 +1,6 @@
-package com.mycompany.schedule;
+package com.mycompany.project.user;
 
+import com.mycompany.project.common.config.GlobalFeignConfig;
 import org.mybatis.spring.annotation.MapperScan;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.boot.SpringApplication;
@@ -12,19 +13,18 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients
+@EnableFeignClients(defaultConfiguration = GlobalFeignConfig.class)
 @EnableJpaRepositories(basePackages = "com.mycompany.project")
 @EntityScan(basePackages = "com.mycompany.project")
 @MapperScan(basePackages = "com.mycompany.project", annotationClass = Mapper.class)
 @ComponentScan(basePackages = {
-        "com.mycompany.schedule",
-        "com.mycompany.project.schedule",
-        "com.mycompany.project.security",
+        "com.mycompany.project.user",
         "com.mycompany.project.common",
+        "com.mycompany.project.security",
         "com.mycompany.project.exception"
 })
-public class ScheduleServiceApplication {
+public class UserServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(ScheduleServiceApplication.class, args);
+        SpringApplication.run(UserServiceApplication.class, args);
     }
 }

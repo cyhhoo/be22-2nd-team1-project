@@ -8,8 +8,15 @@ import java.time.*;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     boolean existsByFacilityIdAndReservationDateAndStartTime(
-            Long facilityId, LocalDate date, LocalTime time
-    );
+            Long facilityId, LocalDate date, LocalTime time);
 
-    boolean existsByFacilityIdAndReservationDateAndStartTimeAndStatus(Long facilityId, LocalDate reservationDate, LocalTime startTime, ReservationStatus reservationStatus);
+    boolean existsByFacilityIdAndReservationDateAndStartTimeAndReservationIdNot(
+            Long facilityId,
+            LocalDate reservationDate,
+            LocalTime startTime,
+            Long reservationId);
+
+    boolean existsByFacilityIdAndReservationDateAndStartTimeAndStatus(Long facilityId, LocalDate reservationDate,
+            LocalTime startTime, ReservationStatus reservationStatus);
+
 }

@@ -7,12 +7,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.mycompany.project.course.dto.InternalCourseResponse;
 import com.mycompany.project.course.dto.StudentDetailResDTO;
 import com.mycompany.project.common.response.ApiResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -105,7 +106,7 @@ public class CourseController {
 
     @Operation(summary = "수강생 강제 취소", description = "특정 수강생의 수강 신청을 강제로 취소합니다. (사유 필수)")
     @PostMapping("/{courseId}/students/{studentId}/force-cancel")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<Void>> forceCancelStudent(
             @PathVariable Long courseId,
             @PathVariable Long studentId,
@@ -127,7 +128,7 @@ public class CourseController {
 
     @Operation(summary = "교사별 강좌 목록 조회", description = "특정 교사가 담당하는 강좌 목록을 페이징하여 조회합니다.")
     @GetMapping("/teacher/{teacherId}")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<com.mycompany.project.course.dto.CourseListResDTO>>> getCourseList(
             @PathVariable Long teacherId,
             @org.springframework.data.web.PageableDefault(size = 10) org.springframework.data.domain.Pageable pageable) {
@@ -154,7 +155,7 @@ public class CourseController {
 
     @Operation(summary = "교사 주간 시간표 조회", description = "교사의 주간 수업 일정(요일/교시별)을 조회합니다.")
     @GetMapping("/teacher/{teacherId}/timetable")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<com.mycompany.project.course.dto.TeacherTimetableResDTO>> getTeacherTimetable(
             @PathVariable Long teacherId,
             @RequestParam(defaultValue = "1") Long semester) { // Default semester should be handled properly in real
@@ -163,23 +164,27 @@ public class CourseController {
         return ResponseEntity.ok(ApiResponse.success(courseService.getTeacherTimetable(teacherId, semester)));
     }
 
+    @Hidden
     @GetMapping("/internal/{courseId}")
     public ResponseEntity<InternalCourseResponse> getInternalCourseInfo(@PathVariable Long courseId) {
         return ResponseEntity.ok(courseService.getInternalCourseInfo(courseId));
     }
 
+    @Hidden
     @PostMapping("/internal/{courseId}/increase-enrollment")
     public ResponseEntity<Void> increaseEnrollment(@PathVariable Long courseId) {
         courseService.increaseEnrollment(courseId);
         return ResponseEntity.ok().build();
     }
 
+    @Hidden
     @PostMapping("/internal/{courseId}/decrease-enrollment")
     public ResponseEntity<Void> decreaseEnrollment(@PathVariable Long courseId) {
         courseService.decreaseEnrollment(courseId);
         return ResponseEntity.ok().build();
     }
 
+    @Hidden
     @GetMapping("/internal/courses/academic-year/{academicYearId}")
     public ResponseEntity<java.util.List<InternalCourseResponse>> getInternalCoursesByAcademicYear(
             @PathVariable Long academicYearId) {

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,12 +22,14 @@ public class SubjectQueryController {
 
     @Operation(summary = "전체 과목 목록 조회", description = "등록된 모든 과목을 조회합니다.")
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<SubjectResponse>>> getAllSubjects() {
         return ResponseEntity.ok(ApiResponse.success(subjectQueryService.getAllSubjects()));
     }
 
     @Operation(summary = "과목 상세 조회", description = "특정 과목의 정보를 조회합니다.")
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SubjectResponse>> getSubject(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(subjectQueryService.getSubjectById(id)));
     }

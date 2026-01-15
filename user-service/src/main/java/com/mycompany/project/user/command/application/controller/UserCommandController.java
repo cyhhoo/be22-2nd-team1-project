@@ -4,6 +4,7 @@ import com.mycompany.project.common.response.ApiResponse;
 import com.mycompany.project.user.command.application.dto.UserRegisterRequest;
 import com.mycompany.project.user.command.application.dto.UserInternalActivateRequest;
 import com.mycompany.project.user.command.application.service.UserCommandService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class UserCommandController {
     return ResponseEntity.ok(ApiResponse.success(count + "명 수정 완료"));
   }
 
+  @Hidden
   @PostMapping("/internal/activate")
   public ResponseEntity<Void> internalActivate(@RequestBody UserInternalActivateRequest request) {
     userCommandService.internalActivate(request.getEmail(), request.getEncryptedPassword());

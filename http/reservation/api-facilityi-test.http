@@ -1,0 +1,121 @@
+### =========================
+### 시설 예약
+### =========================
+POST http://localhost:8080/reservations?studentId=1
+Authorization: Basic dGVzdDoxMjM0
+Content-Type: application/json
+
+{
+  "facilityId": 1,
+  "reservationDate": "2026-01-15",
+  "startTime": "10:00"
+}
+
+### =========================
+### 시설 예약 변경
+### =========================
+PUT http://localhost:8080/reservations/1?studentId=1
+Content-Type: application/json
+
+{
+  "reservationDate": "2026-01-16",
+  "startTime": "11:00"
+}
+
+### =========================
+### 시설 예약 취소
+### =========================
+DELETE http://localhost:8080/reservations/1?studentId=1
+
+
+### =========================
+### 시설 예약 승인
+### =========================
+PUT http://localhost:8080/reservations/1/approve?adminId=99
+Content-Type: application/json
+
+{
+  "approve": true,
+  "rejectionReason": null
+}
+
+### =========================
+### 시설 예약 거부
+### =========================
+PUT http://localhost:8080/reservations/1/approve?adminId=99
+Content-Type: application/json
+
+{
+  "approve": false,
+  "rejectionReason": "시설 점검으로 이용 불가"
+}
+### =========================
+### 시설 등록 (CREATE)
+### POST /facility?adminId=1
+### =========================
+POST http://localhost:8080/facility?adminId=1
+Content-Type: application/json
+
+{
+  "name": "컴퓨터실 A",
+  "openTime": "09:00",
+  "closeTime": "18:00",
+  "location": "1층",
+  "facilityType": "컴퓨터실"
+}
+
+###
+
+### =========================
+### 시설 등록 (중복 이름 테스트 - 실패해야 정상)
+### =========================
+POST http://localhost:8080/facility?adminId=1
+Content-Type: application/json
+
+{
+  "name": "컴퓨터실 A",
+  "openTime": "10:00",
+  "closeTime": "19:00",
+  "location": "2층",
+  "facilityType": "컴퓨터실"
+}
+
+### =========================
+### 시설 수정 (UPDATE)
+### PUT /facility/{facilityId}?adminId=1
+### - facilityId는 실제 DB에 생성된 값으로 바꿔
+### - status: AVAILABLE / UNAVAILABLE
+### =========================
+PUT http://localhost:8080/facility/1?adminId=1
+Content-Type: application/json
+
+{
+  "name": "컴퓨터실 A-수정",
+  "status": "AVAILABLE",
+  "openTime": "10:00",
+  "closeTime": "20:00",
+  "location": "2층",
+  "facilityType": "컴퓨터실"
+}
+
+### =========================
+### 시설 수정 (상태값 오류 테스트 - 실패해야 정상)
+### =========================
+PUT http://localhost:8080/facility/1?adminId=1
+Content-Type: application/json
+
+{
+  "name": "컴퓨터실 A-수정",
+  "status": "OPEN",
+  "openTime": "10:00",
+  "closeTime": "20:00",
+  "location": "2층",
+  "facilityType": "컴퓨터실"
+}
+
+### =========================
+### 시설 삭제 (DELETE)
+### DELETE /facility/{facilityId}?adminId=1
+### =========================
+DELETE http://localhost:8080/facility/1?adminId=1
+
