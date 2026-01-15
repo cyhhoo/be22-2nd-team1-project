@@ -27,20 +27,20 @@ Content-Type: application/json
 Authorization: Bearer {{admin_access_token}}
 
 {
-  "email": "teacher1@test.com",
-  "password": "password1234!",
+  "email": "teacher2@test.com",
+  "password": "password1534!",
   "name": "김선생",
   "role": "TEACHER",
-  "birthDate": "1990-01-01",
+  "birthDate": "1991-01-01",
   "teacherDetail": {
     "subject": "MATH"
   }
 }
 
 > {%
-    client.global.set("teacher_email", "teacher1@test.com");
+    client.global.set("teacher_email", "teacher2@test.com");
     client.global.set("teacher_password", "password1234!");
-    client.global.set("teacher_auth_code", "900101");
+    client.global.set("teacher_auth_code", "950101");
 %}
 
 ### 0-3. 교사 계정 활성화
@@ -50,7 +50,7 @@ Content-Type: application/json
 {
   "email": "{{teacher_email}}",
   "name": "김선생",
-  "birthDate": "1990-01-01",
+  "birthDate": "1991-01-01",
   "authCode": "{{teacher_auth_code}}",
   "newPassword": "{{teacher_password}}"
 }

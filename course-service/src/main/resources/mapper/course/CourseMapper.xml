@@ -44,6 +44,114 @@
           AND c.status NOT IN ('CANCELED', 'REFUSE')
     </select>
 
+    <!-- ========================================= -->
+    <!-- ResultMap 정의 -->
+    <!-- ========================================= -->
+    
+    <!-- 강좌 목록 조회용 ResultMap -->
+    <resultMap id="CourseListResultMap" type="com.mycompany.project.course.dto.CourseListResDTO">
+        <id property="courseId" column="course_id" />
+        <result property="name" column="name" />
+        <result property="courseType" column="course_type" />
+        <result property="status" column="status" />
+        <result property="currentCount" column="current_count" />
+        <result property="maxCapacity" column="max_capacity" />
+        <result property="teacherName" column="teacher_name" />
+    </resultMap>
+    
+    <!-- 수강생 상세 조회용 ResultMap -->
+    <resultMap id="StudentDetailResultMap" type="com.mycompany.project.course.dto.StudentDetailResDTO">
+        <result property="studentId" column="user_id" />
+        <result property="studentName" column="student_name" />
+        <result property="memo" column="memo" />
+        <result property="attendancePresent" column="attendance_present" />
+        <result property="attendanceLate" column="attendance_late" />
+        <result property="attendanceAbsent" column="attendance_absent" />
+        <result property="assignmentTotal" column="assignment_total" />
+        <result property="assignmentSubmitted" column="assignment_submitted" />
+    </resultMap>
+
+    <!-- ========================================= -->
+    <!-- 조회 쿼리 (READ) -->
+    <!-- ========================================= -->
+
+    <!-- 교사별 강좌 목록 조회 (페이징) -->
+    <select id="findCourseListByTeacher" resultMap="CourseListResultMap">
+        SELECT 
+            c.course_id,
+            c.name,
+            c.course_type,
+            c.status,
+            c.current_count,
+            c.max_capacity,
+            u.name AS teacher_name
+        FROM tbl_course c
+        LEFT JOIN tbl_user u ON c.teacher_detail_id = u.user_id
+        WHERE c.teacher_detail_id = #{teacherId}
+        ORDER BY c.course_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 교사별 강좌 목록 전체 개수 조회 (페이징용) -->
+    <select id="countCourseListByTeacher" resultType="long">
+        SELECT COUNT(*)
+        FROM tbl_course c
+        WHERE c.teacher_detail_id = #{teacherId}
+    </select>
+
+    <!-- 전체 강좌 목록 조회 (관리자, 페이징) -->
+    <select id="findAllCourseList" resultMap="CourseListResultMap">
+        SELECT 
+            c.course_id,
+            c.name,
+            c.course_type,
+            c.status,
+            c.current_count,
+            c.max_capacity,
+            u.name AS teacher_name
+        FROM tbl_course c
+        LEFT JOIN tbl_user u ON c.teacher_detail_id = u.user_id
+        ORDER BY c.course_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 전체 강좌 목록 전체 개수 조회 (페이징용) -->
+    <select id="countAllCourseList" resultType="long">
+        SELECT COUNT(*)
+        FROM tbl_course
+    </select>
+
+    <!-- 수강생 상세 정보 조회 (강좌 ID + 학생 User ID) -->
+    <select id="findStudentDetailByCourseAndStudent" resultMap="StudentDetailResultMap">
+        SELECT 
+            e.user_id,
+            u.name AS student_name,
+            e.memo,
+            COALESCE(att_stats.present_count, 0) AS attendance_present,
+            COALESCE(att_stats.late_count, 0) AS attendance_late,
+            COALESCE(att_stats.absent_count, 0) AS attendance_absent,
+            0 AS assignment_total,
+            0 AS assignment_submitted
+        FROM tbl_enrollment e
+        INNER JOIN tbl_user u ON e.user_id = u.user_id
+        LEFT JOIN (
+            SELECT 
+                enrollment_id,
+                SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) AS present_count,
+                SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) AS late_count,
+                SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) AS absent_count
+            FROM tbl_attendance
+            GROUP BY enrollment_id
+        ) att_stats ON e.enrollment_id = att_stats.enrollment_id
+        WHERE e.course_id = #{courseId}
+          AND e.user_id = #{studentId}
+        LIMIT 1
+    </select>
+
+    <!-- ========================================= -->
+    <!-- 기존 검증 쿼리 -->
+    <!-- ========================================= -->
+
     <!-- 교사 주간 시간표 조회 (폐강/반려 제외) -->
     <select id="findTeacherTimetable" resultType="java.util.Map">
         SELECT

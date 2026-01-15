@@ -1,151 +1,407 @@
-@baseUrl = http://localhost:8080
-@email = test@example.com
-@password = Password123!
-@name = Test User
-@birthDate = 2005-01-01
-@role = STUDENT
-# registerUser() uses birthDate.substring(2), so 2005-01-01 -> 05-01-01
-@authCode = 05-01-01
-@accessToken =
-@refreshToken =
-@teacherEmail = teacher@schoolmate.test
-@teacherPassword = Password123!
-@teacherUserId = 10
-@teacherAccessToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNzY4MTM2ODIxLCJleHAiOjE3NjgxMzg2MjEsImF1dGgiOiJTVFVERU5UIn0.pK21IhEeBd_6QcI6pkZHQwaV3_mHYqJcfAlHxvTz0_d975X9Dn7OqfeMq8iKSXu8ewNwlaFT_hYEGQHEMrwAdg
-@adminEmail = admin@schoolmate.test
-@adminPassword = Password123!
-@adminUserId = 1
-@adminAccessToken =
+### 전역 변수 설정
+@host = http://localhost:8000
+@contentType = application/json
+@course_id = 4
+@student_id = 3
 
-
-### 0. 회원가입 (테스트 계정 생성)
-POST http://localhost:8080/api/auth/signup
-Content-Type: application/json
+### 0-1. 관리자 로그인 (필수 Setup)
+POST {{host}}/auth/login
+Content-Type: {{contentType}}
 
 {
-  "email": "teacher200@school.com",
-  "password": "password123",
-  "name": "Teacher Kim",
-  "birthDate": "19901010",
-  "role": "TEACHER"
-}
-
-### 0. 로그인 (토큰 발급)
-POST http://localhost:8080/api/auth/login
-Content-Type: application/json
-
-{
-  "email": "teacher200@school.com",
-  "password": "password123"
+  "email": "admin@test.com",
+  "password": "admin1234"
 }
 
 > {%
-client.global.set("auth_token", response.body.data.accessToken);
+    client.global.set("admin_access_token", response.body.data.accessToken);
+    client.log("Admin Token Captured");
+%}
+
+### 0-3. 학년도 생성 (필수 Setup - 관리자)
+POST {{host}}/schedule/years
+Authorization: Bearer {{admin_access_token}}
+Content-Type: {{contentType}}
+
+{
+  "year": 2026,
+  "semester": 1,
+  "startDate": "2026-03-01",
+  "endDate": "2026-06-30"
+}
+
+> {%
+    client.global.set("academic_year_id", response.body.data);
+    client.log("Academic Year Created: " + response.body.data);
+%}
+
+### 0-4. 과목 생성 (필수 Setup - 관리자)
+POST {{host}}/subjects
+Authorization: Bearer {{admin_access_token}}
+Content-Type: {{contentType}}
+
+{
+    "name": "Computer Science"
+}
+
+> {%
+    client.global.set("subject_id", response.body.data);
+    client.log("Subject Created: " + response.body.data);
 %}
 
 
-### 1. 강좌 개설 신청 (PENDING)
-POST http://localhost:8080/api/v1/courses
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+### 2-1. 교사 회원가입 (관리자가 등록)
+POST {{host}}/user/register
+Authorization: Bearer {{admin_access_token}}
+Content-Type: {{contentType}}
 
 {
-  "name": "Java Programming Basic",
+  "email": "teacher_test@test.com",
+  "password": "password1234!",
+  "name": "박교사",
+  "role": "TEACHER",
+  "birthDate": "1985-05-10",
+  "teacherDetail": {
+    "subjectId": {{subject_id}}
+  }
+}
+
+### 2-2. 교사 계정 활성화
+POST {{host}}/auth/activate
+Content-Type: {{contentType}}
+
+{
+  "email": "teacher_test@test.com",
+  "name": "박교사",
+  "birthDate": "1985-05-10",
+  "authCode": "850510",
+  "newPassword": "password1234!"
+}
+
+### 2-3. 교사 로그인
+POST {{host}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "teacher_test@test.com",
+  "password": "password1234!"
+}
+
+> {%
+    client.global.set("teacher_token", response.body.data.accessToken);
+    client.global.set("teacher_id", response.body.data.userId);
+%}
+
+### 2-1. 교사 회원가입 (관리자가 등록)
+POST {{host}}/user/register
+Authorization: Bearer {{admin_access_token}}
+Content-Type: {{contentType}}
+
+{
+  "email": "teacher_test2@test.com",
+  "password": "password1234!",
+  "name": "김교사",
+  "role": "TEACHER",
+  "birthDate": "1985-05-10",
+  "teacherDetail": {
+    "subjectId": {{subject_id}}
+  }
+}
+
+### 2-2. 교사 계정 활성화
+POST {{host}}/auth/activate
+Content-Type: {{contentType}}
+
+{
+  "email": "teacher_test2@test.com",
+  "name": "김교사",
+  "birthDate": "1985-05-10",
+  "authCode": "850510",
+  "newPassword": "password1234!"
+}
+
+### 2-3. 교사 로그인
+POST {{host}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "teacher_test2@test.com",
+  "password": "password1234!"
+}
+
+> {%
+    client.global.set("teacher_token2", response.body.data.accessToken);
+    client.global.set("teacher_id2", response.body.data.userId);
+%}
+
+
+### 2-3-1. 교사2 ID 조회 (토큰을 사용하여 내 정보 조회)
+GET {{host}}/user/me
+Authorization: Bearer {{teacher_token2}}
+
+> {%
+    // 응답 바디의 구조에 따라 userId 또는 id를 추출
+    // 예: response.body.data.userId
+    client.global.set("teacher_id2", response.body.data.userId);
+%}
+
+### 2-3-2. 교사 ID 조회 (토큰을 사용하여 내 정보 조회)
+GET {{host}}/user/me
+Authorization: Bearer {{teacher_token2}}
+
+> {%
+    // 응답 바디의 구조에 따라 userId 또는 id를 추출
+    // 예: response.body.data.userId
+    client.global.set("teacher_id", response.body.data.userId);
+%}
+
+
+### 0-5. 학생 로그인 (수강생 테스트용)
+POST {{host}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "student1@test.com",
+  "password": "password1234!"
+}
+
+> {%
+    client.global.set("student_access_token", response.body.data.accessToken);
+%}
+
+### 2-4-1. 강좌 개설 신청1 (교사1)
+POST {{host}}/courses
+Authorization: Bearer {{teacher_token}}
+Content-Type: {{contentType}}
+
+{
+  "name": "자바 마스터 클래스 1반",
   "courseType": "MANDATORY",
-  "maxCapacity": 30,
-  "tuition": 150000,
-  "subjectId": 10,
-  "academicYearId": 1,
-  "teacherDetailId": 200,
+  "maxCapacity": 3,
+  "tuition": 200000,
+  "subjectId": {{subject_id}},
+  "academicYearId": {{academic_year_id}},
+  "teacherDetailId": {{teacher_id}},
   "timeSlots": [
     {
-      "dayOfWeek": "MON",
+      "dayOfWeek": "MONDAY",
       "period": 1,
-      "classroom": "Room 101"
-    },
-    {
-      "dayOfWeek": "WED",
-      "period": 2,
-      "classroom": "Room 101"
+      "classroom": "IT관 101호"
     }
   ]
 }
 
-### 2. 강좌 승인 (PENDING -> OPEN)
-# Course ID를 실제 생성된 ID로 변경하여 테스트하세요.
-POST http://localhost:8080/api/v1/courses/1/approve
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+### 2-4-2. 강좌 개설 신청2 (교사1)
+POST {{host}}/courses
+Authorization: Bearer {{teacher_token2}}
+Content-Type: {{contentType}}
 
-### 3. 강좌 반려 (PENDING -> REFUSE)
-POST http://localhost:8080/api/v1/courses/2/refuse?reason=Curriculum+Insufficient
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+{
+  "name": "SQL 클래스 3반",
+  "courseType": "MANDATORY",
+  "maxCapacity": 30,
+  "tuition": 100000,
+  "subjectId": {{subject_id}},
+  "academicYearId": {{academic_year_id}},
+  "teacherDetailId": {{teacher_id2}},
+  "timeSlots": [
+    {
+      "dayOfWeek": "MONDAY",
+      "period": 7,
+      "classroom": "IT관 206호"
+    }
+  ]
+}
 
-### 4. 강좌 목록 조회 (관리자 - 전체)
-GET http://localhost:8080/api/v1/courses?page=0&size=10
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+### 2-4-3. 강좌 개설 신청3 (교사1)
+POST {{host}}/courses
+Authorization: Bearer {{teacher_token}}
+Content-Type: {{contentType}}
 
-### 5. 강좌 목록 조회 (교사별)
-GET http://localhost:8080/api/v1/courses/teacher/200?page=0&size=10
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+{
+  "name": "자바 마스터 클래스 3반",
+  "courseType": "MANDATORY",
+  "maxCapacity": 3,
+  "tuition": 200000,
+  "subjectId": {{subject_id}},
+  "academicYearId": {{academic_year_id}},
+  "teacherDetailId": {{teacher_id}},
+  "timeSlots": [
+    {
+      "dayOfWeek": "FRIDAY",
+      "period": 3,
+      "classroom": "IT관 101호"
+    }
+  ]
+}
 
-### 6. 강좌 상태 수동 변경 (OPEN -> CLOSED)
-PUT http://localhost:8080/api/v1/courses/1/status?status=CLOSED
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+### 2-4-4. 중복 강좌 개설 (교사2)
+POST {{host}}/courses
+Authorization: Bearer {{teacher_token2}}
+Content-Type: {{contentType}}
 
-### 7. 교사 주간 시간표 조회
-GET http://localhost:8080/api/v1/courses/teacher/200/timetable?semester=1
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+{
+  "name": "중복 시간표 강좌 개설용",
+  "courseType": "MANDATORY",
+  "maxCapacity": 3,
+  "tuition": 200000,
+  "subjectId": {{subject_id}},
+  "academicYearId": {{academic_year_id}},
+  "teacherDetailId": {{teacher_id2}},
+  "timeSlots": [
+    {
+      "dayOfWeek": "MONDAY",
+      "period": 1,
+      "classroom": "IT관 102호"
+    }
+  ]
+}
 
-### 8. 강좌 변경 요청 (정원 증가)
-POST http://localhost:8080/api/v1/courses/1/request-update?reason=Capacity+Increase
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+
+### 1-1. 강좌 목록 조회 및 Main Course ID 획득
+GET {{host}}/courses/teacher/{{teacher_id}}
+Authorization: Bearer {{teacher_access_token}}
+
+> {%
+    // 목록 첫번째 강좌 ID 획득 (최신 생성된 강좌)
+    client.global.set("course_id", response.body.data.content[0].courseId);
+    client.log("Main Course ID Captured: " + response.body.data.content[0].courseId);
+%}
+
+### 2. 강좌 개설 신청 (Sub - 반려용)
+POST {{host}}/courses
+Content-Type: {{contentType}}
+Authorization: Bearer {{teacher_access_token}}
+
+{
+  "name": "Bad Course for Rejection Test",
+  "courseType": "ELECTIVE",
+  "maxCapacity": 10,
+  "tuition": 50000,
+  "subjectId": {{subject_id}},
+  "academicYearId": {{academic_year_id}},
+  "teacherDetailId": {{teacher_id}},
+  "timeSlots": [
+    {
+      "dayOfWeek": "MONDAY",
+      "period": 5,
+      "classroom": "Room 102"
+    }
+  ]
+}
+
+### 2-1. 강좌 목록 조회 및 Sub Course ID 획득
+GET {{host}}/courses/teacher/{{teacher_id}}
+Authorization: Bearer {{teacher_access_token}}
+
+> {%
+    // 목록 첫번째 강좌 ID 획득 (최신 생성된 강좌 = Sub Course)
+    client.global.set("course_id_reject", response.body.data.content[0].courseId);
+    client.log("Sub Course ID for Rejection Captured: " + response.body.data.content[0].courseId);
+%}
+
+### 3. 강좌 승인 (PENDING -> OPEN)
+POST http://localhost:8000/courses/{{course_id}}/approve
+Authorization: Bearer {{admin_access_token}}
+
+### 4. 강좌 반려 (PENDING -> REFUSE)
+POST {{host}}/courses/{{course_id}}/refuse?reason=Curriculum+Insufficient
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_access_token}}
+
+### 5. 강좌 목록 조회 (관리자 - 전체)
+GET {{host}}/courses?page=0&size=10
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_access_token}}
+
+### 6. 강좌 목록 조회 (교사별)
+GET {{host}}/courses/teacher/{{teacher_id}}?page=0&size=10
+Content-Type: {{contentType}}
+Authorization: Bearer {{teacher_access_token}}
+
+### 7. 강좌 상태 수동 변경 (OPEN -> CLOSED)
+# 주의: 이 동작을 수행하면 이후 수강신청 등에서 에러가 날 수 있음
+PUT {{host}}/courses/{{course_id}}/status?status=CLOSED
+Content-Type: {{contentType}}
+Authorization: Bearer {{teacher_access_token}}
+
+### 7-1. 강좌 상태 다시 오픈 (CLOSED -> OPEN) - 테스트 복구
+PUT {{host}}/courses/{{course_id}}/status?status=OPEN
+Content-Type: {{contentType}}
+Authorization: Bearer {{teacher_access_token}}
+
+### 8. 교사 주간 시간표 조회
+GET {{host}}/courses/teacher/{{teacher_id}}/timetable?semester=1
+Content-Type: {{contentType}}
+Authorization: Bearer {{teacher_access_token}}
+
+### 9. 강좌 변경 요청 (정원 증가)
+POST {{host}}/courses/{{course_id}}/request-update?reason=Capacity+Increase
+Content-Type: {{contentType}}
+Authorization: Bearer {{teacher_access_token}}
 
 {
   "maxCapacity": 50,
   "tuition": 150000
 }
 
-### 9. 강좌 변경 요청 승인
-# Request ID를 실제 생성된 ID로 변경하세요.
-POST http://localhost:8080/api/v1/courses/requests/1/approve
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+> {%
+    client.global.set("requestId", response.body.data);
+    client.log("Captured Request ID: " + response.body.data);
+%}
 
-### 10. 강좌 변경 요청 반려
-POST http://localhost:8080/api/v1/courses/requests/1/reject?reason=No+Budget
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+### 10. 강좌 변경 요청 승인
+POST {{host}}/courses/requests/{{requestId}}/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{admin_access_token}}
 
-### 11. 담당 교사 변경
-POST http://localhost:8080/api/v1/courses/1/change-teacher?newTeacherId=201
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+### 11. 담당 교사 변경 (교사2 필요, 생략 시 에러 가능성 있음)
+ #newTeacherId는 유효한 다른 교사 ID여야 함. 테스트를 위해 현재 교사 ID 그대로 사용 시도하거나 생략 권장.
+ POST {{host}}/courses/{{course_id}}/change-teacher?newTeacherId={{teacher_id}}
+ Content-Type: {{contentType}}
+ Authorization: Bearer {{admin_access_token}}
 
-### 12. 강좌 폐강 (관리자 삭제)
-POST http://localhost:8080/api/v1/courses/1/cancel?reason=Low+Enrollment
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+### 12. 강좌 폐강 (관리자 삭제) - 마지막에 수행 권장
+ POST {{host}}/courses/{{course_id}}/cancel?reason=Low+Enrollment
+ Content-Type: {{contentType}}
+ Authorization: Bearer {{admin_access_token}}
 
-### 13. 수강생 상세 조회
-GET http://localhost:8080/api/v1/courses/1/students/50
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+### 13. 수강 신청 (Setup for Student Tests)
+POST {{host}}/enrollments
+Authorization: Bearer {{student_access_token}}
+Content-Type: {{contentType}}
 
-### 14. 수강생 메모 수정
-PUT http://localhost:8080/api/v1/courses/1/students/50/memo
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+{
+    "courseId": {{course_id}}
+}
+
+> {%
+    client.global.set("enrollment_id", response.body.data);
+%}
+
+### 13-1. 학생 ID 조회
+GET {{host}}/user/me
+Authorization: Bearer {{student_access_token}}
+
+> {%
+    // Controller expects Long ID, so use 'id' (PK), not 'userId' (String Login ID)
+    client.global.set("student_id", response.body.data.id);
+    client.log("Student PK Captured: " + response.body.data.id);
+%}
+
+### 14. 수강생 상세 조회
+GET {{host}}/courses/{{course_id}}/students/{{student_id}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{teacher_access_token}}
+
+### 15. 수강생 메모 수정
+PUT {{host}}/courses/{{course_id}}/students/{{student_id}}/memo
+Content-Type: text/plain; charset=UTF-8
+Authorization: Bearer {{teacher_access_token}}
 
 학생이 수업 태도가 매우 우수함.
 
-### 15. 수강생 강제 취소
-POST http://localhost:8080/api/v1/courses/1/students/50/force-cancel?reason=Attendance+Issue
-Content-Type: application/json
-Authorization: Bearer {{auth_token}}
+### 16. 수강생 강제 취소
+POST {{host}}/courses/{{course_id}}/students/{{student_id}}/force-cancel?reason=Attendance+Issue
+Content-Type: {{contentType}}
+Authorization: Bearer {{teacher_access_token}}

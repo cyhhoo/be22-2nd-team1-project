@@ -89,7 +89,7 @@ public class CourseController {
 
     @Operation(summary = "강좌 삭제 (DeleteCourse)", description = "운영 중인 강좌를 폐강(삭제) 처리합니다. (상태: CANCELED, 수강생 일괄 취소)")
     @PostMapping("/{courseId}/cancel")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteCourse(@PathVariable Long courseId, @RequestParam String reason) {
         courseService.deleteCourse(courseId, reason);
         return ResponseEntity.ok(ApiResponse.success(null));
@@ -97,7 +97,7 @@ public class CourseController {
 
     @Operation(summary = "수강생 상세 조회", description = "수강생의 출결 및 과제 현황, 메모를 조회합니다.")
     @GetMapping("/{courseId}/students/{studentId}")
-    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<ApiResponse<StudentDetailResDTO>> getStudentDetail(
             @PathVariable Long courseId,
             @PathVariable Long studentId) {
@@ -117,7 +117,7 @@ public class CourseController {
 
     @Operation(summary = "수강생 메모 수정", description = "수강생에 대한 특이사항 메모를 수정합니다.")
     @PutMapping("/{courseId}/students/{studentId}/memo")
-    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<ApiResponse<Void>> updateStudentMemo(
             @PathVariable Long courseId,
             @PathVariable Long studentId,
@@ -145,7 +145,7 @@ public class CourseController {
 
     @Operation(summary = "강좌 상태 변경", description = "강좌의 상태를 수동으로 변경합니다. (예: 조기 마감, 재오픈)")
     @PutMapping("/{courseId}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<ApiResponse<Void>> changeCourseStatus(
             @PathVariable Long courseId,
             @RequestParam com.mycompany.project.course.entity.CourseStatus status) {
