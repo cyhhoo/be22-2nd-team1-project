@@ -523,6 +523,7 @@ public class CourseService {
                 .collect(Collectors.toList());
 
         return com.mycompany.project.course.dto.TeacherTimetableResDTO.builder()
+                .timeSlots(timeSlots)
                 .build();
     }
 
@@ -539,6 +540,17 @@ public class CourseService {
         response.setSubjectId(course.getSubjectId());
         response.setCourseType(course.getCourseType());
         response.setStatus(course.getStatus());
+        response.setTargetGrade(course.getAcademicYearId().intValue()); // 임시: academicYearId를 학년으로 사용
+
+        List<InternalCourseResponse.TimeSlotResponse> slots = course.getTimeSlots().stream()
+                .map(ts -> {
+                    InternalCourseResponse.TimeSlotResponse slot = new InternalCourseResponse.TimeSlotResponse();
+                    slot.setDayOfWeek(ts.getDayOfWeek());
+                    slot.setPeriod(ts.getPeriod());
+                    return slot;
+                }).collect(Collectors.toList());
+        response.setTimeSlots(slots);
+
         return response;
     }
 
