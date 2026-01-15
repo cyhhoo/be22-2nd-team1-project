@@ -1,5 +1,7 @@
 package com.mycompany.project.course.entity;
 
+import com.mycompany.project.exception.BusinessException;
+import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.user.command.domain.aggregate.TeacherDetail;
 import jakarta.persistence.*;
 import lombok.*;
@@ -94,7 +96,7 @@ public class Course {
     // 1. 방어 로직: 이미 꽉 찼는지 확인
     if (this.currentCount >= this.maxCapacity) {
       this.status = CourseStatus.CLOSED; // 상태 업데이트
-      throw new IllegalStateException("수강 정원이 초과되었습니다.");
+      throw new BusinessException(ErrorCode.COURSE_CAPACITY_FULL);
     }
 
     // 2. 인원 증가
