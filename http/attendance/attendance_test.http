@@ -40,3 +40,5 @@ Authorization: Bearer {{access_token_student}}
 POST {{host}}/api/v1/attendance/corrections/1/approve
 Content-Type: application/json
 Authorization: Bearer {{access_token_teacher}}
+
+
