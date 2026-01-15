@@ -14,7 +14,7 @@ Content-Type: application/json
 }
 
 > {%
-  client.global.set("admin_access_token", response.body.data.accessToken);
+    client.global.set("admin_access_token", response.body.data.accessToken);
 %}
 
 ### 0-1. 관리자 프로필 (userId)
@@ -22,7 +22,7 @@ GET {{baseUrl}}/user/me
 Authorization: Bearer {{admin_access_token}}
 
 > {%
-  client.global.set("admin_id", response.body.data.userId);
+    client.global.set("admin_id", response.body.data.userId);
 %}
 
 ### 1. 과목 생성
@@ -35,7 +35,7 @@ Content-Type: application/json
 }
 
 > {%
-  client.global.set("subject_id", response.body.data);
+    client.global.set("subject_id", response.body.data);
 %}
 
 ### 2. 교사 등록
@@ -58,9 +58,9 @@ Content-Type: application/json
 }
 
 > {%
-  client.global.set("teacher_email", "teacher1@test.com");
-  client.global.set("teacher_password", "password1234!");
-  client.global.set("teacher_auth_code", "900101");
+    client.global.set("teacher_email", "teacher1@test.com");
+    client.global.set("teacher_password", "password1234!");
+    client.global.set("teacher_auth_code", "900101");
 %}
 
 ### 3. 교사 계정 활성화
@@ -85,7 +85,7 @@ Content-Type: application/json
 }
 
 > {%
-  client.global.set("teacher_access_token", response.body.data.accessToken);
+    client.global.set("teacher_access_token", response.body.data.accessToken);
 %}
 
 ### 4-1. 교사 프로필 (userId = teacherDetailId)
@@ -93,7 +93,7 @@ GET {{baseUrl}}/user/me
 Authorization: Bearer {{teacher_access_token}}
 
 > {%
-  client.global.set("teacher_id", response.body.data.userId);
+    client.global.set("teacher_id", response.body.data.userId);
 %}
 
 ### 5. 학생 등록
@@ -115,9 +115,9 @@ Content-Type: application/json
 }
 
 > {%
-  client.global.set("student_email", "student1@test.com");
-  client.global.set("student_password", "password1234!");
-  client.global.set("student_auth_code", "050101");
+    client.global.set("student_email", "student1@test.com");
+    client.global.set("student_password", "password1234!");
+    client.global.set("student_auth_code", "050101");
 %}
 
 ### 6. 학생 계정 활성화
@@ -142,7 +142,7 @@ Content-Type: application/json
 }
 
 > {%
-  client.global.set("student_access_token", response.body.data.accessToken);
+    client.global.set("student_access_token", response.body.data.accessToken);
 %}
 
 ### 7-1. 학생 프로필 (userId)
@@ -150,7 +150,7 @@ GET {{baseUrl}}/user/me
 Authorization: Bearer {{student_access_token}}
 
 > {%
-  client.global.set("student_id", response.body.data.userId);
+    client.global.set("student_id", response.body.data.userId);
 %}
 
 ### 8. 학년도 생성
@@ -166,7 +166,7 @@ Content-Type: application/json
 }
 
 > {%
-  client.global.set("academic_year_id", response.body.data);
+    client.global.set("academic_year_id", response.body.data);
 %}
 
 ### 9. 강좌 개설 (교사)
@@ -196,7 +196,7 @@ GET {{baseUrl}}/courses/teacher/{{teacher_id}}
 Authorization: Bearer {{teacher_access_token}}
 
 > {%
-  client.global.set("course_id", response.body.data.content[0].courseId);
+    client.global.set("course_id", response.body.data.content[0].courseId);
 %}
 
 ### 9-2. 강좌 승인 (관리자)
@@ -213,7 +213,7 @@ Content-Type: application/json
 }
 
 > {%
-  client.global.set("enrollment_id", response.body.data);
+    client.global.set("enrollment_id", response.body.data);
 %}
 
 ### 11. 출결 코드 조회 (활성)
@@ -221,11 +221,11 @@ GET {{baseUrl}}/attendance/codes?activeOnly=true
 Authorization: Bearer {{teacher_access_token}}
 
 > {%
-  const codes = response.body.data || [];
-  const present = codes.find(c => c.code === "PRESENT") || codes[0];
-  const alt = codes.find(c => c.code !== present.code) || present;
-  client.global.set("present_code_id", present.attendanceCodeId);
-  client.global.set("alt_code_id", alt.attendanceCodeId);
+    const codes = response.body.data || [];
+    const present = codes.find(c => c.code === "PRESENT") || codes[0];
+    const alt = codes.find(c => c.code !== present.code) || present;
+    client.global.set("present_code_id", present.attendanceCodeId);
+    client.global.set("alt_code_id", alt.attendanceCodeId);
 %}
 
 ### 12. 출석부 자동 생성
@@ -264,7 +264,7 @@ GET {{baseUrl}}/attendance?courseId={{course_id}}&fromDate={{classDate}}&toDate=
 Authorization: Bearer {{teacher_access_token}}
 
 > {%
-  client.global.set("attendance_id", response.body.data[0].attendanceId);
+    client.global.set("attendance_id", response.body.data[0].attendanceId);
 %}
 
 ### 15. 출결 확정 (담임)
@@ -296,7 +296,7 @@ GET {{baseUrl}}/attendance/corrections?status=PENDING
 Authorization: Bearer {{teacher_access_token}}
 
 > {%
-  client.global.set("correction_request_id", response.body.data[0].requestId);
+    client.global.set("correction_request_id", response.body.data[0].requestId);
 %}
 
 ### 16-2. 정정 요청 처리 (관리자 승인)
@@ -337,3 +337,26 @@ Content-Type: application/json
 ### 17-1. 마감 이력 조회
 GET {{baseUrl}}/attendance/closures?courseId={{course_id}}
 Authorization: Bearer {{admin_access_token}}
+
+### 출결 확정 실패 (담임 권한 없음)
+POST {{baseUrl}}/attendance/confirmations
+Authorization: Bearer {{student_access_token}}
+Content-Type: application/json
+
+{
+  "courseId": 1,
+  "classDate": "2026-01-14",
+  "period": 2,
+  "userId": 1
+}
+
+### 정정 요청 처리 실패 (관리자 권한 없음)
+PATCH {{baseUrl}}/attendance/corrections/{{correction_request_id}}
+Authorization: Bearer {{teacher_access_token}}
+Content-Type: application/json
+
+{
+  "approved": true,
+  "adminComment": "승인",
+  "adminId": {{teacher_id}}
+}
