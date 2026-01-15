@@ -29,3 +29,11 @@ logging:
   level:
     root: INFO
     com.mycompany: DEBUG
+
+# Swagger(SpringDoc) 설정 추가
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true

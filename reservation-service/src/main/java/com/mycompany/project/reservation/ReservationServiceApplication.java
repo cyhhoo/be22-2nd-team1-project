@@ -1,4 +1,4 @@
-package com.mycompany.course;
+package com.mycompany.project.reservation;
 
 import com.mycompany.project.common.config.GlobalFeignConfig;
 import org.mybatis.spring.annotation.MapperScan;
@@ -18,14 +18,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan(basePackages = "com.mycompany.project")
 @MapperScan(basePackages = "com.mycompany.project", annotationClass = Mapper.class)
 @ComponentScan(basePackages = {
-        "com.mycompany.course",
-        "com.mycompany.project.course",
-        "com.mycompany.project.security",
+        "com.mycompany.project.reservation",
         "com.mycompany.project.common",
+        "com.mycompany.project.security",
         "com.mycompany.project.exception"
 })
-public class CourseServiceApplication {
+public class ReservationServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(CourseServiceApplication.class, args);
+        SpringApplication.run(ReservationServiceApplication.class, args);
     }
 }

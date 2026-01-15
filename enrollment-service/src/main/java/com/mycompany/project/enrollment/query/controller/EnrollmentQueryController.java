@@ -9,6 +9,7 @@ import com.mycompany.project.enrollment.query.service.EnrollmentQueryService;
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.security.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,7 @@ public class EnrollmentQueryController {
   }
 
   // Internal API for other services (Feign)
+  @Hidden
   @GetMapping("/internal/course/{courseId}")
   public ResponseEntity<List<InternalEnrollmentResponse>> getInternalEnrollments(
       @PathVariable Long courseId,
@@ -66,11 +68,13 @@ public class EnrollmentQueryController {
     return ResponseEntity.ok(enrollmentQueryService.getInternalEnrollmentsByCourse(courseId, status));
   }
 
+  @Hidden
   @GetMapping("/internal/{enrollmentId}")
   public ResponseEntity<InternalEnrollmentResponse> getInternalEnrollment(@PathVariable Long enrollmentId) {
     return ResponseEntity.ok(enrollmentQueryService.getInternalEnrollment(enrollmentId));
   }
 
+  @Hidden
   @PostMapping("/internal/enrollments/search")
   public ResponseEntity<List<InternalEnrollmentResponse>> searchEnrollments(
       @RequestBody com.mycompany.project.enrollment.query.dto.EnrollmentSearchRequest request) {

@@ -13,6 +13,7 @@ import com.mycompany.project.course.dto.StudentDetailResDTO;
 import com.mycompany.project.common.response.ApiResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -163,23 +164,27 @@ public class CourseController {
         return ResponseEntity.ok(ApiResponse.success(courseService.getTeacherTimetable(teacherId, semester)));
     }
 
+    @Hidden
     @GetMapping("/internal/{courseId}")
     public ResponseEntity<InternalCourseResponse> getInternalCourseInfo(@PathVariable Long courseId) {
         return ResponseEntity.ok(courseService.getInternalCourseInfo(courseId));
     }
 
+    @Hidden
     @PostMapping("/internal/{courseId}/increase-enrollment")
     public ResponseEntity<Void> increaseEnrollment(@PathVariable Long courseId) {
         courseService.increaseEnrollment(courseId);
         return ResponseEntity.ok().build();
     }
 
+    @Hidden
     @PostMapping("/internal/{courseId}/decrease-enrollment")
     public ResponseEntity<Void> decreaseEnrollment(@PathVariable Long courseId) {
         courseService.decreaseEnrollment(courseId);
         return ResponseEntity.ok().build();
     }
 
+    @Hidden
     @GetMapping("/internal/courses/academic-year/{academicYearId}")
     public ResponseEntity<java.util.List<InternalCourseResponse>> getInternalCoursesByAcademicYear(
             @PathVariable Long academicYearId) {

@@ -1,4 +1,4 @@
-package com.mycompany.enrollment;
+package com.mycompany.project.user;
 
 import com.mycompany.project.common.config.GlobalFeignConfig;
 import org.mybatis.spring.annotation.MapperScan;
@@ -13,19 +13,18 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "com.mycompany.project.enrollment.client", defaultConfiguration = GlobalFeignConfig.class)
+@EnableFeignClients(defaultConfiguration = GlobalFeignConfig.class)
 @EnableJpaRepositories(basePackages = "com.mycompany.project")
 @EntityScan(basePackages = "com.mycompany.project")
 @MapperScan(basePackages = "com.mycompany.project", annotationClass = Mapper.class)
 @ComponentScan(basePackages = {
-        "com.mycompany.enrollment",
-        "com.mycompany.project.enrollment",
-        "com.mycompany.project.security",
+        "com.mycompany.project.user",
         "com.mycompany.project.common",
+        "com.mycompany.project.security",
         "com.mycompany.project.exception"
 })
-public class EnrollmentServiceApplication {
+public class UserServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(EnrollmentServiceApplication.class, args);
+        SpringApplication.run(UserServiceApplication.class, args);
     }
 }

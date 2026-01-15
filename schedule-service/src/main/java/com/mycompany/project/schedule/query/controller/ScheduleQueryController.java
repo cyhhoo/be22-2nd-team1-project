@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -46,6 +47,7 @@ public class ScheduleQueryController {
   }
 
   // 내부 API용 학년도 단건 조회
+  @Hidden
   @GetMapping("/internal/academic-years/{academicYearId}")
   public ResponseEntity<com.mycompany.project.schedule.query.dto.InternalAcademicYearResponse> getInternalAcademicYear(
       @PathVariable Long academicYearId) {

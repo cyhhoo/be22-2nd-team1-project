@@ -1,4 +1,4 @@
-package com.mycompany.auth;
+package com.mycompany.project.auth;
 
 import com.mycompany.project.common.config.GlobalFeignConfig;
 import org.mybatis.spring.annotation.MapperScan;
@@ -13,15 +13,14 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "com.mycompany.project.auth.command.infrastructure", defaultConfiguration = GlobalFeignConfig.class)
+@EnableFeignClients(defaultConfiguration = GlobalFeignConfig.class)
 @EnableJpaRepositories(basePackages = "com.mycompany.project")
 @EntityScan(basePackages = "com.mycompany.project")
 @MapperScan(basePackages = "com.mycompany.project", annotationClass = Mapper.class)
 @ComponentScan(basePackages = {
-        "com.mycompany.auth",
         "com.mycompany.project.auth",
-        "com.mycompany.project.security",
         "com.mycompany.project.common",
+        "com.mycompany.project.security",
         "com.mycompany.project.exception"
 })
 public class AuthServiceApplication {

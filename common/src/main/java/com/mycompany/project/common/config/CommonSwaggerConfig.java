@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SwaggerConfig {
+public class CommonSwaggerConfig {
 
     @Value("${spring.application.name:Schoolmate Service}")
     private String applicationName;

@@ -1,4 +1,4 @@
-package com.mycompany.attendance;
+package com.mycompany.project.schedule;
 
 import com.mycompany.project.common.config.GlobalFeignConfig;
 import org.mybatis.spring.annotation.MapperScan;
@@ -13,21 +13,18 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "com.mycompany.project.attendance.client", defaultConfiguration = GlobalFeignConfig.class)
+@EnableFeignClients(defaultConfiguration = GlobalFeignConfig.class)
 @EnableJpaRepositories(basePackages = "com.mycompany.project")
 @EntityScan(basePackages = "com.mycompany.project")
-@MapperScan(basePackages = "com.mycompany.project", annotationClass = Mapper.class // @Mapper 어노테이션이 붙은 것만 스캔하여 JPA
-                                                                                   // 리포지토리와 충돌 방지
-)
+@MapperScan(basePackages = "com.mycompany.project", annotationClass = Mapper.class)
 @ComponentScan(basePackages = {
-        "com.mycompany.attendance",
-        "com.mycompany.project.attendance",
-        "com.mycompany.project.security",
+        "com.mycompany.project.schedule",
         "com.mycompany.project.common",
+        "com.mycompany.project.security",
         "com.mycompany.project.exception"
 })
-public class AttendanceServiceApplication {
+public class ScheduleServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(AttendanceServiceApplication.class, args);
+        SpringApplication.run(ScheduleServiceApplication.class, args);
     }
 }
