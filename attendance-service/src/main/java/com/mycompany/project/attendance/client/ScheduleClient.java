@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "swcamp-schedule-service", url = "${gateway.url}")
 public interface ScheduleClient {
 
-    @GetMapping("/api/v1/schedule/internal/academic-years/{academicYearId}")
+    @GetMapping("/schedule/internal/academic-years/{academicYearId}")
     InternalAcademicYearResponse getInternalAcademicYear(@PathVariable("academicYearId") Long academicYearId);
 }

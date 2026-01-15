@@ -15,16 +15,16 @@ import java.util.List;
 @FeignClient(name = "swcamp-user-service", url = "${gateway.url}")
 public interface UserClient {
 
-    @GetMapping("/api/v1/users/internal/{userId}")
+    @GetMapping("/user/internal/{userId}")
     UserResponse getUserInfo(@PathVariable("userId") Long userId);
 
-    @PostMapping("/api/v1/users/internal/students/search")
+    @PostMapping("/user/internal/students/search")
     List<InternalStudentResponse> searchStudents(@RequestBody StudentSearchRequest request);
 
-    @GetMapping("/api/v1/users/internal/teacher/{userId}")
+    @GetMapping("/user/internal/teacher/{userId}")
     InternalTeacherResponse getTeacherInfo(@PathVariable("userId") Long userId);
 
-    @GetMapping("/api/v1/users/internal/students/count-matched")
+    @GetMapping("/user/internal/students/count-matched")
     Long countMatchedStudents(@org.springframework.web.bind.annotation.RequestParam("studentIds") List<Long> studentIds,
             @org.springframework.web.bind.annotation.RequestParam("grade") Integer grade,
             @org.springframework.web.bind.annotation.RequestParam("classNo") String classNo);
