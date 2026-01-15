@@ -66,7 +66,13 @@ spring:
             - Path=/auth/login, /auth/register, /auth/refresh, /auth/activate
           filters:
             - RewritePath=/auth/(?<segment>.*), /api/v1/auth/${segment}
-        
+
+        # Auth Service - Direct API path (for Swagger)
+        - id: auth-api-direct
+          uri: lb://SWCAMP-AUTH-SERVICE
+          predicates:
+            - Path=/api/v1/auth/**
+
         # Auth Service - Protected endpoints
         - id: auth-protected
           uri: lb://SWCAMP-AUTH-SERVICE
@@ -80,10 +86,16 @@ spring:
         - id: user-service
           uri: lb://SWCAMP-USER-SERVICE
           predicates:
-            - Path=/user/**
+            - Path=/user/**, /user, /users/**, /users
           filters:
             - JwtAuthentication
             - RewritePath=/user/(?<segment>.*), /api/v1/users/${segment}
+
+        # User Service - Direct API path (for Swagger)
+        - id: user-api-direct
+          uri: lb://SWCAMP-USER-SERVICE
+          predicates:
+            - Path=/api/v1/users/**, /api/v1/user/**, /api/v1/user, /api/v1/users
         
         # Schedule Service
         - id: schedule-service
@@ -93,6 +105,12 @@ spring:
           filters:
             - JwtAuthentication
             - RewritePath=/(?<segment>.*), /api/v1/${segment}
+
+        # Schedule Service - Direct API path (for Swagger)
+        - id: schedule-api-direct
+          uri: lb://SWCAMP-SCHEDULE-SERVICE
+          predicates:
+            - Path=/api/v1/schedule/**, /api/v1/subjects/**
         
         # Enrollment Service
         - id: enrollment-service
@@ -102,6 +120,12 @@ spring:
           filters:
             - JwtAuthentication
             - RewritePath=/enrollments/(?<segment>.*), /api/v1/enrollments/${segment}
+
+        # Enrollment Service - Direct API path (for Swagger)
+        - id: enrollment-api-direct
+          uri: lb://SWCAMP-ENROLLMENT-SERVICE
+          predicates:
+            - Path=/api/v1/enrollments/**, /api/v1/carts/**
         
         # Course Service
         - id: course-service
@@ -111,6 +135,12 @@ spring:
           filters:
             - JwtAuthentication
             - RewritePath=/courses/(?<segment>.*), /api/v1/courses/${segment}
+
+        # Course Service - Direct API path (for Swagger)
+        - id: course-api-direct
+          uri: lb://SWCAMP-COURSE-SERVICE
+          predicates:
+            - Path=/api/v1/courses/**
         
         # Attendance Service
         - id: attendance-service
@@ -120,6 +150,12 @@ spring:
           filters:
             - JwtAuthentication
             - RewritePath=/attendances/(?<segment>.*), /api/v1/attendances/${segment}
+
+        # Attendance Service - Direct API path (for Swagger)
+        - id: attendance-api-direct
+          uri: lb://SWCAMP-ATTENDANCE-SERVICE
+          predicates:
+            - Path=/api/v1/attendances/**
         
         # Reservation Service
         - id: reservation-service
@@ -128,7 +164,13 @@ spring:
             - Path=/reservations/**
           filters:
             - JwtAuthentication
-            - RewritePath=/reservations/(?<segment>.*), /api/v1/reservations/${segment}
+            - RewritePath=/reservation/(?<segment>.*), /api/v1/${segment}
+
+        # Reservation Service - Direct API path (for Swagger)
+        - id: reservation-api-direct
+          uri: lb://SWCAMP-RESERVATION-SERVICE
+          predicates:
+            - Path=/api/v1/reservations/**, /api/v1/facilities/**
 
 springdoc:
   swagger-ui:
