@@ -1,16 +1,30 @@
 package com.mycompany.project.reservation.command.application.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalTime;
+
 @Getter
 @RequiredArgsConstructor
 public class FacilityCreateRequest {
+
+  @NotBlank
+  private String name;
+
   @NotNull
-  private final Integer facilityId;
+  private LocalTime openTime;
+
   @NotNull
-  private final String name;
-  @NotNull
-  private final String status;
+  private LocalTime closeTime;
+
+  @NotBlank
+  private String location;
+
+  @NotBlank
+  private String facilityType;
+
+
 }

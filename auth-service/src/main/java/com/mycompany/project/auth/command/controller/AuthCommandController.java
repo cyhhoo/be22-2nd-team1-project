@@ -6,6 +6,12 @@ import com.mycompany.project.auth.query.dto.TokenResponse;
 import com.mycompany.project.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+<<<<<<< HEAD:src/main/java/com/mycompany/project/auth/command/controller/AuthCommandController.java
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
+=======
+>>>>>>> 3a1188fad3717f0a7412f86adc8c318b581d7226:auth-service/src/main/java/com/mycompany/project/auth/command/controller/AuthCommandController.java
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

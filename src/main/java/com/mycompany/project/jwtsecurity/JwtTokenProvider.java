@@ -1,0 +1,147 @@
+package com.mycompany.project.jwtsecurity;
+
+import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.user.command.domain.aggregate.UserStatus;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.stream.Collectors;
+
+@Component
+public class JwtTokenProvider {
+
+  @Value("${jwt.secret}")
+  private String secretKey;
+  private SecretKey key;
+
+  // 30분, 7일
+  private final long ACCESS_TOKEN_VALIDITY = 30 * 60 * 1000L;
+  private final long REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60 * 1000L;
+
+  @PostConstruct
+  protected void init() {
+    byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+    // 키 길이가 짧으면 에러가 날 수 있으니 application.yaml의 secret을 길게 설정하세요.
+    // 만약 에러나면: Keys.hmacShaKeyFor(secretKey.getBytes()) 로 변경 가능
+    this.key = Keys.hmacShaKeyFor(keyBytes);
+  }
+
+  // 토큰 생성
+  public String createAccessToken(Long userId, String email, Role role, UserStatus status) {
+    Date now = new Date();
+    Date validityDate = new Date(now.getTime() + ACCESS_TOKEN_VALIDITY);
+
+    return Jwts.builder()
+        .setSubject(email)
+        .claim("userId", userId)
+        .claim("auth", role.name())
+        .claim("status", status.name())
+        .setIssuedAt(now)
+        .setExpiration(validityDate)
+        .signWith(key)
+        .compact();
+
+  }
+
+  public String createRefreshToken(String email) {
+    return createToken(email, null, null, REFRESH_TOKEN_VALIDITY);
+  }
+
+  private String createToken(String email, Role role, UserStatus status, long validity) {
+    Date now = new Date();
+    Date validityDate = new Date(now.getTime() + validity);
+
+    JwtBuilder builder = Jwts.builder()
+        .subject(email)
+        .issuedAt(now)
+        .expiration(validityDate)
+        .signWith(key);
+
+    if (role != null) {
+      builder.claim("auth", role.name());
+    }
+
+    if (status != null) {
+      builder.claim("status", status.name());
+    }
+
+    return builder.compact();
+  }
+
+  // 토큰에서 인증 정보 조회
+  public Authentication getAuthentication(String token) {
+    Claims claims = parseClaims(token);
+
+    Object userIdObj = claims.get("userId");
+    Object authObj = claims.get("auth");
+    Object statusObj = claims.get("status");
+
+    // refresh token 인 경우, 해당 클레임이 null이라서 안전하게 처리함
+    CustomUserDetails userdetails = CustomUserDetails.builder()
+        .userId(userIdObj != null ? Long.valueOf(userIdObj.toString()) : null)
+        .email(claims.getSubject())
+        .role(authObj != null ? Role.valueOf(authObj.toString()) : null)
+        .status(statusObj != null ? UserStatus.valueOf(statusObj.toString()) : null)
+        .build();
+
+    // 권한 목록 가져오기, role이 null인 경우 빈 리스트 반환해서 getAuthorities() 호출 안됨으로 NPE 에러 방지
+    Collection<? extends GrantedAuthority> authorities = (userdetails.getRole() != null)
+        ? userdetails.getAuthorities()
+        : Collections.emptyList();
+
+    return new UsernamePasswordAuthenticationToken(userdetails, "", authorities);
+  }
+
+  // 토큰 유효성 검증
+  public boolean validateToken(String token) {
+    try {
+      parseClaims(token);
+      return true;
+    } catch (Exception e) {
+      // ExpiredJwtException, UnsupportedJwtException, MalformedJwtException etc.
+      return false;
+    }
+  }
+
+  private Claims parseClaims(String token) {
+    return Jwts.parser()
+        .verifyWith(key)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
+  }
+
+  public String getUserEmailFromJWT(String refreshToken) {
+    Claims claims = Jwts.parser()
+        .verifyWith(key)
+        .build()
+        .parseSignedClaims(refreshToken)
+        .getPayload();
+    return claims.getSubject();
+  }
+
+  public String getStatusFromToken(String token) {
+    try {
+      Claims claims = parseClaims(token);
+      return claims.get("status", String.class);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+}

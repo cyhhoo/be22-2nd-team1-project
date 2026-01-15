@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.project.enrollment.repository.CartMapper">
+
+    <select id="selectCartListByUserId" resultType="com.mycompany.project.enrollment.query.dto.CartListResponse">
+        SELECT
+            cart.cart_id      AS cartId,
+            c.course_id       AS courseId,
+            c.name            AS courseName,
+            u_teacher.name    AS teacherName,
+            c.max_capacity    AS maxCapacity,
+            c.current_count   AS currentCount,
+            c.course_type     AS courseType,
+
+            -- [유지] 시간표 요약 서브쿼리 (예: "월 1교시 / 수 3교시")
+            (
+                SELECT
+                    GROUP_CONCAT(
+                            CONCAT(
+                                    CASE cts.day_of_week
+                                        WHEN 'MON' THEN '월'
+                                        WHEN 'TUE' THEN '화'
+                                        WHEN 'WED' THEN '수'
+                                        WHEN 'THU' THEN '목'
+                                        WHEN 'FRI' THEN '금'
+                                        WHEN 'SAT' THEN '토'
+                                        ELSE cts.day_of_week
+                                        END,
+                                    ' ', cts.period, '교시'
+                            )
+                                ORDER BY
+                            CASE cts.day_of_week
+                                WHEN 'MON' THEN 1
+                                WHEN 'TUE' THEN 2
+                                WHEN 'WED' THEN 3
+                                WHEN 'THU' THEN 4
+                                WHEN 'FRI' THEN 5
+                                ELSE 6
+                            END,
+                            cts.period ASC
+                        SEPARATOR ' / '
+                    )
+                FROM tbl_course_time_slot cts
+                WHERE cts.course_id = c.course_id
+            ) AS timetableSummary
+
+        FROM
+            tbl_cart cart
+                JOIN
+            tbl_student_detail sd ON cart.student_detail_id = sd.student_id
+                JOIN
+            tbl_course c ON cart.course_id = c.course_id
+                LEFT JOIN
+            tbl_teacher_detail td ON c.teacher_detail_id = td.teacher_id
+                LEFT JOIN
+            tbl_user u_teacher ON td.teacher_id = u_teacher.user_id
+        WHERE
+            sd.student_id = #{userId}
+        ORDER BY
+            cart.created_at DESC
+    </select>
+
+</mapper>
