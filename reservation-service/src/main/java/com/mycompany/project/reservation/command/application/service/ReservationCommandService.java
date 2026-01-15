@@ -95,9 +95,25 @@ public class ReservationCommandService {
         .orElseThrow(() -> new BusinessException(ErrorCode.FACILITY_NOT_FOUND));
     validateFacilityOpenHours(facility, req.getStartTime());
 
-    if (reservationRepository.existsByFacilityIdAndReservationDateAndStartTime(
-        r.getFacilityId(), req.getReservationDate(), req.getStartTime())) {
-      throw new BusinessException(ErrorCode.RESERVED_TIME_CONFLICT);
+    // 변경 전과 동일한 날짜/시간인지 체크
+    boolean sameDateTime =
+        Objects.equals(r.getReservationDate(), req.getReservationDate()) &&
+            Objects.equals(r.getStartTime(), req.getStartTime());
+
+    // 실제로 변경되는 경우에만 중복 체크
+    if (!sameDateTime) {
+      boolean duplicated =
+          reservationRepository
+              .existsByFacilityIdAndReservationDateAndStartTimeAndIdNot(
+                  r.getFacilityId(),
+                  req.getReservationDate(),
+                  req.getStartTime(),
+                  r.getStudentId()
+              );
+
+      if (duplicated) {
+        throw new BusinessException(ErrorCode.RESERVED_TIME_CONFLICT);
+      }
     }
 
     r.change(req.getReservationDate(), req.getStartTime());

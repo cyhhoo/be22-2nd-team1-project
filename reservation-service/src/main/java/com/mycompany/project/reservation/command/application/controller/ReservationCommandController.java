@@ -6,12 +6,14 @@ import com.mycompany.project.reservation.command.application.dto.request.Reserva
 import com.mycompany.project.reservation.command.application.dto.request.ReservationCreateRequest;
 import com.mycompany.project.reservation.command.application.dto.response.ReservationCommandResponse;
 import com.mycompany.project.reservation.command.application.service.ReservationCommandService;
+import com.mycompany.project.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = " 시설 예약 ")
@@ -29,11 +31,11 @@ public class ReservationCommandController {
     @PostMapping
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<ReservationCommandResponse>> createReservation(
-            @RequestParam Long studentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid ReservationCreateRequest request
     ) {
         return ResponseEntity.ok(
-                ApiResponse.success(reservationCommandService.create(studentId, request))
+                ApiResponse.success(reservationCommandService.create(userDetails.getUserId() , request))
         );
     }
 
