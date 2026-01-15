@@ -1,5 +1,6 @@
 package com.mycompany.attendance;
 
+import com.mycompany.project.common.config.GlobalFeignConfig;
 import org.mybatis.spring.annotation.MapperScan;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.boot.SpringApplication;
@@ -12,7 +13,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "com.mycompany.project.attendance.client")
+@EnableFeignClients(basePackages = "com.mycompany.project.attendance.client", defaultConfiguration = GlobalFeignConfig.class)
 @EnableJpaRepositories(basePackages = "com.mycompany.project")
 @EntityScan(basePackages = "com.mycompany.project")
 @MapperScan(basePackages = "com.mycompany.project", annotationClass = Mapper.class // @Mapper 어노테이션이 붙은 것만 스캔하여 JPA
