@@ -121,6 +121,20 @@ spring:
           filters:
             - RewritePath=/v3/api-docs/reservation, /v3/api-docs
 
+        # --- Swagger UI Static Resources ---
+        - id: swagger-ui
+          uri: http://localhost:8000
+          predicates:
+            - Path=/swagger-ui.html, /swagger-ui/**
+          filters:
+            - RewritePath=/(?<segment>.*), /${segment}
+
+        - id: webjars
+          uri: http://localhost:8000
+          predicates:
+            - Path=/webjars/**
+          filters:
+            - RewritePath=/(?<segment>.*), /${segment}
 
 springdoc:
   swagger-ui:

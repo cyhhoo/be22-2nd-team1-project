@@ -250,7 +250,7 @@ public class CourseService {
      */
     private List<Enrollment> getEnrollmentsByCourseId(Long courseId) {
         return enrollmentRepository.findAll().stream()
-                .filter(e -> e.getCourseId().equals(courseId))
+                .filter(e -> e.getCourse().getCourseId().equals(courseId))
                 .collect(Collectors.toList());
     }
 
@@ -360,7 +360,7 @@ public class CourseService {
             // 3-2. 수강 등록 (필드명 studentDetail로 수정)
             Enrollment enrollment = Enrollment.builder()
                     .studentDetail(student)
-                    .courseId(course.getCourseId())
+                    .course(course)
                     .build();
             enrollmentRepository.save(enrollment);
         }

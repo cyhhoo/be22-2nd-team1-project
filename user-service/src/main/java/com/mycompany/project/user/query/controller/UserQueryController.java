@@ -17,8 +17,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
 
+@Tag(name = "사용자 조회 (User Query)", description = "사용자 정보 조회 API")
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -26,6 +30,7 @@ public class UserQueryController {
 
   private final UserQueryService userQueryService;
 
+  @Operation(summary = "내 정보 조회", description = "현재 로그인한 사용자의 정보를 조회합니다.")
   @GetMapping("/me")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ApiResponse<UserResponse>> getMyInfo(
@@ -38,6 +43,7 @@ public class UserQueryController {
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
+  @Operation(summary = "전체 사용자 목록 조회", description = "관리자가 전체 사용자 목록을 페이징하여 조회합니다.")
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getUserList(
