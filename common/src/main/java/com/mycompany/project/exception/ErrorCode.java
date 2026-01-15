@@ -87,6 +87,7 @@ public enum ErrorCode {
   MAX_CREDITS_EXCEEDED(HttpStatus.BAD_REQUEST, "ENROLL_004", "최대 수강 가능 학점을 초과했습니다."),
   NOT_YOUR_ENROLLMENT(HttpStatus.BAD_REQUEST, "ENROLL_005", "본인의 수강 내역만 취소할 수 있습니다."),
   ENROLL_NOT_FOUND(HttpStatus.NOT_FOUND, "ENROLL_006", "수강 신청 내역을 찾을 수 없습니다."),
+  ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "ENROLL_007", "이미 취소된 수강 내역입니다."),
 
   // Cart (CART)
   ALREADY_IN_CART(HttpStatus.BAD_REQUEST, "CART_001", "이미 장바구니에 담긴 과목입니다."),
