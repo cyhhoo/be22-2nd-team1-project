@@ -1,0 +1,77 @@
+### Global Variables
+@host = http://localhost:8080
+@email_student = student@test.com
+@email_teacher = teacher@test.com
+@email_admin = admin@test.com
+@password = password
+@password_admin = admin1234
+
+### 1-1. 로그인 (관리자)
+POST {{host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email_admin}}",
+  "password": "{{password_admin}}"
+}
+
+> {%
+  client.global.set("access_token_admin", response.body.data.accessToken);
+  client.global.set("refresh_token_admin", response.body.data.refreshToken);
+%}
+
+### 1-2. 로그인 (학생) - *Note: 먼저 회원가입 및 승인이 되어있어야 함*
+POST {{host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email_student}}",
+  "password": "{{password}}"
+}
+
+> {%
+  client.global.set("access_token_student", response.body.data.accessToken);
+  client.global.set("refresh_token_student", response.body.data.refreshToken);
+%}
+
+### 1-3. 로그인 (교사) - *Note: 먼저 회원가입 및 승인이 되어있어야 함*
+POST {{host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email_teacher}}",
+  "password": "{{password}}"
+}
+
+> {%
+  client.global.set("access_token_teacher", response.body.data.accessToken);
+  client.global.set("refresh_token_teacher", response.body.data.refreshToken);
+%}
+
+### 2. 토큰 재발급
+POST {{host}}/api/v1/auth/reissue
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refresh_token_student}}"
+}
+
+### 3. 계정 활성화 (최초 로그인 시)
+POST {{host}}/api/v1/auth/activation
+Content-Type: application/json
+
+{
+  "email": "new_student@test.com",
+  "name": "신입생",
+  "birthDate": "2008-01-01",
+  "authCode": "080101",
+  "newPassword": "new_password"
+}
+
+### 4. 로그아웃
+POST {{host}}/api/v1/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refresh_token_student}}"
+}

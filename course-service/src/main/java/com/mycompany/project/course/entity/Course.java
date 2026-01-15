@@ -88,24 +88,36 @@ public class Course {
 
   /**
    * 수강 신청 시 호출: 인원 증가
-   * 정원이 꽉 찼다면 예외를 터뜨려서 신청을 막습니다.
+   * 정원이 꽉 찼다면 상태를 CLOSED로 변경하고 예외를 터뜨려서 신청을 막습니다.
    */
   public void increaseCurrentCount() {
     // 1. 방어 로직: 이미 꽉 찼는지 확인
     if (this.currentCount >= this.maxCapacity) {
+      this.status = CourseStatus.CLOSED; // 상태 업데이트
       throw new IllegalStateException("수강 정원이 초과되었습니다.");
     }
-    // 2. 상태 변경
+
+    // 2. 인원 증가
     this.currentCount++;
+
+    // 3. 증가 후 정원에 도달했다면 상태를 CLOSED로 변경
+    if (this.currentCount.equals(this.maxCapacity)) {
+      this.status = CourseStatus.CLOSED;
+    }
   }
 
   /**
    * 수강 취소 시 호출: 인원 감소
-   * 0명 미만으로 내려가지 않도록 보호합니다.
+   * 자리가 생겼고 현재 상태가 CLOSED라면 다시 OPEN으로 변경합니다.
    */
   public void decreaseCurrentCount() {
     if (this.currentCount > 0) {
       this.currentCount--;
+    }
+
+    // 자리가 생겼고, 강제로 닫힌 상태가 아니라면(자동 마감 상태였다면) 다시 OPEN
+    if (this.currentCount < this.maxCapacity && this.status == CourseStatus.CLOSED) {
+      this.status = CourseStatus.OPEN;
     }
   }
 
