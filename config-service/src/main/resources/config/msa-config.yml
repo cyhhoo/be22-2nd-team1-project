@@ -1,9 +1,9 @@
 # ===================================
-# Config Server - 공통 설정 (msa-config)
-# 모든 마이크로서비스가 공유하는 설정
+# Config Server - Common Settings (msa-config)
+# Settings shared by all microservices
 # ===================================
 
-# Eureka 클라이언트 설정
+# Eureka Client Settings
 eureka:
   client:
     service-url:
@@ -12,19 +12,19 @@ eureka:
     prefer-ip-address: true
 
 spring:
-  # Spring Boot 3.5.9 호환성 검사 비활성화
+  # Spring Boot 3.5.9 version compatibility check disabled
   cloud:
     compatibility-verifier:
       enabled: false
 
-  # 기본 데이터베이스 설정 (개발용)
+  # Default database settings (development)
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/schoolmate
     username: swcamp
     password: swcamp
 
-  # JPA 공통 설정
+  # JPA common settings
   jpa:
     hibernate:
       ddl-auto: create
@@ -34,7 +34,7 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MariaDBDialect
 
-# 로깅 공통 설정
+# Logging common settings
 logging:
   level:
     root: INFO
@@ -42,6 +42,6 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
-# 기본 JWT 설정
+# Default JWT settings
 jwt:
   secret: your-very-long-secret-key-that-should-be-at-least-256-bits-for-hs256-algorithm-make-sure-this-is-secure-default

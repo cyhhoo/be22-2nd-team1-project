@@ -16,7 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = " 시설 예약 ")
+@Tag(name = "Facility Reservation")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/reservation")
@@ -24,58 +24,50 @@ public class ReservationCommandController {
 
     private final ReservationCommandService reservationCommandService;
 
-    private Long mockStudent() { return 1L; }
-
-    /* 시설 예약*/
-    @Operation(summary = "시설 예약", description = "ex) reservationId=1, studentId =1")
+    /* Facility Reservation */
+    @Operation(summary = "Create facility reservation", description = "Register a new reservation for a specific facility.")
     @PostMapping
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<ReservationCommandResponse>> createReservation(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody @Valid ReservationCreateRequest request
-    ) {
+            @RequestBody @Valid ReservationCreateRequest request) {
         return ResponseEntity.ok(
-                ApiResponse.success(reservationCommandService.create(userDetails.getUserId() , request))
-        );
+                ApiResponse.success(reservationCommandService.create(userDetails.getUserId(), request)));
     }
 
-
-    /* 시설 예약 취소 */
-    @Operation(summary = "시설 예약 취소",description = "ex) reservationId = 1, studentId = 1")
+    /* Cancel Reservation */
+    @Operation(summary = "Cancel facility reservation", description = "Cancel an existing reservation.")
     @DeleteMapping("{reservationId}")
 
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<Void>> cancelReservation(
             @PathVariable Long reservationId,
-            @RequestParam Long studentId
-    ) {
+            @RequestParam Long studentId) {
         reservationCommandService.cancel(reservationId, studentId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
-    /* 시설 예약 변경 */
-    @Operation(summary = "시설 예약 변경",description = "ex) ")
+
+    /* Change Reservation */
+    @Operation(summary = "Change facility reservation", description = "Modify the date or time of an existing reservation.")
     @PutMapping("{reservationId}")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<Void>> changeReservation(
             @PathVariable Long reservationId,
             @RequestParam Long studentId,
-            @RequestBody @Valid ReservationChangeRequest request
-    ) {
+            @RequestBody @Valid ReservationChangeRequest request) {
         reservationCommandService.change(reservationId, studentId, request);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    /* 시설 예약 승인, 거부 */
-    @Operation(summary = "시설 예약 승인, 거부")
+    /* Approve/Reject Reservation */
+    @Operation(summary = "Approve/Reject reservation", description = "Admin approves or rejects a facility reservation request.")
     @PutMapping("{reservationId}/approve")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> approveReservation(
             @PathVariable Long reservationId,
             @RequestParam Long adminId,
-            @RequestBody @Valid ReservationApproveRequest request
-    ) {
+            @RequestBody @Valid ReservationApproveRequest request) {
         reservationCommandService.approve(adminId, reservationId, request);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }
-

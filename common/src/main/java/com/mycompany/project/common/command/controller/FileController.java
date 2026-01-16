@@ -21,7 +21,7 @@ public class FileController {
 
     private final FileService fileService;
 
-    @Operation(summary = "파일 업로드", description = "이미지 등 파일을 업로드하고 URL을 반환받습니다.")
+    @Operation(summary = "File upload", description = "Upload image or other files and receive URL")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<FileResponse>> uploadFile(@RequestPart("file") MultipartFile file) {

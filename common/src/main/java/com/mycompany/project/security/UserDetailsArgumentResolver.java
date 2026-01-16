@@ -1,7 +1,7 @@
 package com.mycompany.project.security;
 
-import com.mycompany.project.user.command.domain.aggregate.Role;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
+import com.mycompany.project.common.enums.Role;
+import com.mycompany.project.common.enums.UserStatus;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;

@@ -21,34 +21,34 @@ public class UserMyPageService {
   private final PasswordEncoder passwordEncoder;
 
   @Transactional
-  public void changePassword(String email, ChangePasswordRequest request){
+  public void changePassword(String email, ChangePasswordRequest request) {
 
-    // 1. 유저 조회
+    // 1. Find user
     User user = userRepository.findByEmail(email)
-        .orElseThrow(()->new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
+        .orElseThrow(() -> new IllegalArgumentException("User not found or password mismatch."));
 
-    // 2. 현재 비밀번호 확인
-    if (!passwordEncoder.matches(request.getCurrentPassword(),user.getPassword())){
-      throw new IllegalArgumentException("비밀 번호가 일치하지 않습니다");
+    // 2. Verify current password
+    if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+      throw new IllegalArgumentException("Current password does not match.");
     }
 
-    // 3. 최근 비밀번호 3개와 중복 체크
+    // 3. Check duplication with last 3 passwords
     List<PasswordHistory> passwordHistories = passwordHistoryRepository.findTop3ByUserOrderByCreatedAtDesc(user);
 
-    for (PasswordHistory passwordHistory : passwordHistories){
-      if (passwordEncoder.matches(request.getNewPassword(),passwordHistory.getPassword())){
-        throw new IllegalArgumentException("최근 사용한 비밀번호는 사용할 수 없습니다.");
+    for (PasswordHistory passwordHistory : passwordHistories) {
+      if (passwordEncoder.matches(request.getNewPassword(), passwordHistory.getPassword())) {
+        throw new IllegalArgumentException("Cannot use recently used passwords.");
       }
     }
 
-    // 4. 기존 비밀번호를 History에 백업
+    // 4. Backup current password to History
     PasswordHistory history = PasswordHistory.builder()
         .user(user)
         .password(user.getPassword())
         .build();
     passwordHistoryRepository.save(history);
 
-    // 5. 새 비밀번호로 변경
+    // 5. Change to new password
     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
   }
 }

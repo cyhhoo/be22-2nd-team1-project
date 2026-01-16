@@ -1,8 +1,10 @@
 package com.mycompany.project.common.response;
 
-/* 공통 응답 처리 클래스
- * - API 응답 형식을 통일해서
- *   클라이언트가 일관된 방식으로 응답을 처리할 수 있도록 함*/
+/**
+ * Common Response Handler Class
+ * - Unified API response format
+ *   Allows client to process responses in a consistent manner
+ */
 
 import lombok.Builder;
 import lombok.Getter;
@@ -13,20 +15,20 @@ import java.time.LocalDateTime;
 @Builder
 public class ApiResponse<T> {
 
-  private boolean success; // 요청 성공 여부
-  private T data;           // 실제 데이터 (성공 시 사용)
-  private String errorCode; // 에러 코드 (실패 시 사용)
-  private String message; // 에러 메세지(실패)
-  private LocalDateTime timestamp; // 응답 생성 시간
+  private boolean success; // Request success status
+  private T data; // Actual data (used on success)
+  private String errorCode; // Error code (used on failure)
+  private String message; // Error message (on failure)
+  private LocalDateTime timestamp; // Response creation time
 
-  /* 성공 응답 정적 생성 메서드 */
-  public static<T> ApiResponse<T> success(T data){
+  /** Success response static factory method */
+  public static <T> ApiResponse<T> success(T data) {
     return ApiResponse.<T>builder().success(true).data(data).timestamp(LocalDateTime.now()).build();
   }
 
-  /* 실패 응답 정적 생성 메서드 */
-  public static<T> ApiResponse<T> failure(String errorCode, String message){
-    return ApiResponse.<T>builder().success(false).errorCode(errorCode).message(message).timestamp(LocalDateTime.now()).build();
+  /** Failure response static factory method */
+  public static <T> ApiResponse<T> failure(String errorCode, String message) {
+    return ApiResponse.<T>builder().success(false).errorCode(errorCode).message(message).timestamp(LocalDateTime.now())
+        .build();
   }
 }
-

@@ -1,9 +1,9 @@
 # ===================================
-# Config Server - 공통 설정
-# 모든 마이크로서비스가 공유하는 설정
+# Config Server - Common Settings
+# Settings shared by all microservices
 # ===================================
 
-# Eureka 클라이언트 설정 (공통)
+# Eureka Client Settings (common)
 eureka:
   client:
     service-url:
@@ -11,13 +11,13 @@ eureka:
   instance:
     prefer-ip-address: true
 
-# 데이터베이스 공통 설정 (드라이버만)
+# Database common settings (driver only)
 spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    # url, username, password는 프로파일별 파일에서 설정
+    # url, username, password are set in profile-specific files
 
-# JPA 공통 설정
+# JPA common settings
   jpa:
     hibernate:
       ddl-auto: update
@@ -27,7 +27,7 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MariaDBDialect
 
-# 로깅 공통 설정
+# Logging common settings
 logging:
   level:
     root: INFO
@@ -35,4 +35,4 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
-# JWT secret은 프로파일별 파일에서 설정
+# JWT secret is set in profile-specific files

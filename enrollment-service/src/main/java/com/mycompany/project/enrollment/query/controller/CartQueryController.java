@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "장바구니 (Cart)", description = "장바구니 조회 API")
+@Tag(name = "?λ컮援щ땲 (Cart)", description = "?λ컮援щ땲 議고쉶 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/carts")
@@ -27,7 +27,7 @@ public class CartQueryController {
 
   private final CartQueryService cartQueryService;
 
-  @Operation(summary = "내 장바구니 목록 조회", description = "내가 담은 수강 신청 장바구니 목록을 조회합니다.")
+  @Operation(summary = "???λ컮援щ땲 紐⑸줉 議고쉶", description = "?닿? ?댁? ?섍컯 ?좎껌 ?λ컮援щ땲 紐⑸줉??議고쉶?⑸땲??")
   @GetMapping
   @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<List<CartListResponse>>> getMyCartList() {

@@ -1,6 +1,5 @@
 package com.mycompany.project.common.entity;
 
-import com.mycompany.project.user.command.domain.aggregate.AdminDetail;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -27,9 +26,8 @@ public class BulkUploadLog {
     @JoinColumn(name = "file_id")
     private AttachFile file;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
-    private AdminDetail admin;
+    @Column(name = "admin_id")
+    private Long adminId; // AdminDetailEntity 李몄“ ?쒓굅 -> ID 李몄“濡?蹂寃?
 
     @Enumerated(EnumType.STRING)
     @Column(name = "upload_type", nullable = false)
@@ -62,18 +60,10 @@ public class BulkUploadLog {
     @Column(name = "request_id", nullable = false, length = 50)
     private String requestId = UUID.randomUUID().toString().substring(0, 36);
 
-    // ===== 비즈니스 메서드 =====
-
-    /**
-     * 처리 시작
-     */
     public void startProcessing() {
         this.status = UploadStatus.PROCESSING;
     }
 
-    /**
-     * 처리 완료
-     */
     public void complete(int successCount, int failCount, String errorLog) {
         this.status = UploadStatus.COMPLETED;
         this.successCount = successCount;
@@ -83,9 +73,6 @@ public class BulkUploadLog {
         this.finishedAt = LocalDateTime.now();
     }
 
-    /**
-     * 처리 실패
-     */
     public void fail(String errorLog) {
         this.status = UploadStatus.FAILED;
         this.errorLog = errorLog;

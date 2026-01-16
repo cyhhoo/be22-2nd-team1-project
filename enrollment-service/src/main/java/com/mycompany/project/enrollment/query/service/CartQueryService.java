@@ -1,7 +1,7 @@
 package com.mycompany.project.enrollment.query.service;
 
 import com.mycompany.project.enrollment.query.dto.CartListResponse;
-import com.mycompany.project.enrollment.repository.CartMapper;
+import com.mycompany.project.enrollment.command.domain.repository.CartMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

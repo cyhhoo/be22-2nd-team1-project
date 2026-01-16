@@ -14,10 +14,10 @@ public class EnrollmentHistoryResponse {
 
   private Long courseId;
 
-  private String courseName;      // 과목명
-  private String teacherName;   // 선생님 성함
+  private String courseName;      // 怨쇰ぉ紐?
+  private String teacherName;   // ?좎깮???깊븿
   private String status;          //
 
-  private String enrollmentDate;  // "2025-03-02" (String으로 포맷팅된 날짜)
+  private String enrollmentDate;  // "2025-03-02" (String?쇰줈 ?щ㎎?낅맂 ?좎쭨)
 
 }

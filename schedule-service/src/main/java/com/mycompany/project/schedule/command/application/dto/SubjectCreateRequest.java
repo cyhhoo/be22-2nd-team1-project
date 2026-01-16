@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class SubjectCreateRequest {
-    private String name; // 과목명
+    private String name; // Subject name
 }

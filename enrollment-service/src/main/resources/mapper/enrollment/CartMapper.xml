@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.mycompany.project.enrollment.repository.CartMapper">
+<mapper namespace="com.mycompany.project.enrollment.command.domain.repository.CartMapper">
 
     <select id="selectCartListByUserId" resultType="com.mycompany.project.enrollment.query.dto.CartListResponse">
         SELECT
@@ -14,21 +14,21 @@
             c.current_count   AS currentCount,
             c.course_type     AS courseType,
 
-            -- 시간 요약 서브쿼리
+            -- Timetable summary subquery
             (
                 SELECT
                     GROUP_CONCAT(
                             CONCAT(
                                     CASE cts.day_of_week
-                                        WHEN 'MON' THEN '월'
-                                        WHEN 'TUE' THEN '화'
-                                        WHEN 'WED' THEN '수'
-                                        WHEN 'THU' THEN '목'
-                                        WHEN 'FRI' THEN '금'
-                                        WHEN 'SAT' THEN '토'
+                                        WHEN 'MON' THEN 'Mon'
+                                        WHEN 'TUE' THEN 'Tue'
+                                        WHEN 'WED' THEN 'Wed'
+                                        WHEN 'THU' THEN 'Thu'
+                                        WHEN 'FRI' THEN 'Fri'
+                                        WHEN 'SAT' THEN 'Sat'
                                         ELSE cts.day_of_week
                                         END,
-                                    ' ', cts.period, '교시'
+                                    ' P', cts.period
                             )
                                 ORDER BY
                             CASE cts.day_of_week

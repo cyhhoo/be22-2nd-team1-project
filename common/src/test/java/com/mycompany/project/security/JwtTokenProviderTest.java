@@ -1,7 +1,7 @@
 package com.mycompany.project.security;
 
-import com.mycompany.project.user.command.domain.aggregate.Role;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
+import com.mycompany.project.common.enums.Role;
+import com.mycompany.project.common.enums.UserStatus;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @DisplayName("토큰 생성 및 유효성 검증 성공")
+    @DisplayName("?좏겙 ?앹꽦 諛??좏슚??寃利??깃났")
     void createAndValidateToken_Success() {
         // given
         Long userId = 1L;
@@ -44,7 +44,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @DisplayName("만료된 토큰 검증 실패")
+    @DisplayName("留뚮즺???좏겙 寃利??ㅽ뙣")
     void validateToken_Expired() {
         // given - Manually create an expired token
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -62,7 +62,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @DisplayName("토큰에서 상태값 추출 테스트")
+    @DisplayName("?좏겙?먯꽌 ?곹깭媛?異붿텧 ?뚯뒪??)
     void getStatusFromToken_Success() {
         // given
         String token = jwtTokenProvider.createAccessToken(1L, "test@test.com", Role.ADMIN, UserStatus.INACTIVE);

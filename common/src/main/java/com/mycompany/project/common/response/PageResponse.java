@@ -5,16 +5,16 @@ import java.util.List;
 @Getter
 public class PageResponse<T> {
     private final List<T> content;
-    private final int pageNumber;      // 현재 페이지 번호 (1부터 시작하도록 조정 가능)
-    private final int pageSize;        // 페이지 크기
-    private final long totalElements;  // 전체 요소 수
-    private final int totalPages;      // 전체 페이지 수
-    private final boolean last;        // 마지막 페이지 여부
+    private final int pageNumber;      // ?꾩옱 ?섏씠吏 踰덊샇 (1遺???쒖옉?섎룄濡?議곗젙 媛??
+    private final int pageSize;        // ?섏씠吏 ?ш린
+    private final long totalElements;  // ?꾩껜 ?붿냼 ??
+    private final int totalPages;      // ?꾩껜 ?섏씠吏 ??
+    private final boolean last;        // 留덉?留??섏씠吏 ?щ?
 
 
     public PageResponse(Page<T> page) {
         this.content = page.getContent();
-        this.pageNumber = page.getNumber() + 1; // 1-based index로 변환 (선택사항)
+        this.pageNumber = page.getNumber() + 1; // 1-based index濡?蹂??(?좏깮?ы빆)
         this.pageSize = page.getSize();
         this.totalElements = page.getTotalElements();
         this.totalPages = page.getTotalPages();
@@ -22,7 +22,7 @@ public class PageResponse<T> {
     }
 
 
-    // 정적 팩토리 메서드
+    // ?뺤쟻 ?⑺넗由?硫붿꽌??
     public static <T> PageResponse<T> of(Page<T> page) {
         return new PageResponse<>(page);
     }

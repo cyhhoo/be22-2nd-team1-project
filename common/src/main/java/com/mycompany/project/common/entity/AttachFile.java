@@ -1,6 +1,5 @@
 package com.mycompany.project.common.entity;
 
-import com.mycompany.project.user.command.domain.aggregate.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,6 +10,8 @@ import java.time.LocalDateTime;
 @Table(name = "tbl_file")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class AttachFile {
 
@@ -19,9 +20,8 @@ public class AttachFile {
     @Column(name = "file_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id")
+    private Long userId; // Entity 李몄“ ???ID 李몄“濡?蹂寃?
 
     @Column(name = "original_name", nullable = false)
     private String originalName;

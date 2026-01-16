@@ -37,7 +37,7 @@ class UserMyPageServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    @DisplayName("비밀번호 변경 성공 - 이력 저장 확인")
+    @DisplayName("鍮꾨?踰덊샇 蹂寃??깃났 - ?대젰 ????뺤씤")
     void changePassword_Success() {
         // given
         String email = "test@test.com";
@@ -64,7 +64,7 @@ class UserMyPageServiceTest {
     }
 
     @Test
-    @DisplayName("비밀번호 변경 실패 - 최근 사용한 비밀번호")
+    @DisplayName("鍮꾨?踰덊샇 蹂寃??ㅽ뙣 - 理쒓렐 ?ъ슜??鍮꾨?踰덊샇")
     void changePassword_Fail_RecentPassword() {
         // given
         String email = "test@test.com";

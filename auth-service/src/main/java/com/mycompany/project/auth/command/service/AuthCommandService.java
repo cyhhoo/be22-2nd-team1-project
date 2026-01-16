@@ -1,16 +1,16 @@
 package com.mycompany.project.auth.command.service;
 
-import com.mycompany.project.auth.command.infrastructure.UserClient;
+import com.mycompany.project.auth.client.UserClient;
+import com.mycompany.project.common.dto.UserInternalActivateRequest;
+import com.mycompany.project.common.dto.UserInternalResponse;
+import com.mycompany.project.auth.command.domain.aggregate.Token;
+import com.mycompany.project.auth.command.domain.repository.TokenRepository;
 import com.mycompany.project.auth.command.dto.AccountActivationRequest;
 import com.mycompany.project.auth.query.dto.TokenResponse;
+import com.mycompany.project.common.enums.UserStatus;
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.security.JwtTokenProvider;
-import com.mycompany.project.auth.client.dto.UserInternalActivateRequest;
-import com.mycompany.project.user.command.domain.aggregate.Token;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
-import com.mycompany.project.user.command.domain.repository.TokenRepository;
-import com.mycompany.project.auth.client.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,41 +27,42 @@ public class AuthCommandService {
 
     @Transactional
     public TokenResponse activateAccount(AccountActivationRequest request) {
-        // 1. 사용자 조회 (Feign)
-        UserResponse user = userClient.getByEmail(request.getEmail());
+        // 1. Get user (Feign)
+        UserInternalResponse user = userClient.getByEmail(request.getEmail());
         if (user == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
-        // 2. 이미 활성화 된 경우
+        // 2. If already activated
         if (user.getStatus() == UserStatus.ACTIVE) {
-            throw new IllegalArgumentException("이미 활성화 된 계정입니다.");
+            throw new IllegalArgumentException("Account is already activated.");
         }
 
-        // 3. 본인 인증
+        // 3. Identity verification
         if (!(user.getName().equals(request.getName()) && user.getBirthDate().equals(request.getBirthDate()))) {
-            throw new IllegalArgumentException("사용자 정보가 일치하지 않습니다.");
+            throw new IllegalArgumentException("User information does not match.");
         }
 
-        // 인증 코드 체크
+        // Auth code check
         if (user.getAuthCode() != null && !user.getAuthCode().equals(request.getAuthCode())) {
-            throw new IllegalArgumentException("인증 코드가 일치하지 않습니다.");
+            throw new IllegalArgumentException("Auth code does not match.");
         }
 
-        // 4. 활성화 (Feign 호출을 통해 user-service 데이터 업데이트)
+        // 4. Activate (Feign call to update user-service data)
         String encryptedPassword = passwordEncoder.encode(request.getNewPassword());
         userClient.activateUser(new UserInternalActivateRequest(request.getEmail(), encryptedPassword));
 
-        // 활성화 된 상태로 바로 즉시 토큰 발급
+        // Issue tokens immediately after activation
         String accessToken = jwtTokenProvider.createAccessToken(
-                user.getUserId(), user.getEmail(), user.getRole(), user.getStatus());
+                user.getUserId(), user.getEmail(), user.getRole(), UserStatus.ACTIVE);
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
 
-        // DB에 리프레시 토큰 저장
+        // Save refresh token to DB
         Token tokenEntity = Token.builder()
                 .token(refreshToken)
                 .email(user.getEmail())
                 .build();
+        java.util.Objects.requireNonNull(tokenEntity);
         tokenRepository.save(tokenEntity);
 
         return new TokenResponse(accessToken, refreshToken);

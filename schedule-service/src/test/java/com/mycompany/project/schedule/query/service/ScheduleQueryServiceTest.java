@@ -35,7 +35,7 @@ class ScheduleQueryServiceTest {
     private AcademicYearRepository academicYearRepository;
 
     @Test
-    @DisplayName("월간 일정 조회 성공")
+    @DisplayName("?붽컙 ?쇱젙 議고쉶 ?깃났")
     void getMonthlySchedules_Success() {
         // given
         int year = 2025;
@@ -52,7 +52,7 @@ class ScheduleQueryServiceTest {
     }
 
     @Test
-    @DisplayName("주간 일정 조회 성공")
+    @DisplayName("二쇨컙 ?쇱젙 議고쉶 ?깃났")
     void getWeeklySchedules_Success() {
         // given
         LocalDate start = LocalDate.of(2025, 3, 1);
@@ -69,7 +69,7 @@ class ScheduleQueryServiceTest {
     }
 
     @Test
-    @DisplayName("내부 학년도 정보 조회 성공")
+    @DisplayName("?대? ?숇뀈???뺣낫 議고쉶 ?깃났")
     void getInternalAcademicYear_Success() {
         // given
         Long id = 1L;
@@ -92,7 +92,7 @@ class ScheduleQueryServiceTest {
     }
 
     @Test
-    @DisplayName("내부 학년도 정보 조회 실패 - 정보 없음")
+    @DisplayName("?대? ?숇뀈???뺣낫 議고쉶 ?ㅽ뙣 - ?뺣낫 ?놁쓬")
     void getInternalAcademicYear_NotFound() {
         // given
         Long id = 99L;

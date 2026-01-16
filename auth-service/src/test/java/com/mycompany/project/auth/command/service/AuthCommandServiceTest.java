@@ -1,17 +1,16 @@
 package com.mycompany.project.auth.command.service;
 
+import com.mycompany.project.auth.client.UserClient;
 import com.mycompany.project.auth.client.dto.UserInternalActivateRequest;
 import com.mycompany.project.auth.client.dto.UserResponse;
+import com.mycompany.project.auth.command.domain.aggregate.Token;
+import com.mycompany.project.auth.command.domain.repository.TokenRepository;
 import com.mycompany.project.auth.command.dto.AccountActivationRequest;
-import com.mycompany.project.auth.command.infrastructure.UserClient;
 import com.mycompany.project.auth.query.dto.TokenResponse;
+import com.mycompany.project.common.enums.Role;
+import com.mycompany.project.common.enums.UserStatus;
 import com.mycompany.project.exception.BusinessException;
-import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.security.JwtTokenProvider;
-import com.mycompany.project.user.command.domain.aggregate.Role;
-import com.mycompany.project.user.command.domain.aggregate.Token;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
-import com.mycompany.project.user.command.domain.repository.TokenRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,16 +45,16 @@ class AuthCommandServiceTest {
     private TokenRepository tokenRepository;
 
     @Test
-    @DisplayName("계정 활성화 성공 - 정상 케이스")
+    @DisplayName("Account Activation Success")
     void activateAccount_Success() {
         // given
         AccountActivationRequest request = new AccountActivationRequest(
-                "test@test.com", "홍길동", LocalDate.of(2000, 1, 1), "123456", "newPassword");
+                "test@test.com", "Hong Gil Dong", LocalDate.of(2000, 1, 1), "123456", "newPassword");
 
         UserResponse mockUser = new UserResponse();
         mockUser.setUserId(1L);
         mockUser.setEmail("test@test.com");
-        mockUser.setName("홍길동");
+        mockUser.setName("Hong Gil Dong");
         mockUser.setBirthDate(LocalDate.of(2000, 1, 1));
         mockUser.setAuthCode("123456");
         mockUser.setStatus(UserStatus.INACTIVE);
@@ -79,11 +78,11 @@ class AuthCommandServiceTest {
     }
 
     @Test
-    @DisplayName("계정 활성화 실패 - 사용자 없음")
+    @DisplayName("Account Activation Fail - User Not Found")
     void activateAccount_UserNotFound() {
         // given
         AccountActivationRequest request = new AccountActivationRequest(
-                "unknown@test.com", "누구", LocalDate.now(), "000000", "pass");
+                "unknown@test.com", "Unknown", LocalDate.now(), "000000", "pass");
 
         given(userClient.getByEmail(request.getEmail())).willReturn(null);
 
@@ -92,14 +91,14 @@ class AuthCommandServiceTest {
     }
 
     @Test
-    @DisplayName("계정 활성화 실패 - 이미 활성화 된 계정")
+    @DisplayName("Account Activation Fail - Already Active")
     void activateAccount_AlreadyActive() {
         // given
         AccountActivationRequest request = new AccountActivationRequest(
-                "active@test.com", "홍길동", LocalDate.of(2000, 1, 1), "123456", "pass");
+                "active@test.com", "Hong Gil Dong", LocalDate.of(2000, 1, 1), "123456", "pass");
 
         UserResponse mockUser = new UserResponse();
-        mockUser.setStatus(UserStatus.ACTIVE); // Active 상태
+        mockUser.setStatus(UserStatus.ACTIVE);
 
         given(userClient.getByEmail(request.getEmail())).willReturn(mockUser);
 
@@ -108,14 +107,14 @@ class AuthCommandServiceTest {
     }
 
     @Test
-    @DisplayName("계정 활성화 실패 - 사용자 정보 불일치 (이름)")
+    @DisplayName("Account Activation Fail - Info Mismatch (Name)")
     void activateAccount_InfoMismatch() {
         // given
         AccountActivationRequest request = new AccountActivationRequest(
-                "test@test.com", "다른이름", LocalDate.of(2000, 1, 1), "123456", "pass");
+                "test@test.com", "Different Name", LocalDate.of(2000, 1, 1), "123456", "pass");
 
         UserResponse mockUser = new UserResponse();
-        mockUser.setName("홍길동"); // 이름 다름
+        mockUser.setName("Hong Gil Dong");
         mockUser.setBirthDate(LocalDate.of(2000, 1, 1));
         mockUser.setStatus(UserStatus.INACTIVE);
 

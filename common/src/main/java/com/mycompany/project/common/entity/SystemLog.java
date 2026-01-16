@@ -1,6 +1,5 @@
 package com.mycompany.project.common.entity;
 
-import com.mycompany.project.user.command.domain.aggregate.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class) // created_at 자동 주입용
+@EntityListeners(AuditingEntityListener.class)
 public class SystemLog {
 
     @Id
@@ -24,19 +23,18 @@ public class SystemLog {
     @Column(name = "log_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user; // 작업자
+    @Column(name = "user_id")
+    private Long userId;
 
     @Column(name = "table_code_id")
-    private Integer tableCodeId; // 단순 ID 저장 or TableCode Entity 매핑
+    private Integer tableCodeId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "change_type", nullable = false)
-    private ChangeType changeType;
+    private ChangeType changeType; // com.mycompany.project.common.entity.ChangeType ?ъ슜
 
     @Column(name = "target_id", nullable = false)
-    private Long targetId; // 변경된 대상의 PK
+    private Long targetId;
 
     @Column(name = "request_id", length = 50)
     private String requestId;
@@ -45,8 +43,7 @@ public class SystemLog {
     @Column(name = "modifed_at", nullable = false, updatable = false)
     private LocalDateTime modifiedAt;
 
-    // LogDetail과 1:N 관계 (필요 시)
     @OneToMany(mappedBy = "systemLog", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<LogDetail> logDetails = new ArrayList<>();
-
 }

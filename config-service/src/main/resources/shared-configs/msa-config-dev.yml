@@ -1,5 +1,5 @@
-# 개발 환경 민감 정보 (Git에 올라가면 안 됨!)
-# .gitignore에 추가 필요: *-dev.yml
+# Development environment sensitive information (Do not upload real secrets to Git)
+# Should be ignored by .gitignore: *-dev.yml
 
 spring:
   datasource:

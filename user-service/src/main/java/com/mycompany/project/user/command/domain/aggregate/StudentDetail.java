@@ -14,9 +14,9 @@ public class StudentDetail {
 
     @Id
     @Column(name = "student_id")
-    private Long id; // PK이자 FK
+    private Long id; // PK and FK
 
-    @MapsId // User의 PK를 같이 사용
+    @MapsId // Share PK with User
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private User user;

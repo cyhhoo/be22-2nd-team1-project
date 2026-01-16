@@ -18,15 +18,14 @@ public class AcademicYear {
     private Long academicYearId;
 
     @Column(name = "year", nullable = false)
-    private Integer year; // 2025, 2026...
+    private Integer year; // 2025, 2026, etc.
 
     @Column(nullable = false)
     private Integer semester; // 1, 2
 
-    private LocalDate startDate; // 학기 시작일
-    private LocalDate endDate; // 학기 종료일
+    private LocalDate startDate; // Semester start date
+    private LocalDate endDate; // Semester end date
 
-    // 현재 진행 중인 학기인지 여부
-    // '현재 학기 여부'
+    // Indicates if this is the currently active semester
     private Boolean isCurrent;
 }

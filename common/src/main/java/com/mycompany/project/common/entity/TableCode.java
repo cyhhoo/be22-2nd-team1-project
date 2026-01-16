@@ -7,7 +7,7 @@ import lombok.*;
 @Table(name = "tbl_table_code")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class TableCode { // BaseEntity 상속 불필요 (created_at만 있음) hoặc 직접 추가
+public class TableCode { // BaseEntity ?곸냽 遺덊븘??(created_at留??덉쓬) ho梳톍 吏곸젒 異붽?
 
     @Id
     @Column(name = "table_code_id")
@@ -19,5 +19,5 @@ public class TableCode { // BaseEntity 상속 불필요 (created_at만 있음) h
     @Column(length = 100)
     private String description;
     
-    // createdAt 등은 필요시 추가
+    // createdAt ?깆? ?꾩슂??異붽?
 }

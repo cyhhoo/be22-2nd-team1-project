@@ -16,20 +16,20 @@ public class ScheduleQueryService {
   private final ScheduleMapper scheduleMapper;
   private final com.mycompany.project.schedule.command.domain.repository.AcademicYearRepository academicYearRepository;
 
-  // 월간 일정 조회 (MyBatis 사용)
+  // Monthly schedule lookup (using MyBatis)
   public List<ScheduleDTO> getMonthlySchedules(int year, int month) {
     return scheduleMapper.selectMonthlySchedules(year, month);
   }
 
-  // 주간 일정 조회
+  // Weekly schedule lookup
   public List<ScheduleDTO> getWeeklySchedules(LocalDate startDate, LocalDate endDate) {
     return scheduleMapper.selectWeeklySchedules(startDate, endDate);
   }
 
-  // 내부 API용 학년도 단건 조회
+  // Internal API for other services to get academic year info
   public com.mycompany.project.schedule.query.dto.InternalAcademicYearResponse getInternalAcademicYear(
       Long academicYearId) {
-    return academicYearRepository.findById(academicYearId)
+    return academicYearRepository.findById(java.util.Objects.requireNonNull(academicYearId))
         .map(ay -> {
           com.mycompany.project.schedule.query.dto.InternalAcademicYearResponse res = new com.mycompany.project.schedule.query.dto.InternalAcademicYearResponse();
           res.setAcademicYearId(ay.getAcademicYearId());

@@ -1,6 +1,6 @@
 package com.mycompany.project.user.query.service;
 
-import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.common.enums.Role;
 import com.mycompany.project.user.command.domain.aggregate.User;
 import com.mycompany.project.user.command.domain.repository.StudentDetailRepository;
 import com.mycompany.project.user.command.domain.repository.TeacherDetailRepository;
@@ -39,13 +39,13 @@ class UserQueryServiceTest {
     private ModelMapper modelMapper;
 
     @Test
-    @DisplayName("내 정보 조회 성공")
+    @DisplayName("???뺣낫 議고쉶 ?깃났")
     void getMyInfo_Success() {
         // given
-        String email = "test@test.com"; // userId 대신 email 사용
+        String email = "test@test.com"; // userId ???email ?ъ슜
         User mockUser = User.builder()
                 .email(email)
-                .name("테스터")
+                .name("?뚯뒪??)
                 .role(Role.STUDENT)
                 .build();
 
@@ -57,11 +57,11 @@ class UserQueryServiceTest {
         // then
         assertNotNull(response);
         assertEquals(email, response.getEmail());
-        assertEquals("테스터", response.getName());
+        assertEquals("?뚯뒪??, response.getName());
     }
 
     @Test
-    @DisplayName("내 정보 조회 실패 - 사용자 없음")
+    @DisplayName("???뺣낫 議고쉶 ?ㅽ뙣 - ?ъ슜???놁쓬")
     void getMyInfo_NotFound() {
         // given
         String email = "unknown@test.com";
@@ -72,7 +72,7 @@ class UserQueryServiceTest {
     }
 
     @Test
-    @DisplayName("내부 사용자(Internal User) 조회 성공")
+    @DisplayName("?대? ?ъ슜??Internal User) 議고쉶 ?깃났")
     void getInternalUser_Success() {
         // given
         Long userId = 1L;

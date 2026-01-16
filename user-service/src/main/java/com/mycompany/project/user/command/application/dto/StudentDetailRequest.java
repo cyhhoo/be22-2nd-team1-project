@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class StudentDetailRequest {
-    private Integer grade; // 학년
-    private String classNo; // 반
-    private Integer studentNo; // 번호
+    private Integer grade; // Grade level
+    private String classNo; // Class number
+    private Integer studentNo; // Student number (in class)
 }

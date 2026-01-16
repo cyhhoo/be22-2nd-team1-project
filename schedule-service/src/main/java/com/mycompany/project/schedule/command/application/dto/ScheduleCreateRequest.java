@@ -15,17 +15,17 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ScheduleCreateRequest {
 
-    @NotNull(message = "일정 날짜는 필수입니다.")
-    @Future(message = "일정 날짜는 미래여야 합니다.") // 비즈니스 요구사항에 따라
+    @NotNull(message = "Schedule date is required")
+    @Future(message = "Schedule date must be in the future")
     private LocalDate scheduleDate;
 
-    @NotNull(message = "일정 타입은 필수입니다.")
-    private ScheduleType scheduleType; // SEMESTER_START, MIDTERM_EXAM, HOLIDAY 등
+    @NotNull(message = "Schedule type is required")
+    private ScheduleType scheduleType; // SEMESTER_START, MIDTERM_EXAM, HOLIDAY, etc.
 
-    @NotBlank(message = "일정 내용은 필수입니다.")
-    private String content; // 예: "중간고사 시작"
+    @NotBlank(message = "Schedule content is required")
+    private String content; // e.g., "Midterm Exam Start"
 
-    @NotNull(message = "일정 학기은 필수입니다.")
-    private Long academicYearId; // 어떤 학기에 속하는지
+    @NotNull(message = "Academic year ID is required")
+    private Long academicYearId;
     private String targetGrade; // "1", "2", "3", "ALL"
 }

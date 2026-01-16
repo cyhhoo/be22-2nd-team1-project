@@ -27,13 +27,13 @@ public class JwtAuthenticationGatewayFilterFactory
                 try {
                     Claims claims = jwtTokenProvider.parseClaims(token);
 
-                    // JWT에서 사용자 정보 추출
+                    // Extract user info from JWT
                     String userId = claims.get("userId") != null ? claims.get("userId").toString() : "";
                     String email = claims.getSubject();
                     String role = claims.get("auth") != null ? claims.get("auth").toString() : "";
                     String status = claims.get("status") != null ? claims.get("status").toString() : "";
 
-                    // 헤더에 사용자 정보 추가
+                    // Add user info to headers
                     ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                             .header("X-User-Id", userId)
                             .header("X-User-Email", email)
@@ -43,12 +43,12 @@ public class JwtAuthenticationGatewayFilterFactory
 
                     return chain.filter(exchange.mutate().request(modifiedRequest).build());
                 } catch (Exception e) {
-                    // JWT 파싱 실패 시 원본 요청 그대로 전달
+                    // Fail to parse JWT, proceed with original request
                     return chain.filter(exchange);
                 }
             }
 
-            // 토큰이 없거나 유효하지 않으면 원본 요청 그대로 전달
+            // No token or invalid token, proceed with original request
             return chain.filter(exchange);
         };
     }

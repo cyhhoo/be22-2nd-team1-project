@@ -19,10 +19,10 @@ public class ScheduleCommandService {
   private final AcademicScheduleRepository academicScheduleRepository;
   private final AcademicYearRepository academicYearRepository;
 
-  // 1. 학년도/학기 생성 (관리자용)
+  // 1. Create academic year (Admin)
   @Transactional
   public Long createAcademicYear(AcademicYearDTO request) {
-    // 중복 체크: 이미 존재하면 해당 ID 반환 (Idempotent)
+    // Duplicate check: Return existing ID if already exists (Idempotent)
     return academicYearRepository.findByYearAndSemester(request.getYear(), request.getSemester())
         .map(AcademicYear::getAcademicYearId)
         .orElseGet(() -> {
@@ -31,13 +31,13 @@ public class ScheduleCommandService {
               .semester(request.getSemester())
               .startDate(request.getStartDate())
               .endDate(request.getEndDate())
-              .isCurrent(true) // 새로 만들면 일단 현재 학기로 설정
+              .isCurrent(true)
               .build();
           return academicYearRepository.save(academicYear).getAcademicYearId();
         });
   }
 
-  // 2. 상세 일정 등록 (관리자용)
+  // 2. Register schedule (Admin)
   @Transactional
   public Long createSchedule(ScheduleCreateRequest request) {
     AcademicYear academicYear = academicYearRepository.findById(request.getAcademicYearId())
@@ -54,10 +54,9 @@ public class ScheduleCommandService {
     return academicScheduleRepository.save(schedule).getScheduleId();
   }
 
-  // 3. 일정 수정
+  // 3. Update schedule
   @Transactional
   public void updateSchedule(Long scheduleId, ScheduleCreateRequest request) {
-
     AcademicSchedule schedule = academicScheduleRepository.findById(scheduleId)
         .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
 
@@ -68,13 +67,13 @@ public class ScheduleCommandService {
         request.getTargetGrade());
   }
 
-  // 4. 일정 삭제 (Soft Delete)
+  // 4. Delete schedule (Soft Delete)
   @Transactional
   public void deleteSchedule(Long scheduleId) {
     AcademicSchedule schedule = academicScheduleRepository.findById(scheduleId)
         .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
 
-    // Soft Delete: 상태만 변경
+    // Soft Delete: status change naturally
     schedule.delete();
   }
 }

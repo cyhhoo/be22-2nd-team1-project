@@ -1,10 +1,10 @@
 # ===================================
-# Config Server - 전역 기본 설정 (application.yml)
-# 모든 마이크로서비스가 무조건 참조하는 인프라 설정
+# Config Server - Default Application Settings (application.yml)
+# Environment settings inherited by all microservices unconditionally
 # ===================================
 
 server:
-  # 개별 서비스는 포트 0(랜덤)을 기본으로 사용
+  # Each service uses random port (0) by default for development
   port: ${PORT:0}
 
 eureka:
@@ -16,11 +16,11 @@ eureka:
 
 spring:
   profiles:
-    # [Master Switch] 모든 서비스의 기본 프로파일을 여기서 결정합니다.
-    # 운영 환경(PRD)으로 전환 시 이 값을 prd로 바꾸면 모든 서비스가 prd 설정을 찾게 됩니다.
+    # [Master Switch] Determines the default profile for all services
+    # Change this value to 'prd' when switching to production environment
     active: dev
   cloud:
-    # 버전 호환성 검사 비활성화 (공통)
+    # Version compatibility check disabled (common)
     compatibility-verifier:
       enabled: false
 

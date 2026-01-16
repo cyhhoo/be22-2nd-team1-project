@@ -1,7 +1,7 @@
 package com.mycompany.project.security;
 
-import com.mycompany.project.user.command.domain.aggregate.Role;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
+import com.mycompany.project.common.enums.Role;
+import com.mycompany.project.common.enums.UserStatus;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,12 +14,12 @@ import java.util.Collections;
 @Builder
 public class CustomUserDetails implements UserDetails {
 
-    private final Long userId; // PK 추가
+    private final Long userId; // PK 異붽?
     private final String email;
     private final Role role;
     private final UserStatus status;
 
-    // --- UserDetails 필수 구현 메서드 ---
+    // --- UserDetails ?꾩닔 援ы쁽 硫붿꽌??---
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -28,7 +28,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getPassword() {
         return null;
-    } // Stateless 하므로 비밀번호는 필요 없음
+    } // Stateless ?섎?濡?鍮꾨?踰덊샇???꾩슂 ?놁쓬
 
     @Override
     public String getUsername() {

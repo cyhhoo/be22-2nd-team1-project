@@ -2,7 +2,7 @@ package com.mycompany.project.reservation.query.service;
 
 import com.mycompany.project.reservation.query.dto.ReservationDTO;
 import com.mycompany.project.reservation.query.dto.FacilityDTO;
-import com.mycompany.project.reservation.query.mapper.ReservationMapper;
+import com.mycompany.project.reservation.query.repository.ReservationMapper;
 import lombok.RequiredArgsConstructor;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class ReservationService {
     }
 
 
-    // 나의 예약 조회
+    // ?섏쓽 ?덉빟 議고쉶
     public List<ReservationDTO> selectMyReservations(Long studentId, String status) {
         return reservationMapper.selectMyReservations(studentId, status);
     }

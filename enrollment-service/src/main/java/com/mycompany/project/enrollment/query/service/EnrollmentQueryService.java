@@ -1,16 +1,18 @@
 package com.mycompany.project.enrollment.query.service;
 
-import com.mycompany.project.enrollment.entity.EnrollmentStatus;
+import com.mycompany.project.enrollment.command.domain.aggregate.Enrollment;
+import com.mycompany.project.common.enums.EnrollmentStatus;
 import com.mycompany.project.enrollment.query.dto.EnrollmentHistoryResponse;
 import com.mycompany.project.enrollment.query.dto.InternalEnrollmentResponse;
 import com.mycompany.project.enrollment.query.dto.TimetableResponse;
-import com.mycompany.project.enrollment.repository.EnrollmentRepository;
+import com.mycompany.project.enrollment.command.domain.repository.EnrollmentRepository;
+import com.mycompany.project.enrollment.command.domain.repository.EnrollmentMapper;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
-import com.mycompany.project.enrollment.repository.EnrollmentMapper;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,72 +22,61 @@ public class EnrollmentQueryService {
   private final EnrollmentMapper enrollmentMapper;
   private final EnrollmentRepository enrollmentRepository;
 
-  public List<EnrollmentHistoryResponse> getMyHistory(Long userId) {
-    return enrollmentMapper.selectHistoryByUserId(userId);
+  public List<EnrollmentHistoryResponse> getMyHistory(Long studentDetailId) {
+    return enrollmentMapper.selectHistoryByUserId(studentDetailId);
   }
 
-  public List<TimetableResponse> getMyTimetable(Long userId) {
-    return enrollmentMapper.selectTimetableByUserId(userId);
+  public List<TimetableResponse> getMyTimetable(Long studentDetailId) {
+    return enrollmentMapper.selectTimetableByUserId(studentDetailId);
   }
 
   public List<InternalEnrollmentResponse> getInternalEnrollmentsByCourse(Long courseId, EnrollmentStatus status) {
     return enrollmentRepository.findByCourseIdAndStatus(courseId, status)
         .stream()
-        .map(e -> {
-          InternalEnrollmentResponse res = new InternalEnrollmentResponse();
-          res.setEnrollmentId(e.getEnrollmentId());
-          res.setStudentDetailId(e.getStudentDetail().getId());
-          res.setCourseId(e.getCourseId());
-          res.setStatus(e.getStatus());
-          return res;
-        })
-        .toList();
+        .map(this::convertToInternalResponse)
+        .collect(Collectors.toList());
   }
 
   public InternalEnrollmentResponse getInternalEnrollment(Long enrollmentId) {
-    return enrollmentRepository.findById(enrollmentId)
-        .map(e -> {
-          InternalEnrollmentResponse res = new InternalEnrollmentResponse();
-          res.setEnrollmentId(e.getEnrollmentId());
-          res.setStudentDetailId(e.getStudentDetail().getId());
-          res.setCourseId(e.getCourseId());
-          res.setStatus(e.getStatus());
-          return res;
-        })
+    return enrollmentRepository.findById(java.util.Objects.requireNonNull(enrollmentId))
+        .map(this::convertToInternalResponse)
         .orElse(null);
   }
 
   public List<InternalEnrollmentResponse> searchEnrollments(
       com.mycompany.project.enrollment.query.dto.EnrollmentSearchRequest request) {
-    List<com.mycompany.project.enrollment.entity.Enrollment> enrollments = enrollmentRepository.findAll();
+    // In MSA, complex searching across services often uses Query services or ID
+    // collections.
+    // For now, we use a simple filter on existing repository data.
+    List<Enrollment> enrollments = enrollmentRepository.findAll();
 
     return enrollments.stream()
         .filter(e -> {
           if (request.getCourseIds() != null && !request.getCourseIds().isEmpty()) {
-            if (!request.getCourseIds().contains(e.getCourseId())) {
+            if (!request.getCourseIds().contains(e.getCourseId()))
               return false;
-            }
           }
           if (request.getStudentIds() != null && !request.getStudentIds().isEmpty()) {
-            if (!request.getStudentIds().contains(e.getStudentDetail().getUser().getUserId())) {
+            // Note: In refined MSA, studentIds here would be studentDetailIds.
+            if (!request.getStudentIds().contains(e.getStudentDetailId()))
               return false;
-            }
           }
           if (request.getStatus() != null) {
-            if (!e.getStatus().name().equals(request.getStatus())) {
+            if (!e.getStatus().name().equals(request.getStatus()))
               return false;
-            }
           }
           return true;
         })
-        .map(e -> {
-          InternalEnrollmentResponse res = new InternalEnrollmentResponse();
-          res.setEnrollmentId(e.getEnrollmentId());
-          res.setStudentDetailId(e.getStudentDetail().getId());
-          res.setCourseId(e.getCourseId());
-          res.setStatus(e.getStatus());
-          return res;
-        })
-        .toList();
+        .map(this::convertToInternalResponse)
+        .collect(Collectors.toList());
+  }
+
+  private InternalEnrollmentResponse convertToInternalResponse(Enrollment e) {
+    InternalEnrollmentResponse res = new InternalEnrollmentResponse();
+    res.setEnrollmentId(e.getEnrollmentId());
+    res.setStudentDetailId(e.getStudentDetailId());
+    res.setCourseId(e.getCourseId());
+    res.setStatus(e.getStatus());
+    return res;
   }
 }

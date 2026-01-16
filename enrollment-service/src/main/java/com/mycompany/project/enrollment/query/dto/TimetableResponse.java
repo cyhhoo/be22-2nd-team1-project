@@ -10,12 +10,12 @@ import lombok.*;
 @ToString
 public class TimetableResponse {
 
-  private Long courseId; // 강좌 상세 조회를 위해 필요
+  private Long courseId; // 媛뺤쥖 ?곸꽭 議고쉶瑜??꾪빐 ?꾩슂
 
-  private String courseName;   // 과목명
-  private String dayOfWeek;    // 요일 (MON, TUE...)
-  private Integer period;      // 교시 (1, 2...)
-  private String classroom;    // 강의실 (A101)
-  private String teacherName;// 선생님
+  private String courseName;   // 怨쇰ぉ紐?
+  private String dayOfWeek;    // ?붿씪 (MON, TUE...)
+  private Integer period;      // 援먯떆 (1, 2...)
+  private String classroom;    // 媛뺤쓽??(A101)
+  private String teacherName;// ?좎깮??
 
 }

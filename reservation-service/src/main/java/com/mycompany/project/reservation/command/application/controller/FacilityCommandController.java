@@ -1,7 +1,6 @@
 package com.mycompany.project.reservation.command.application.controller;
 
 import com.mycompany.project.common.response.ApiResponse;
-import com.mycompany.project.reservation.command.application.dto.request.FacilityChangeRequest;
 import com.mycompany.project.reservation.command.application.dto.request.FacilityCreateRequest;
 import com.mycompany.project.reservation.command.application.dto.request.FacilityUpdateRequest;
 import com.mycompany.project.reservation.command.application.dto.response.FacilityCommandResponse;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "시설 관리 (Facility)", description = "시설 등록/수정/삭제 API")
+@Tag(name = "Facility Management", description = "Facility registration, update, and deletion API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/facilities")
@@ -22,7 +21,7 @@ public class FacilityCommandController {
 
   private final FacilityCommandService facilityCommandService;
 
-  @Operation(summary = "시설 등록", description = "관리자가 새로운 시설을 등록합니다.")
+  @Operation(summary = "Register facility", description = "Admin registers a new facility.")
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<FacilityCommandResponse>> create(
@@ -32,7 +31,7 @@ public class FacilityCommandController {
         ApiResponse.success(facilityCommandService.create(adminId, request)));
   }
 
-  @Operation(summary = "시설 수정", description = "관리자가 시설 정보를 수정합니다.")
+  @Operation(summary = "Update facility", description = "Admin updates facility information.")
   @PutMapping("/{facilityId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<FacilityCommandResponse>> update(
@@ -43,7 +42,7 @@ public class FacilityCommandController {
         ApiResponse.success(facilityCommandService.update(adminId, facilityId, request)));
   }
 
-  @Operation(summary = "시설 삭제", description = "관리자가 시설을 삭제합니다.")
+  @Operation(summary = "Delete facility", description = "Admin deletes a facility.")
   @DeleteMapping("/{facilityId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<Void>> delete(

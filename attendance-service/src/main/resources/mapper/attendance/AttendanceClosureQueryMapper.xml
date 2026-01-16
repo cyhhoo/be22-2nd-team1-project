@@ -3,11 +3,11 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.mycompany.project.attendance.mapper.AttendanceClosureQueryMapper">
+<mapper namespace="com.mycompany.project.attendance.query.repository.AttendanceClosureQueryMapper">
 
-    <!-- 마감이력 상세 -->
+    <!-- Attendance Closure Detail -->
     <select id="findById" parameterType="long"
-            resultType="com.mycompany.project.attendance.dto.response.AttendanceClosureResponse">
+            resultType="com.mycompany.project.attendance.query.application.dto.AttendanceClosureResponse">
         SELECT
         closure_id       AS closureId,
         academic_year_id AS academicYearId,
@@ -22,10 +22,10 @@
         WHERE closure_id = #{closureId}
     </select>
 
-    <!-- 마감이력 목록/검색 -->
+    <!-- Attendance Closure List/Search -->
     <select id="search"
-            parameterType="com.mycompany.project.attendance.dto.request.ClosureSearchRequest"
-            resultType="com.mycompany.project.attendance.dto.response.AttendanceClosureResponse">
+            parameterType="com.mycompany.project.attendance.command.application.dto.ClosureSearchRequest"
+            resultType="com.mycompany.project.attendance.query.application.dto.AttendanceClosureResponse">
         SELECT
         closure_id       AS closureId,
         academic_year_id AS academicYearId,
@@ -63,9 +63,9 @@
         </if>
     </select>
 
-    <!-- 총 개수 조회 -->
+    <!-- Total count for pagination -->
     <select id="count"
-            parameterType="com.mycompany.project.attendance.dto.request.ClosureSearchRequest"
+            parameterType="com.mycompany.project.attendance.command.application.dto.ClosureSearchRequest"
             resultType="long">
         SELECT COUNT(*)
         FROM tbl_attendance_closure

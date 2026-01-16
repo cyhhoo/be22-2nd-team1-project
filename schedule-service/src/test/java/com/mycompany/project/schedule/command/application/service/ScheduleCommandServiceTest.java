@@ -36,7 +36,7 @@ class ScheduleCommandServiceTest {
     private AcademicYearRepository academicYearRepository;
 
     @Test
-    @DisplayName("학년도 생성 성공 - 신규")
+    @DisplayName("?숇뀈???앹꽦 ?깃났 - ?좉퇋")
     void createAcademicYear_Success_New() {
         // given
         AcademicYearDTO request = new AcademicYearDTO();
@@ -58,14 +58,14 @@ class ScheduleCommandServiceTest {
     }
 
     @Test
-    @DisplayName("상세 일정 등록 성공")
+    @DisplayName("?곸꽭 ?쇱젙 ?깅줉 ?깃났")
     void createSchedule_Success() {
         // given
         ScheduleCreateRequest request = new ScheduleCreateRequest();
         request.setAcademicYearId(1L);
         request.setScheduleDate(LocalDate.now());
         request.setScheduleType(ScheduleType.OTHER);
-        request.setContent("중간고사");
+        request.setContent("以묎컙怨좎궗");
 
         AcademicYear mockYear = AcademicYear.builder().academicYearId(1L).build();
         given(academicYearRepository.findById(1L)).willReturn(Optional.of(mockYear));
@@ -82,7 +82,7 @@ class ScheduleCommandServiceTest {
     }
 
     @Test
-    @DisplayName("상세 일정 등록 실패 - 학년도 없음")
+    @DisplayName("?곸꽭 ?쇱젙 ?깅줉 ?ㅽ뙣 - ?숇뀈???놁쓬")
     void createSchedule_AcademicYearNotFound() {
         // given
         ScheduleCreateRequest request = new ScheduleCreateRequest();
@@ -97,14 +97,14 @@ class ScheduleCommandServiceTest {
     }
 
     @Test
-    @DisplayName("일정 수정 성공")
+    @DisplayName("?쇱젙 ?섏젙 ?깃났")
     void updateSchedule_Success() {
         // given
         Long scheduleId = 10L;
         ScheduleCreateRequest request = new ScheduleCreateRequest();
-        request.setContent("수정된 내용");
+        request.setContent("?섏젙???댁슜");
 
-        AcademicSchedule mockSchedule = AcademicSchedule.builder().scheduleId(10L).content("기존 내용").build();
+        AcademicSchedule mockSchedule = AcademicSchedule.builder().scheduleId(10L).content("湲곗〈 ?댁슜").build();
 
         given(academicScheduleRepository.findById(scheduleId)).willReturn(Optional.of(mockSchedule));
 
@@ -112,11 +112,11 @@ class ScheduleCommandServiceTest {
         scheduleCommandService.updateSchedule(scheduleId, request);
 
         // then
-        assertEquals("수정된 내용", mockSchedule.getContent());
+        assertEquals("?섏젙???댁슜", mockSchedule.getContent());
     }
 
     @Test
-    @DisplayName("일정 삭제 성공 (Soft Delete)")
+    @DisplayName("?쇱젙 ??젣 ?깃났 (Soft Delete)")
     void deleteSchedule_Success() {
         // given
         Long scheduleId = 10L;

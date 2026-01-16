@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class) // Listener 설정. 아래 field가 수정되면 현재시간을 자동으로 채워줌
+@EntityListeners(AuditingEntityListener.class) // Listener ?ㅼ젙. ?꾨옒 field媛 ?섏젙?섎㈃ ?꾩옱?쒓컙???먮룞?쇰줈 梨꾩썙以?
 public abstract class BaseEntity{
 
   @CreatedDate

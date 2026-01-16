@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.mycompany.project.course.mapper.CourseMapper">
+<mapper namespace="com.mycompany.project.course.query.repository.CourseMapper">
 
-    <!-- 교사 중복 스케줄 조회 (반려/폐강 제외) -->
+    <!-- 援먯궗 以묐났 ?ㅼ?以?議고쉶 (諛섎젮/?먭컯 ?쒖쇅) -->
     <select id="countTeacherSchedule" resultType="int">
         SELECT COUNT(*)
         FROM tbl_course c
@@ -14,7 +14,7 @@
           AND c.status NOT IN ('CANCELED', 'REFUSE')
     </select>
 
-    <!-- 강의실 중복 스케줄 조회 (반려/폐강 제외) -->
+    <!-- 媛뺤쓽??以묐났 ?ㅼ?以?議고쉶 (諛섎젮/?먭컯 ?쒖쇅) -->
     <select id="countClassroomSchedule" resultType="int">
         SELECT COUNT(*)
         FROM tbl_course c
@@ -26,7 +26,7 @@
           AND c.status NOT IN ('CANCELED', 'REFUSE')
     </select>
 
-    <!-- 수강생 중복 수강 내역 조회 (폐강/반려 제외) -->
+    <!-- ?섍컯??以묐났 ?섍컯 ?댁뿭 議고쉶 (?먭컯/諛섎젮 ?쒖쇅) -->
     <select id="findConflictingEnrollments" resultType="java.util.Map">
         SELECT
             e.enrollment_id AS enrollmentId,
@@ -44,7 +44,7 @@
           AND c.status NOT IN ('CANCELED', 'REFUSE')
     </select>
 
-    <!-- 교사 주간 시간표 조회 (폐강/반려 제외) -->
+    <!-- 援먯궗 二쇨컙 ?쒓컙??議고쉶 (?먭컯/諛섎젮 ?쒖쇅) -->
     <select id="findTeacherTimetable" resultType="java.util.Map">
         SELECT
             cts.day_of_week AS dayOfWeek,

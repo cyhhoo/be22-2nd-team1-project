@@ -1,6 +1,6 @@
 package com.mycompany.project.user.command.application.dto;
 
-import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.common.enums.Role;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,7 +17,7 @@ public class UserRegisterRequest {
     private LocalDate birthDate;
     private Role role; // ADMIN, TEACHER, STUDENT
 
-    // 역할별 상세 정보 (Optional)
+    // Role-specific detailed information (Optional)
     private StudentDetailRequest studentDetail;
     private TeacherDetailRequest teacherDetail;
     private AdminDetailRequest adminDetail;

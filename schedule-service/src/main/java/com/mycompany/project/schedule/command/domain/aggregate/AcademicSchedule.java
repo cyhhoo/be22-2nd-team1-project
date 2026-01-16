@@ -30,10 +30,10 @@ public class AcademicSchedule extends BaseEntity {
   private ScheduleType scheduleType; // ENUM: START, EXAM, HOLIDAY
 
   @Column(nullable = false)
-  private String content; // 일정 내용 (예: "1학기 기말고사 시작")
+  private String content; // Schedule content (e.g., "1st Semester Final Exam")
 
   @Column(nullable = false)
-  private String targetGrade; // ENUM: 1, 2, 3, ALL
+  private String targetGrade; // Target grade (e.g., 1, 2, 3, ALL)
 
   @Builder.Default
   @Column(nullable = false)
@@ -49,7 +49,5 @@ public class AcademicSchedule extends BaseEntity {
 
   public void delete() {
     this.isDeleted = true;
-
   }
-
 }

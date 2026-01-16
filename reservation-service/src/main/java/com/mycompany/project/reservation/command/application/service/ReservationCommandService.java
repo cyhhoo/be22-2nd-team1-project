@@ -9,9 +9,9 @@ import com.mycompany.project.reservation.command.application.dto.response.Reserv
 import com.mycompany.project.reservation.command.domain.aggregate.Facility;
 import com.mycompany.project.reservation.command.domain.aggregate.Reservation;
 import com.mycompany.project.reservation.command.domain.aggregate.ReservationStatus;
-import com.mycompany.project.reservation.command.infrastructure.repository.FacilityRepository;
-import com.mycompany.project.reservation.command.infrastructure.repository.FacilityRestrictionRepository;
-import com.mycompany.project.reservation.command.infrastructure.repository.ReservationRepository;
+import com.mycompany.project.reservation.command.domain.repository.FacilityRepository;
+import com.mycompany.project.reservation.command.domain.repository.FacilityRestrictionRepository;
+import com.mycompany.project.reservation.command.domain.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -30,10 +30,10 @@ public class ReservationCommandService {
   private final FacilityRepository facilityRepository;
   private final FacilityRestrictionRepository restrictionRepository;
 
-  /* 시설 예약 신청 */
+  /* Create Facility Reservation */
   public ReservationCommandResponse create(Long studentId, ReservationCreateRequest req) {
 
-    // 1) 시설 존재/상태 확인
+    // 1) Check facility existência/availability
     Facility facility = facilityRepository.findById(req.getFacilityId())
         .orElseThrow(() -> new BusinessException(ErrorCode.FACILITY_NOT_FOUND));
 
@@ -41,24 +41,24 @@ public class ReservationCommandService {
       throw new BusinessException(ErrorCode.FACILITY_NOT_AVAILABLE);
     }
 
-    // 2) 시간 규칙 + 시설 운영시간 확인
+    // 2) Validate time rules and facility open hours
     validateTimeRules(req.getStartTime());
     validateFacilityOpenHours(facility, req.getStartTime());
 
-    // 3) 시설 이용 제한 기간 확인
+    // 3) Check for facility restrictions on specified date
     validateRestriction(req.getFacilityId(), req.getReservationDate());
 
-    // 4) 중복 예약 확인 (1차)
+    // 4) Check for duplicate reservations (primary check)
     if (reservationRepository.existsByFacilityIdAndReservationDateAndStartTime(
         req.getFacilityId(), req.getReservationDate(), req.getStartTime())) {
       throw new BusinessException(ErrorCode.RESERVED_TIME_CONFLICT);
     }
 
-    // 5) 예약 생성/저장
+    // 5) Create and initialize reservation
     Reservation reservation = Reservation.create(
         req.getFacilityId(), studentId, req.getReservationDate(), req.getStartTime());
 
-    // 6) 동시성 최종 방어
+    // 6) Final persistent check
     try {
       return ReservationCommandResponse.from(reservationRepository.save(reservation));
     } catch (DataIntegrityViolationException e) {
@@ -66,7 +66,7 @@ public class ReservationCommandService {
     }
   }
 
-  /* 시설 예약 취소 */
+  /* Cancel Facility Reservation */
   public void cancel(Long reservationId, Long studentId) {
     Reservation r = reservationRepository.findById(reservationId)
         .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
@@ -78,7 +78,7 @@ public class ReservationCommandService {
     r.cancel();
   }
 
-  /* 시설 예약 변경 */
+  /* Change Facility Reservation */
   public void change(Long reservationId, Long studentId, ReservationChangeRequest req) {
     Reservation r = reservationRepository.findById(reservationId)
         .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
@@ -94,11 +94,11 @@ public class ReservationCommandService {
         .orElseThrow(() -> new BusinessException(ErrorCode.FACILITY_NOT_FOUND));
     validateFacilityOpenHours(facility, req.getStartTime());
 
-    // 변경 전과 동일한 날짜/시간인지 체크
+    // Check if new date/time is same as original
     boolean sameDateTime = Objects.equals(r.getReservationDate(), req.getReservationDate()) &&
         Objects.equals(r.getStartTime(), req.getStartTime());
 
-    // 실제로 변경되는 경우에만 중복 체크
+    // Perform duplicate check only if date/time changed
     if (!sameDateTime) {
       boolean duplicated = reservationRepository
           .existsByFacilityIdAndReservationDateAndStartTimeAndReservationIdNot(
@@ -115,7 +115,7 @@ public class ReservationCommandService {
     r.change(req.getReservationDate(), req.getStartTime());
   }
 
-  /* 관리자 승인/거부 */
+  /* Admin Approval/Rejection */
   public void approve(Long adminId, Long reservationId, ReservationApproveRequest req) {
     Reservation r = reservationRepository.findById(reservationId)
         .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
@@ -142,7 +142,7 @@ public class ReservationCommandService {
     }
   }
 
-  /* 검증 메서드들 */
+  /* Validation Methods */
 
   private void validateRestriction(Long facilityId, LocalDate date) {
     boolean restricted = restrictionRepository.existsByFacilityIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(

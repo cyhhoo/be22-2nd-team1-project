@@ -29,12 +29,12 @@ class SubjectQueryServiceTest {
     private SubjectRepository subjectRepository;
 
     @Test
-    @DisplayName("전체 과목 조회 성공")
+    @DisplayName("?꾩껜 怨쇰ぉ 議고쉶 ?깃났")
     void getAllSubjects_Success() {
         // given
         List<Subject> mockSubjects = Arrays.asList(
-                Subject.builder().id(1L).name("수학").build(),
-                Subject.builder().id(2L).name("영어").build());
+                Subject.builder().id(1L).name("?섑븰").build(),
+                Subject.builder().id(2L).name("?곸뼱").build());
         given(subjectRepository.findAll()).willReturn(mockSubjects);
 
         // when
@@ -42,16 +42,16 @@ class SubjectQueryServiceTest {
 
         // then
         assertEquals(2, responses.size());
-        assertEquals("수학", responses.get(0).getName());
-        assertEquals("영어", responses.get(1).getName());
+        assertEquals("?섑븰", responses.get(0).getName());
+        assertEquals("?곸뼱", responses.get(1).getName());
     }
 
     @Test
-    @DisplayName("단일 과목 조회 성공")
+    @DisplayName("?⑥씪 怨쇰ぉ 議고쉶 ?깃났")
     void getSubjectById_Success() {
         // given
         Long subjectId = 1L;
-        Subject mockSubject = Subject.builder().id(subjectId).name("수학").build();
+        Subject mockSubject = Subject.builder().id(subjectId).name("?섑븰").build();
         given(subjectRepository.findById(subjectId)).willReturn(Optional.of(mockSubject));
 
         // when
@@ -60,11 +60,11 @@ class SubjectQueryServiceTest {
         // then
         assertNotNull(response);
         assertEquals(subjectId, response.getId());
-        assertEquals("수학", response.getName());
+        assertEquals("?섑븰", response.getName());
     }
 
     @Test
-    @DisplayName("단일 과목 조회 실패 - 존재하지 않음")
+    @DisplayName("?⑥씪 怨쇰ぉ 議고쉶 ?ㅽ뙣 - 議댁옱?섏? ?딆쓬")
     void getSubjectById_NotFound() {
         // given
         Long subjectId = 99L;

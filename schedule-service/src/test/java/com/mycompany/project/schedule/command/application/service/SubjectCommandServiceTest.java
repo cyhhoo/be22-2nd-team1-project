@@ -29,14 +29,14 @@ class SubjectCommandServiceTest {
     private SubjectRepository subjectRepository;
 
     @Test
-    @DisplayName("과목 생성 성공 - 신규 생성")
+    @DisplayName("Subject creation success - New")
     void createSubject_Success_New() {
         // given
         SubjectCreateRequest request = new SubjectCreateRequest();
-        request.setName("수학");
+        request.setName("Math");
 
-        given(subjectRepository.findByName("수학")).willReturn(Optional.empty());
-        given(subjectRepository.save(any(Subject.class))).willAnswer(invocation -> {
+        given(subjectRepository.findByName("Math")).willReturn(Optional.empty());
+        given(subjectRepository.save(java.util.Objects.requireNonNull(any(Subject.class)))).willAnswer(invocation -> {
             Subject s = invocation.getArgument(0);
             // mock id
             return Subject.builder().id(1L).name(s.getName()).build();
@@ -47,31 +47,32 @@ class SubjectCommandServiceTest {
 
         // then
         assertEquals(1L, id);
-        verify(subjectRepository).save(any(Subject.class));
+        verify(subjectRepository).save(java.util.Objects.requireNonNull(any(Subject.class)));
     }
 
     @Test
-    @DisplayName("과목 생성 성공 - 이미 존재함 (Idempotent)")
+    @DisplayName("Subject creation success - Already exists (Idempotent)")
     void createSubject_Success_Existing() {
         // given
         SubjectCreateRequest request = new SubjectCreateRequest();
-        request.setName("영어");
+        request.setName("English");
 
-        Subject existingSubject = Subject.builder().id(100L).name("영어").build();
+        Subject existingSubject = Subject.builder().id(100L).name("English").build();
 
-        given(subjectRepository.findByName("영어")).willReturn(Optional.of(existingSubject));
+        given(subjectRepository.findByName("English")).willReturn(Optional.of(existingSubject));
 
         // when
         Long id = subjectCommandService.createSubject(request);
 
         // then
         assertEquals(100L, id);
-        // save는 호출되지 않아야 함
-        verify(subjectRepository, org.mockito.Mockito.never()).save(any(Subject.class));
+        // save should not be called
+        verify(subjectRepository, org.mockito.Mockito.never())
+                .save(java.util.Objects.requireNonNull(any(Subject.class)));
     }
 
     @Test
-    @DisplayName("과목 삭제 실패 - 존재하지 않음")
+    @DisplayName("Subject deletion fail - Not found")
     void deleteSubject_NotFound() {
         // given
         Long subjectId = 999L;

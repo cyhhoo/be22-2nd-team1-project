@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.mycompany.project.attendance.mapper.AttendanceQueryMapper">
+<mapper namespace="com.mycompany.project.attendance.query.repository.AttendanceQueryMapper">
 
-    <select id="findById" resultType="com.mycompany.project.attendance.dto.response.AttendanceResponse">
+    <select id="findById" resultType="com.mycompany.project.attendance.query.application.dto.AttendanceResponse">
         SELECT
             a.attendance_id AS attendanceId,
             a.class_date AS classDate,
@@ -27,7 +27,7 @@
         WHERE a.attendance_id = #{attendanceId}
     </select>
 
-    <select id="search" resultType="com.mycompany.project.attendance.dto.response.AttendanceListResponse">
+    <select id="search" resultType="com.mycompany.project.attendance.query.application.dto.AttendanceListResponse">
         SELECT
             a.attendance_id AS attendanceId,
             a.class_date AS classDate,

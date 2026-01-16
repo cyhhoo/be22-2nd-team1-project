@@ -1,6 +1,5 @@
 package com.mycompany.project.reservation.query.controller;
 
-
 import com.mycompany.project.common.response.ApiResponse;
 import com.mycompany.project.reservation.query.dto.FacilityDTO;
 import com.mycompany.project.reservation.query.dto.ReservationDTO;
@@ -16,58 +15,53 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-@Tag(name = "예약 가능 시설 조회")
+@Tag(name = "Facility Reservation Query", description = "Query available facilities and reservation status")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/reservation")
 public class ReservationQueryController {
 
-    private final ReservationQueryService reservationQueryService;
+        private final ReservationQueryService reservationQueryService;
 
-    /**
-     * 예약 가능 시설 조회
-     */
-    @Operation(summary = "예약 가능 시설 조회", description = " ex) reservationDat = 2024-02-05, startTime = 2024-02-05T14:00:00")
-    @GetMapping("available")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<ApiResponse<List<FacilityDTO>>> availableFacilities(
-            @RequestParam LocalDate reservationDate,
-            @RequestParam LocalTime startTime
-    ) {
-        return ResponseEntity.ok(
-                ApiResponse.success(reservationQueryService.getAvailableFacilities(reservationDate, startTime))
-        );
-    }
+        /**
+         * Search available facilities
+         */
+        @Operation(summary = "Search available facilities", description = "Search facilities available at a specific date and time.")
+        @GetMapping("available")
+        @PreAuthorize("hasRole('STUDENT')")
+        public ResponseEntity<ApiResponse<List<FacilityDTO>>> availableFacilities(
+                        @RequestParam LocalDate reservationDate,
+                        @RequestParam LocalTime startTime) {
+                return ResponseEntity.ok(
+                                ApiResponse.success(reservationQueryService.getAvailableFacilities(reservationDate,
+                                                startTime)));
+        }
 
-    /**
-     * 나의 예약 조회
-     */
-    @Operation(summary = "나의 예약 조회" ,description = "ex) studentId = 1, status = APPROVE")
-    @GetMapping("my")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<ApiResponse<List<ReservationDTO>>> myReservations(
-            @RequestParam Long studentId,
-            @RequestParam(required = false) String status
-    ) {
-        return ResponseEntity.ok(
-                ApiResponse.success(reservationQueryService.getMyReservations(studentId, status))
-        );
-    }
+        /**
+         * Retrieve student's own reservations
+         */
+        @Operation(summary = "Get my reservations", description = "Retrieve reservations of the currently logged-in student.")
+        @GetMapping("my")
+        @PreAuthorize("hasRole('STUDENT')")
+        public ResponseEntity<ApiResponse<List<ReservationDTO>>> myReservations(
+                        @RequestParam Long studentId,
+                        @RequestParam(required = false) String status) {
+                return ResponseEntity.ok(
+                                ApiResponse.success(reservationQueryService.getMyReservations(studentId, status)));
+        }
 
-    /**
-     관리자 예약 현황 조회
-     */
-    @Operation(summary = "관리자 예약 현황 조회", description = "ex) adminId=1, reservationDate=2024-02-05T14:00:00")
-    @GetMapping("admin/status")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<ReservationDTO>>> adminStatus(
-            @RequestParam Long adminId,
-            @RequestParam(required = false) LocalDate reservationDate,
-            @RequestParam(required = false) String status
-    ) {
-        return ResponseEntity.ok(
-                ApiResponse.success(reservationQueryService.getAdminReservationStatus(adminId, reservationDate, status))
-        );
-    }
-
+        /**
+         * Admin: Retrieve facility reservation status
+         */
+        @Operation(summary = "Admin: Get reservation status", description = "Admin retrieves reservation status for their facilities.")
+        @GetMapping("admin/status")
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<ApiResponse<List<ReservationDTO>>> adminStatus(
+                        @RequestParam Long adminId,
+                        @RequestParam(required = false) LocalDate reservationDate,
+                        @RequestParam(required = false) String status) {
+                return ResponseEntity.ok(
+                                ApiResponse.success(reservationQueryService.getAdminReservationStatus(adminId,
+                                                reservationDate, status)));
+        }
 }

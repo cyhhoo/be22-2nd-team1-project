@@ -16,7 +16,7 @@ public class SubjectCommandService {
     private final SubjectRepository subjectRepository;
 
     /**
-     * 과목 등록
+     * Register subject
      */
     @Transactional
     public Long createSubject(SubjectCreateRequest request) {
@@ -27,15 +27,16 @@ public class SubjectCommandService {
                     Subject subject = Subject.builder()
                             .name(request.getName())
                             .build();
-                    return subjectRepository.save(subject).getId();
+                    return subjectRepository.save(java.util.Objects.requireNonNull(subject)).getId();
                 });
     }
 
     /**
-     * 과목 삭제
+     * Delete subject
      */
     @Transactional
     public void deleteSubject(Long id) {
+        java.util.Objects.requireNonNull(id, "Subject ID must not be null");
         if (!subjectRepository.existsById(id)) {
             throw new BusinessException(ErrorCode.SUBJECT_NOT_FOUND);
         }

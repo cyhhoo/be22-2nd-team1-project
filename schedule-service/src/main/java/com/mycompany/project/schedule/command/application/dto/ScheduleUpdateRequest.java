@@ -1,4 +1,5 @@
 package com.mycompany.project.schedule.command.application.dto;
+
 import com.mycompany.project.schedule.command.domain.aggregate.ScheduleType;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -13,14 +14,14 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ScheduleUpdateRequest {
 
-  @NotNull(message = "일정 날짜는 필수입니다.")
-  @Future(message = "일정 날짜는 미래여야 합니다.") // 비즈니스 요구사항에 따라 FutureOrPresent 등 조정
+  @NotNull(message = "Schedule date is required")
+  @Future(message = "Schedule date must be in the future")
   private LocalDate scheduleDate;
 
-  @NotNull(message = "일정 타입은 필수입니다.")
+  @NotNull(message = "Schedule type is required")
   private ScheduleType scheduleType;
 
-  @NotBlank(message = "일정 내용은 필수입니다.")
+  @NotBlank(message = "Schedule content is required")
   private String content;
 
   private String targetGrade; // Optional

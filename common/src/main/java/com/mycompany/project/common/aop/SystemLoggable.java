@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SystemLoggable {
-    ChangeType type(); // CREATE, UPDATE, DELETE 등
+    ChangeType type(); // CREATE, UPDATE, DELETE ??
 
-    int tableCodeId() default 0; // 대상 테이블 코드 (선택)
+    int tableCodeId() default 0; // ????뚯씠釉?肄붾뱶 (?좏깮)
 }

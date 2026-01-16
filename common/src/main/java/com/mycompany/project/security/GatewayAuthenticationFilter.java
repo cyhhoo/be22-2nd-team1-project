@@ -1,7 +1,7 @@
 package com.mycompany.project.security;
 
-import com.mycompany.project.user.command.domain.aggregate.Role;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
+import com.mycompany.project.common.enums.Role;
+import com.mycompany.project.common.enums.UserStatus;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * API Gateway에서 전달한 헤더(X-User-Id, X-User-Email, X-User-Role)를 읽어
- * SecurityContextHolder에 인증 정보를 설정하는 필터
+ * API Gateway?먯꽌 ?꾨떖???ㅻ뜑(X-User-Id, X-User-Email, X-User-Role)瑜??쎌뼱
+ * SecurityContextHolder???몄쬆 ?뺣낫瑜??ㅼ젙?섎뒗 ?꾪꽣
  */
 public class GatewayAuthenticationFilter extends OncePerRequestFilter {
 
@@ -32,7 +32,7 @@ public class GatewayAuthenticationFilter extends OncePerRequestFilter {
         String statusStr = request.getHeader("X-User-Status");
 
         if (email != null && !email.isEmpty() && roleStr != null) {
-            // "ROLE_STUDENT" 또는 "STUDENT" 모두 처리
+            // "ROLE_STUDENT" ?먮뒗 "STUDENT" 紐⑤몢 泥섎━
             String cleanRole = roleStr.replace("ROLE_", "");
             Role role = Role.valueOf(cleanRole);
             UserStatus status = (statusStr != null) ? UserStatus.valueOf(statusStr) : UserStatus.ACTIVE;

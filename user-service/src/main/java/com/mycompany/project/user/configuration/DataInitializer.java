@@ -2,9 +2,9 @@ package com.mycompany.project.user.configuration;
 
 import com.mycompany.project.user.command.domain.aggregate.AdminDetail;
 import com.mycompany.project.user.command.domain.aggregate.AdminLevel;
-import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.common.enums.Role;
 import com.mycompany.project.user.command.domain.aggregate.User;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
+import com.mycompany.project.common.enums.UserStatus;
 import com.mycompany.project.user.command.domain.repository.AdminDetailRepository;
 import com.mycompany.project.user.command.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 
 /**
- * 애플리케이션 기동 시 초기 데이터를 설정하는 클래스
+ * DataInitializer class to set up initial data on application startup
  */
 @Slf4j
 @Component
@@ -31,31 +31,31 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        // 유저가 한 명도 없는 경우에만 초기 관리자 계정 생성
+        // Create initial admin account only if no users exist
         if (userRepository.count() == 0) {
-            log.info("초기 시스템 관리자 계정을 생성합니다...");
+            log.info("Creating initial system admin account...");
 
             User admin = User.builder()
                     .email("admin@test.com")
                     .password(passwordEncoder.encode("admin1234"))
-                    .name("시스템관리자")
+                    .name("System Admin")
                     .role(Role.ADMIN)
-                    .status(UserStatus.ACTIVE) // 최초 관리자는 바로 활성 상태로 생성
+                    .status(UserStatus.ACTIVE) // Set to ACTIVE immediately for initial admin
                     .birthDate(LocalDate.parse("1990-01-01"))
                     .build();
 
-            userRepository.save(admin);
+            userRepository.save(java.util.Objects.requireNonNull(admin));
 
-            // 관리자 상세 정보 생성 (LEVEL_1로 설정)
+            // Create AdminDetail (Set to LEVEL_1)
             AdminDetail adminDetail = AdminDetail.builder()
                     .user(admin)
                     .level(AdminLevel.LEVEL_1)
                     .build();
-            adminDetailRepository.save(adminDetail);
+            adminDetailRepository.save(java.util.Objects.requireNonNull(adminDetail));
 
-            log.info("관리자 계정 생성 완료: admin@test.com / admin1234");
+            log.info("Admin account created successfully: admin@test.com / admin1234");
         } else {
-            log.info("기존 유저 데이터가 존재하여 초기화를 건너뜜");
+            log.info("User data already exists. Skipping initialization.");
         }
     }
 }

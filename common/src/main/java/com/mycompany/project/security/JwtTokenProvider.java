@@ -1,7 +1,7 @@
 package com.mycompany.project.security;
 
-import com.mycompany.project.user.command.domain.aggregate.Role;
-import com.mycompany.project.user.command.domain.aggregate.UserStatus;
+import com.mycompany.project.common.enums.Role;
+import com.mycompany.project.common.enums.UserStatus;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -29,18 +29,18 @@ public class JwtTokenProvider {
     private String secretKey;
     private SecretKey key;
 
-    // 30분, 7일
+    // 30遺? 7??
     private final long ACCESS_TOKEN_VALIDITY = 30 * 60 * 1000L;
     private final long REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60 * 1000L;
 
     @PostConstruct
     protected void init() {
-        // Base64 디코딩 대신 직접 바이트로 변환 (plain text secret 지원)
+        // Base64 ?붿퐫?????吏곸젒 諛붿씠?몃줈 蹂??(plain text secret 吏??
         byte[] keyBytes = secretKey.getBytes();
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // 토큰 생성
+    // ?좏겙 ?앹꽦
     public String createAccessToken(Long userId, String email, Role role, UserStatus status) {
         Date now = new Date();
         Date validityDate = new Date(now.getTime() + ACCESS_TOKEN_VALIDITY);
@@ -82,7 +82,7 @@ public class JwtTokenProvider {
         return builder.compact();
     }
 
-    // 토큰에서 인증 정보 조회
+    // ?좏겙?먯꽌 ?몄쬆 ?뺣낫 議고쉶
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaims(token);
 
@@ -90,7 +90,7 @@ public class JwtTokenProvider {
         Object authObj = claims.get("auth");
         Object statusObj = claims.get("status");
 
-        // refresh token 인 경우, 해당 클레임이 null이라서 안전하게 처리함
+        // refresh token ??寃쎌슦, ?대떦 ?대젅?꾩씠 null?대씪???덉쟾?섍쾶 泥섎━??
         CustomUserDetails userdetails = CustomUserDetails.builder()
                 .userId(userIdObj != null ? Long.valueOf(userIdObj.toString()) : null)
                 .email(claims.getSubject())
@@ -98,7 +98,7 @@ public class JwtTokenProvider {
                 .status(statusObj != null ? UserStatus.valueOf(statusObj.toString()) : null)
                 .build();
 
-        // 권한 목록 가져오기, role이 null인 경우 빈 리스트 반환해서 getAuthorities() 호출 안됨으로 NPE 에러 방지
+        // 沅뚰븳 紐⑸줉 媛?몄삤湲? role??null??寃쎌슦 鍮?由ъ뒪??諛섑솚?댁꽌 getAuthorities() ?몄텧 ?덈맖?쇰줈 NPE ?먮윭 諛⑹?
         Collection<? extends GrantedAuthority> authorities = (userdetails.getRole() != null)
                 ? userdetails.getAuthorities()
                 : Collections.emptyList();
@@ -106,7 +106,7 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userdetails, "", authorities);
     }
 
-    // 토큰 유효성 검증
+    // ?좏겙 ?좏슚??寃利?
     public boolean validateToken(String token) {
         try {
             parseClaims(token);

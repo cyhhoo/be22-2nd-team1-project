@@ -1,11 +1,11 @@
-# 프로덕션 환경 민감 정보 (Git에 올라가면 안 됨!)
-# .gitignore에 추가 필요: *-prd.yml
+# Production environment sensitive information (Do not upload to Git)
+# Should be ignored by .gitignore: *-prd.yml
 
 spring:
   datasource:
     url: jdbc:mariadb://production-db-server:3306/schoolmate_prod
-    username: ${DB_USERNAME}  # 환경 변수 사용 권장
-    password: ${DB_PASSWORD}  # 환경 변수 사용 권장
+    username: ${DB_USERNAME}  # Recommended to use environment variables
+    password: ${DB_PASSWORD}  # Recommended to use environment variables
 
 jwt:
-  secret: ${JWT_SECRET}  # 환경 변수로 주입 (보안 강화)
+  secret: ${JWT_SECRET}  # Inject via environment variable for security

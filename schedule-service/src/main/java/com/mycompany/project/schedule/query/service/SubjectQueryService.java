@@ -20,7 +20,7 @@ public class SubjectQueryService {
     private final SubjectRepository subjectRepository;
 
     /**
-     * 전체 과목 목록 조회
+     * Retrieve all subjects
      */
     public List<SubjectResponse> getAllSubjects() {
         return subjectRepository.findAll().stream()
@@ -29,10 +29,10 @@ public class SubjectQueryService {
     }
 
     /**
-     * 단일 과목 조회
+     * Retrieve a single subject by ID
      */
     public SubjectResponse getSubjectById(Long id) {
-        Subject subject = subjectRepository.findById(id)
+        Subject subject = subjectRepository.findById(java.util.Objects.requireNonNull(id))
                 .orElseThrow(() -> new BusinessException(ErrorCode.SUBJECT_NOT_FOUND));
         return new SubjectResponse(subject.getId(), subject.getName());
     }

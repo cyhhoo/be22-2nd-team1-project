@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "마이페이지 (MyPage)", description = "사용자 마이페이지 관련 API")
+@Tag(name = "MyPage", description = "User MyPage related API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users/mypage")
@@ -23,7 +23,7 @@ public class UserMyPageController {
 
   private final UserMyPageService userMyPageService;
 
-  @Operation(summary = "비밀번호 변경", description = "현재 비밀번호를 확인 후 새 비밀번호로 변경합니다.")
+  @Operation(summary = "Change password", description = "Verify current password and change to new password.")
   @PostMapping("/password")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ApiResponse<Void>> changePassword(

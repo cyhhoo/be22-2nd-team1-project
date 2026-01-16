@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TeacherDetailRequest {
-    private Long subjectId; // 담당 과목 ID (tbl_subject.subject_id 참조)
-    private String subject; // 담당 과목명 (예: "MATH")
-    private Integer homeroomGrade; // 담임 학년
-    private Integer homeroomClass; // 담임 반
+    private Long subjectId; // Reference to tbl_subject.subject_id
+    private String subject; // Subject name (e.g., "MATH")
+    private Integer homeroomGrade; // Homeroom grade level
+    private Integer homeroomClass; // Homeroom class number
 }

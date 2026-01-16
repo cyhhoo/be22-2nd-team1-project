@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface AcademicYearRepository extends JpaRepository<AcademicYear, Long> {
-    // 1. 특정 연도와 학기로 조회 (예: 2025년 1학기 있는지 확인)
+    // 1. ?뱀젙 ?곕룄? ?숆린濡?議고쉶 (?? 2025??1?숆린 ?덈뒗吏 ?뺤씤)
     Optional<AcademicYear> findByYearAndSemester(Integer year, Integer semester);
 
-    // 2. 현재 활성화된 학기 조회
+    // 2. ?꾩옱 ?쒖꽦?붾맂 ?숆린 議고쉶
     Optional<AcademicYear> findByIsCurrentTrue();
 }

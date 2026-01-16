@@ -1,7 +1,7 @@
 package com.mycompany.project.enrollment.query.controller;
 
+import com.mycompany.project.common.enums.EnrollmentStatus;
 import com.mycompany.project.common.response.ApiResponse;
-import com.mycompany.project.enrollment.entity.EnrollmentStatus;
 import com.mycompany.project.enrollment.query.dto.EnrollmentHistoryResponse;
 import com.mycompany.project.enrollment.query.dto.InternalEnrollmentResponse;
 import com.mycompany.project.enrollment.query.dto.TimetableResponse;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "수강 신청 (Enrollment)", description = "수강 신청 조회 API")
+@Tag(name = "Enrollment", description = "Enrollment Query API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/enrollments")
@@ -29,8 +29,10 @@ public class EnrollmentQueryController {
 
   private final EnrollmentQueryService enrollmentQueryService;
 
-  // 1. 내 수강 내역 조회
-  @Operation(summary = "내 수강 내역 목록 조회", description = "내 수강 신청 목록을 조회합니다.")
+  /**
+   * Get my enrollment history
+   */
+  @Operation(summary = "Get my enrollment history", description = "Retrieves the list of enrollments for the current student.")
   @GetMapping("/history")
   @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<List<EnrollmentHistoryResponse>>> getMyHistory() {
@@ -39,8 +41,10 @@ public class EnrollmentQueryController {
     return ResponseEntity.ok(ApiResponse.success(history));
   }
 
-  // 2. 내 시간표 조회
-  @Operation(summary = "내 시간표 조회", description = "내 시간표를 조회합니다.")
+  /**
+   * Get my timetable
+   */
+  @Operation(summary = "Get my timetable", description = "Retrieves the weekly timetable for the current student.")
   @GetMapping("/timetable")
   @PreAuthorize("hasRole('STUDENT')")
   public ResponseEntity<ApiResponse<List<TimetableResponse>>> getMyTimetable() {

@@ -3,11 +3,11 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.mycompany.project.attendance.mapper.AttendanceCorrectionQueryMapper">
+<mapper namespace="com.mycompany.project.attendance.query.repository.AttendanceCorrectionQueryMapper">
 
-    <!-- 정정신청 상세 조회 -->
+    <!-- Get single correction request detail -->
     <select id="findById" parameterType="long"
-            resultType="com.mycompany.project.attendance.dto.response.CorrectionResponse">
+            resultType="com.mycompany.project.attendance.query.application.dto.CorrectionResponse">
         SELECT
         request_id                  AS requestId,
         attendance_id               AS attendanceId,
@@ -25,10 +25,10 @@
         WHERE request_id = #{requestId}
     </select>
 
-    <!-- 정정신청 목록/검색 -->
+    <!-- Correction Request List/Search -->
     <select id="search"
-            parameterType="com.mycompany.project.attendance.dto.request.CorrectionSearchRequest"
-            resultType="com.mycompany.project.attendance.dto.response.CorrectionResponse">
+            parameterType="com.mycompany.project.attendance.command.application.dto.CorrectionSearchRequest"
+            resultType="com.mycompany.project.attendance.query.application.dto.CorrectionResponse">
         SELECT
         request_id                  AS requestId,
         attendance_id               AS attendanceId,
@@ -66,9 +66,9 @@
         </if>
     </select>
 
-    <!-- 총 개수 조회 -->
+    <!-- Total count for pagination -->
     <select id="count"
-            parameterType="com.mycompany.project.attendance.dto.request.CorrectionSearchRequest"
+            parameterType="com.mycompany.project.attendance.command.application.dto.CorrectionSearchRequest"
             resultType="long">
         SELECT COUNT(*)
         FROM tbl_attendance_correction_request

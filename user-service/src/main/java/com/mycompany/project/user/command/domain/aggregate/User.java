@@ -1,6 +1,8 @@
 package com.mycompany.project.user.command.domain.aggregate;
 
 import com.mycompany.project.common.entity.BaseEntity;
+import com.mycompany.project.common.enums.Role;
+import com.mycompany.project.common.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -56,17 +58,17 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private LocalDate birthDate;
 
-    private String authCode; // 인증 코드
+    private String authCode; // Verification code
 
-    private int loginFailCount; // 로그인 실패 횟수 (5회 실패시 계정 잠금)
+    private int loginFailCount; // Login failure count (Locked after 5 failures)
 
-    private LocalDateTime lastLoginAt; // 마지막 로그인 일시
+    private LocalDateTime lastLoginAt; // Last login timestamp
 
     /**
-     * 초기 계정 활성화 메서드
-     * 계정 생성 후 첫 로그인 시, 동작
+     * Account activation method
+     * Executed on first login after account creation
      * 
-     * @param encodedPassword
+     * @param encodedPassword Encoded new password
      */
     public void activate(String encodedPassword) {
         this.status = UserStatus.ACTIVE;
@@ -75,7 +77,7 @@ public class User extends BaseEntity {
     }
 
     /**
-     * 로그인 성공 시, 카운트 초기화 및 마지막 접속일 갱신
+     * Reset fail count and update last login timestamp on success
      */
     public void loginSuccess() {
         this.loginFailCount = 0;
@@ -83,7 +85,7 @@ public class User extends BaseEntity {
     }
 
     /**
-     * 로그인 실패 시, 실패 카운트 증가 및 5회 이상 실패시 계정 잠금
+     * Increase fail count and lock account if 5 or more failures
      */
     public void loginFail() {
         this.loginFailCount++;
@@ -93,9 +95,9 @@ public class User extends BaseEntity {
     }
 
     /**
-     * 계정 잠금 상태 확인 메서드
+     * Check if account is locked
      * 
-     * @return 잠금 상태 여부 (LOCKED 면 true, 아니면 false)
+     * @return true if status is LOCKED
      */
     public boolean isLocked() {
         return this.status == UserStatus.LOCKED;
@@ -111,9 +113,9 @@ public class User extends BaseEntity {
     }
 
     /**
-     * 비밀번호 변경 메서드
+     * Update password
      * 
-     * @param encodedPassword
+     * @param encodedPassword Encoded new password
      */
     public void setPassword(String encodedPassword) {
         this.password = encodedPassword;

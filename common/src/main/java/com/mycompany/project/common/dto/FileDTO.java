@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileDTO {
-    private String originalFileName; // 사용자가 올린 원래 파일명
-    private String savedFileName;    // 서버에 저장된 유니크한 파일명 (UUID)
-    private String filePath;         // 파일이 저장된 실제 경로
-    private String url;              // 브라우저에서 접근할 수 있는 URL
+    private String originalFileName; // ?ъ슜?먭? ?щ┛ ?먮옒 ?뚯씪紐?
+    private String savedFileName;    // ?쒕쾭????λ맂 ?좊땲?ы븳 ?뚯씪紐?(UUID)
+    private String filePath;         // ?뚯씪????λ맂 ?ㅼ젣 寃쎈줈
+    private String url;              // 釉뚮씪?곗??먯꽌 ?묎렐?????덈뒗 URL
 }

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.mycompany.project.enrollment.repository.EnrollmentMapper">
+<mapper namespace="com.mycompany.project.enrollment.command.domain.repository.EnrollmentMapper">
 
     <select id="selectTimetableByUserId"
             resultType="com.mycompany.project.enrollment.query.dto.TimetableResponse">
@@ -66,7 +66,7 @@
             e.created_at DESC
     </select>
 
-    <!-- 추가 -->
+    <!-- Additional Queries -->
     <select id="selectByCourseIdsAndStatus" resultMap="EnrollmentResultMap">
         SELECT
         enrollment_id,
@@ -83,7 +83,7 @@
         AND status = #{status}
     </select>
 
-    <resultMap id="EnrollmentResultMap" type="com.mycompany.project.enrollment.entity.Enrollment">
+    <resultMap id="EnrollmentResultMap" type="com.mycompany.project.enrollment.command.domain.aggregate.Enrollment">
         <id property="enrollmentId" column="enrollment_id"/>
         <result property="status" column="status"/>
     </resultMap>

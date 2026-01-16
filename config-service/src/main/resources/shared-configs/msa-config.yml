@@ -1,15 +1,15 @@
 # ===================================
-# Config Server - MSA 서비스 공유 설정 (msa-config)
-# 비즈니스 로직을 가진 서비스들이 공유하는 데이터 및 보안 설정
-# (민감 정보 제외 - msa-config-dev.yml 또는 msa-config-prd.yml에서 관리)
+# Config Server - MSA Service Common Settings (msa-config)
+# Database and security settings shared by business logic services
+# (Sensitive info excluded - managed in msa-config-dev.yml or msa-config-prd.yml)
 # ===================================
 
 spring:
-  # 데이터베이스 기본 드라이버 설정
+  # Database driver settings
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
 
-  # JPA 설정
+  # JPA settings
   jpa:
     hibernate:
       ddl-auto: create
@@ -24,13 +24,13 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
-# 로깅 레벨 설정
+# Logging level settings
 logging:
   level:
     root: INFO
     com.mycompany: DEBUG
 
-# Swagger(SpringDoc) 설정 추가
+# Swagger(SpringDoc) settings
 springdoc:
   api-docs:
     path: /v3/api-docs

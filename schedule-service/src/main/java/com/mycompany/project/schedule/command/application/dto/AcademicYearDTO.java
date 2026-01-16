@@ -10,8 +10,8 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 public class AcademicYearDTO {
-    private Integer year; // 예: 2025
-    private Integer semester; // 예: 1
+    private Integer year; // ?? 2025
+    private Integer semester; // ?? 1
     private LocalDate startDate;
     private LocalDate endDate;
 }

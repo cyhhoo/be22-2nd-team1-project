@@ -1,6 +1,5 @@
 package com.mycompany.project.user.command.domain.aggregate;
 
-import com.mycompany.project.schedule.command.domain.aggregate.Subject;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -26,9 +25,8 @@ public class TeacherDetail {
     private User user;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subject_id")
-    private Subject subject;
+    @Column(name = "subject_id")
+    private Long subjectId; // Refers to subjectId (instead of direct Entity reference)
 
     @Min(1)
     @Max(3)
@@ -38,4 +36,13 @@ public class TeacherDetail {
     @Positive
     @Column(name = "homeroom_class_no")
     private Integer homeroomClassNo;
+
+    public void updateInfo(Long subjectId, Integer homeroomGrade, Integer homeroomClassNo) {
+        if (subjectId != null)
+            this.subjectId = subjectId;
+        if (homeroomGrade != null)
+            this.homeroomGrade = homeroomGrade;
+        if (homeroomClassNo != null)
+            this.homeroomClassNo = homeroomClassNo;
+    }
 }

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "사용자 관리 (Command)", description = "사용자 등록/수정/삭제 등 상태 변경 API")
+@Tag(name = "User Management (Command)", description = "User registration, update, delete, and status change API")
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -26,7 +26,7 @@ public class UserCommandController {
 
   private final UserCommandService userCommandService;
 
-  @Operation(summary = "사용자 개별 등록", description = "단일 사용자를 등록합니다. 역할에 따라 StudentDetail, TeacherDetail, AdminDetail이 자동으로 생성됩니다.")
+  @Operation(summary = "Individual user registration", description = "Register a single user. StudentDetail, TeacherDetail, or AdminDetail is automatically created based on the role.")
   @PostMapping("/register")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<Long>> register(@RequestBody UserRegisterRequest request) {
@@ -34,20 +34,20 @@ public class UserCommandController {
     return ResponseEntity.ok(ApiResponse.success(userId));
   }
 
-  @Operation(summary = "사용자 대량 등록 (CSV)", description = "CSV 파일을 업로드하여 사용자를 일괄 등록합니다.\n헤더 필수: email, password, name, role, birthDate")
+  @Operation(summary = "Batch user registration (CSV)", description = "Bulk register users by uploading a CSV file. Required headers: email, password, name, role, birthDate")
   @PostMapping(value = "/batch/import", consumes = "multipart/form-data")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<String>> importUsersBatch(@RequestPart("file") MultipartFile file) {
     int count = userCommandService.importUser(file);
-    return ResponseEntity.ok(ApiResponse.success(count + "명 등록 완료"));
+    return ResponseEntity.ok(ApiResponse.success(count + " users registered successfully"));
   }
 
-  @Operation(summary = "사용자 대량 수정 (CSV)", description = "이메일을 기준으로 기존 사용자 정보를 일괄 수정합니다.\n필수 Header: email. 선택 Header: name, role, birthDate 등")
+  @Operation(summary = "Batch user update (CSV)", description = "Bulk update existing users based on email. Required header: email. Optional headers: name, role, birthDate")
   @PutMapping(value = "/batch/update", consumes = "multipart/form-data")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<String>> updateUsersBatch(@RequestPart("file") MultipartFile file) {
     int count = userCommandService.updateUsersInBatch(file);
-    return ResponseEntity.ok(ApiResponse.success(count + "명 수정 완료"));
+    return ResponseEntity.ok(ApiResponse.success(count + " users updated successfully"));
   }
 
   @Hidden

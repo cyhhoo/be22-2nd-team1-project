@@ -1,6 +1,5 @@
 package com.mycompany.project.reservation.command.application.service;
 
-
 import com.mycompany.project.exception.BusinessException;
 import com.mycompany.project.exception.ErrorCode;
 import com.mycompany.project.reservation.command.application.dto.request.FacilityCreateRequest;
@@ -8,7 +7,7 @@ import com.mycompany.project.reservation.command.application.dto.request.Facilit
 import com.mycompany.project.reservation.command.application.dto.response.FacilityCommandResponse;
 import com.mycompany.project.reservation.command.domain.aggregate.Facility;
 import com.mycompany.project.reservation.command.domain.aggregate.FacilityStatus;
-import com.mycompany.project.reservation.command.infrastructure.repository.FacilityRepository;
+import com.mycompany.project.reservation.command.domain.repository.FacilityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +20,7 @@ import java.time.LocalTime;
 public class FacilityCommandService {
   private final FacilityRepository facilityRepository;
 
-
-  /* 시설 등록 */
+  /* Register new facility */
   public FacilityCommandResponse create(Long adminId, FacilityCreateRequest req) {
 
     if (facilityRepository.existsByName(req.getName())) {
@@ -42,16 +40,14 @@ public class FacilityCommandService {
         .build();
 
     return FacilityCommandResponse.from(
-        facilityRepository.save(facility)
-    );
+        facilityRepository.save(facility));
   }
 
-  /* 시설 수정 */
+  /* Update existing facility */
   public FacilityCommandResponse update(Long adminId, Long facilityId, FacilityUpdateRequest req) {
 
     Facility facility = facilityRepository.findById(facilityId)
         .orElseThrow(() -> new BusinessException(ErrorCode.FACILITY_NOT_FOUND));
-
 
     if (!facility.getAdminId().equals(adminId)) {
       throw new BusinessException(ErrorCode.FACILITY_UPDATE_FORBIDDEN);
@@ -70,13 +66,12 @@ public class FacilityCommandService {
         req.getOpenTime(),
         req.getCloseTime(),
         req.getLocation(),
-        req.getFacilityType()
-    );
+        req.getFacilityType());
 
     return FacilityCommandResponse.from(facility);
   }
 
-  /* 시설 삭제 */
+  /* Delete facility */
   public void delete(Long adminId, Long facilityId) {
 
     Facility facility = facilityRepository.findById(facilityId)
@@ -103,4 +98,3 @@ public class FacilityCommandService {
     }
   }
 }
-

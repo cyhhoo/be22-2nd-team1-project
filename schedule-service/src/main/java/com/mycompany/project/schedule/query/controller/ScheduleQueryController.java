@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "학사 일정 조회 (Schedule Query)", description = "학사 일정 조회 API")
+@Tag(name = "Academic Schedule Query", description = "Academic schedule query API")
 @RestController
 @RequestMapping("/api/v1/schedule")
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class ScheduleQueryController {
 
   private final ScheduleQueryService scheduleQueryService;
 
-  @Operation(summary = "월별 일정 조회", description = "지정한 연도와 월에 해당하는 학사 일정을 조회합니다.")
+  @Operation(summary = "Get monthly schedule", description = "Retrieve academic schedule for a specified year and month.")
   @GetMapping("/events/monthly")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ApiResponse<List<ScheduleDTO>>> getMonthlySchedules(
@@ -35,7 +35,7 @@ public class ScheduleQueryController {
 
   }
 
-  @Operation(summary = "주간 일정 조회", description = "시작일과 종료일 사이의 학사 일정을 조회합니다.")
+  @Operation(summary = "Get weekly schedule", description = "Retrieve academic schedule between start and end dates.")
   @GetMapping("/events/weekly")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<ApiResponse<List<ScheduleDTO>>> getWeeklySchedules(
@@ -46,7 +46,7 @@ public class ScheduleQueryController {
     return ResponseEntity.ok(ApiResponse.success(schedules));
   }
 
-  // 내부 API용 학년도 단건 조회
+  // Internal API for other services to get academic year info
   @Hidden
   @GetMapping("/internal/academic-years/{academicYearId}")
   public ResponseEntity<com.mycompany.project.schedule.query.dto.InternalAcademicYearResponse> getInternalAcademicYear(

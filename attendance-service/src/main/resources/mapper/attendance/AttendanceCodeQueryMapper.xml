@@ -3,11 +3,11 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.mycompany.project.attendance.mapper.AttendanceCodeQueryMapper">
+<mapper namespace="com.mycompany.project.attendance.query.repository.AttendanceCodeQueryMapper">
 
-    <!-- 출결 코드 단건 조회 -->
+    <!-- Get single attendance code detail -->
     <select id="findById" parameterType="long"
-            resultType="com.mycompany.project.attendance.dto.response.AttendanceCodeResponse">
+            resultType="com.mycompany.project.attendance.query.application.dto.AttendanceCodeResponse">
         SELECT
         attendance_code_id AS attendanceCodeId,
         code               AS code,
@@ -20,9 +20,9 @@
         WHERE attendance_code_id = #{attendanceCodeId}
     </select>
 
-    <!-- 출결 코드 전체 조회 -->
+    <!-- Get all attendance codes -->
     <select id="findAll"
-            resultType="com.mycompany.project.attendance.dto.response.AttendanceCodeResponse">
+            resultType="com.mycompany.project.attendance.query.application.dto.AttendanceCodeResponse">
         SELECT
         attendance_code_id AS attendanceCodeId,
         code               AS code,
@@ -33,7 +33,7 @@
         updated_at         AS updatedAt
         FROM tbl_attendance_code
         <where>
-            <!-- activeOnly=true인 경우만 필터링 -->
+            <!-- Filter by active status if activeOnly is true -->
             <if test="activeOnly != null and activeOnly == true">
                 is_active = 1
             </if>

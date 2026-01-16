@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "과목 관리 (Command)", description = "과목 등록/삭제 API")
+@Tag(name = "Subject Management (Command)", description = "Subject registration and deletion API")
 @RestController
 @RequestMapping("/api/v1/subjects")
 @RequiredArgsConstructor
@@ -18,7 +18,7 @@ public class SubjectCommandController {
 
     private final SubjectCommandService subjectCommandService;
 
-    @Operation(summary = "과목 등록", description = "새로운 과목을 등록합니다.")
+    @Operation(summary = "Register subject", description = "Register a new subject.")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Long>> createSubject(@RequestBody SubjectCreateRequest request) {
@@ -26,11 +26,11 @@ public class SubjectCommandController {
         return ResponseEntity.ok(ApiResponse.success(subjectId));
     }
 
-    @Operation(summary = "과목 삭제", description = "과목을 삭제합니다.")
+    @Operation(summary = "Delete subject", description = "Delete an existing subject.")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<String>> deleteSubject(@PathVariable Long id) {
         subjectCommandService.deleteSubject(id);
-        return ResponseEntity.ok(ApiResponse.success("과목 삭제 완료"));
+        return ResponseEntity.ok(ApiResponse.success("Subject deleted successfully"));
     }
 }

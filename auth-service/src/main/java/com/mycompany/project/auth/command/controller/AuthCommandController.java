@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "인증 관리 (Auth Command)", description = "계정 활성화 등 인증 상태 변경 API")
+@Tag(name = "Auth Command", description = "Account activation and authentication state change API")
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ public class AuthCommandController {
 
     private final AuthCommandService authCommandService;
 
-    @Operation(summary = "계정 활성화", description = "최초 로그인 시 비밀번호를 설정하고 계정을 활성화합니다.")
+    @Operation(summary = "Activate account", description = "Set password on first login and activate the account.")
     @PostMapping("/activate")
     public ResponseEntity<ApiResponse<TokenResponse>> activate(@RequestBody AccountActivationRequest request) {
         TokenResponse tokens = authCommandService.activateAccount(request);

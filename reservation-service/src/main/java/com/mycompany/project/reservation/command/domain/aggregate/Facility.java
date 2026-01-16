@@ -21,7 +21,7 @@ public class Facility {
   @Column(nullable = false, length = 50)
   private String name;
 
-  // enum에서 검증된 값만 들어감
+  // Stored as string from FacilityStatus enum validates
   @Column(nullable = false, length = 20)
   private String status;
 
@@ -44,22 +44,19 @@ public class Facility {
     return FacilityStatus.AVAILABLE.name().equals(status);
   }
 
-  // 수정용 메서드 (더티체킹)
+  // Update facility information
   public void update(
       String name,
       FacilityStatus status,
       LocalTime openTime,
       LocalTime closeTime,
       String location,
-      String facilityType
-  ) {
+      String facilityType) {
     this.name = name;
-    this.status = status.name(); // enum → String
+    this.status = status.name();
     this.openTime = openTime;
     this.closeTime = closeTime;
     this.location = location;
     this.facilityType = facilityType;
   }
 }
-
-

@@ -11,11 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "인증 조회 (Auth Query)", description = "로그인/로그아웃/토큰 재발급 API")
+@Tag(name = "Auth Query", description = "Login/Logout and token reissue API")
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class AuthQueryController {
 
   private final AuthQueryService authQueryService;
 
-  @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하여 Access Token과 Refresh Token을 발급받습니다.")
+  @Operation(summary = "Login", description = "Login with email and password to receive Access Token and Refresh Token.")
   @PostMapping("/login")
   @PreAuthorize("permitAll()")
   public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request) {
@@ -31,7 +30,7 @@ public class AuthQueryController {
     return buildTokenResponse(response);
   }
 
-  @Operation(summary = "토큰 재발급", description = "Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.")
+  @Operation(summary = "Token reissue", description = "Use Refresh Token to get a new Access Token.")
   @PostMapping("/reissue")
   @PreAuthorize("permitAll()")
   public ResponseEntity<ApiResponse<TokenResponse>> reissue(
@@ -40,7 +39,7 @@ public class AuthQueryController {
     return buildTokenResponse(response);
   }
 
-  @Operation(summary = "로그아웃", description = "Refresh Token을 삭제하고 로그아웃 처리합니다.")
+  @Operation(summary = "Logout", description = "Delete Refresh Token and process logout.")
   @PostMapping("/logout")
   @PreAuthorize("permitAll()")
   public ResponseEntity<ApiResponse<Void>> logout(
@@ -60,7 +59,7 @@ public class AuthQueryController {
     return new ResponseEntity<>(ApiResponse.success(null), headers, org.springframework.http.HttpStatus.OK);
   }
 
-  /* accessToken 과 refreshToken을 body와 쿠키에 담아 반환 */
+  /* Return accessToken and refreshToken in body and cookies */
   private ResponseEntity<ApiResponse<TokenResponse>> buildTokenResponse(TokenResponse tokenResponse) {
     ResponseCookie accessTokenCookie = createAccessTokenCookie(tokenResponse.getAccessToken());
     ResponseCookie refreshTokenCookie = createRefreshTokenCookie(tokenResponse.getRefreshToken());
@@ -76,8 +75,8 @@ public class AuthQueryController {
     return ResponseCookie.from("AccessToken", accessToken)
         .httpOnly(true)
         .path("/")
-        .maxAge(Duration.ofMinutes(30))
-        .sameSite("Lax") // 호환성을 위해 Lax 사용
+        .maxAge(java.util.Objects.requireNonNull(java.time.Duration.ofMinutes(30)))
+        .sameSite("Lax")
         .build();
   }
 
@@ -85,7 +84,7 @@ public class AuthQueryController {
     return ResponseCookie.from("RefreshToken", refreshToken)
         .httpOnly(true)
         .path("/")
-        .maxAge(Duration.ofDays(7))
+        .maxAge(java.util.Objects.requireNonNull(java.time.Duration.ofDays(7)))
         .sameSite("Lax")
         .build();
   }

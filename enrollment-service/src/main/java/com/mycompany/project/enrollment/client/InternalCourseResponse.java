@@ -14,10 +14,10 @@ public class InternalCourseResponse {
     private Long academicYearId;
     private Long subjectId;
     private String name;
-    private String courseType; // Enum -> String
-    private String status; // Enum -> String
-    private Integer targetGrade; // [추가] 대상 학년
-    private List<TimeSlotResponse> timeSlots; // [추가] 시간표 정보
+    private String courseType; // Enum as String
+    private String status; // Enum as String
+    private Integer targetGrade; // Target grade level
+    private List<TimeSlotResponse> timeSlots; // Time slot information
 
     @Getter
     @Setter

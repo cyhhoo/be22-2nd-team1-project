@@ -1,6 +1,6 @@
 package com.mycompany.project.enrollment.query.dto;
 
-import com.mycompany.project.enrollment.entity.EnrollmentStatus;
+import com.mycompany.project.common.enums.EnrollmentStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

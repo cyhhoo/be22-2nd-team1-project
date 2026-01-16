@@ -3,7 +3,7 @@ package com.mycompany.project.user.command.application.service;
 import com.mycompany.project.common.repository.BulkUploadLogRepository;
 import com.mycompany.project.schedule.command.domain.repository.SubjectRepository;
 import com.mycompany.project.user.command.application.dto.*;
-import com.mycompany.project.user.command.domain.aggregate.Role;
+import com.mycompany.project.common.enums.Role;
 import com.mycompany.project.user.command.domain.aggregate.StudentDetail;
 import com.mycompany.project.user.command.domain.aggregate.User;
 import com.mycompany.project.user.command.domain.repository.*;
@@ -44,13 +44,13 @@ class UserCommandServiceTest {
     private BulkUploadLogRepository bulkUploadLogRepository;
 
     @Test
-    @DisplayName("학생 등록 성공")
+    @DisplayName("?숈깮 ?깅줉 ?깃났")
     void registerUser_Student_Success() {
         // given
         UserRegisterRequest request = new UserRegisterRequest();
         request.setEmail("student@test.com");
         request.setPassword("password");
-        request.setName("학생");
+        request.setName("?숈깮");
         request.setRole(Role.STUDENT);
         request.setBirthDate(LocalDate.of(2005, 1, 1));
 
@@ -76,13 +76,13 @@ class UserCommandServiceTest {
     }
 
     @Test
-    @DisplayName("교사 등록 성공")
+    @DisplayName("援먯궗 ?깅줉 ?깃났")
     void registerUser_Teacher_Success() {
         // given
         UserRegisterRequest request = new UserRegisterRequest();
         request.setEmail("teacher@test.com");
         request.setPassword("password");
-        request.setName("교사");
+        request.setName("援먯궗");
         request.setRole(Role.TEACHER);
 
         TeacherDetailRequest teacherReq = new TeacherDetailRequest();
@@ -102,13 +102,13 @@ class UserCommandServiceTest {
     }
 
     @Test
-    @DisplayName("관리자 등록 성공")
+    @DisplayName("愿由ъ옄 ?깅줉 ?깃났")
     void registerUser_Admin_Success() {
         // given
         UserRegisterRequest request = new UserRegisterRequest();
         request.setEmail("admin@test.com");
         request.setPassword("password");
-        request.setName("관리자");
+        request.setName("愿由ъ옄");
         request.setRole(Role.ADMIN);
 
         AdminDetailRequest adminReq = new AdminDetailRequest();
@@ -127,7 +127,7 @@ class UserCommandServiceTest {
     }
 
     @Test
-    @DisplayName("등록 실패 - 이메일 중복")
+    @DisplayName("?깅줉 ?ㅽ뙣 - ?대찓??以묐났")
     void registerUser_DuplicateEmail() {
         // given
         UserRegisterRequest request = new UserRegisterRequest();

@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "학사 일정 관리 (Command)", description = "학년도 및 상세 일정 등록/수정/삭제 API")
+@Tag(name = "Academic Schedule Management (Command)", description = "Academic year and detailed schedule registration/update/deletion API")
 @RestController
 @RequestMapping("/api/v1/schedule")
 @RequiredArgsConstructor
@@ -19,14 +19,14 @@ public class ScheduleCommandController {
 
   private final ScheduleCommandService scheduleCommandService;
 
-  @Operation(summary = "학년도 등록", description = "새로운 학년도 및 학기를 등록합니다.")
+  @Operation(summary = "Register academic year", description = "Register a new academic year and semester.")
   @PostMapping("/years")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<Long>> createAcademicYear(@RequestBody AcademicYearDTO request) {
     return ResponseEntity.ok(ApiResponse.success(scheduleCommandService.createAcademicYear(request)));
   }
 
-  @Operation(summary = "일정 등록", description = "새로운 학사 일정을 등록합니다.")
+  @Operation(summary = "Register schedule event", description = "Register a new academic schedule event.")
   @PostMapping("/events")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<Long>> createSchedule(
@@ -34,21 +34,21 @@ public class ScheduleCommandController {
     return ResponseEntity.ok(ApiResponse.success(scheduleCommandService.createSchedule(request)));
   }
 
-  @Operation(summary = "일정 수정", description = "기존 학사 일정을 수정합니다.")
+  @Operation(summary = "Update schedule event", description = "Modify an existing academic schedule event.")
   @PutMapping("/events/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<String>> updateSchedule(
       @PathVariable Long id,
       @RequestBody ScheduleCreateRequest request) {
     scheduleCommandService.updateSchedule(id, request);
-    return ResponseEntity.ok(ApiResponse.success("일정 수정 완료"));
+    return ResponseEntity.ok(ApiResponse.success("Schedule updated successfully"));
   }
 
-  @Operation(summary = "일정 삭제", description = "학사 일정을 삭제(Soft Delete)합니다.")
+  @Operation(summary = "Delete schedule event", description = "Delete an academic schedule event (Soft Delete).")
   @DeleteMapping("/events/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<String>> deleteSchedule(@PathVariable Long id) {
     scheduleCommandService.deleteSchedule(id);
-    return ResponseEntity.ok(ApiResponse.success("일정 삭제 완료"));
+    return ResponseEntity.ok(ApiResponse.success("Schedule deleted successfully"));
   }
 }

@@ -27,14 +27,14 @@ public class UserQueryService {
   private final ModelMapper modelMapper;
 
   /**
-   * 이메일로 내 정보 조회 하기
+   * Retrieve user info by email
    * 
-   * @param email 내 이메일(userId)
-   * @return 내 정보(entity -> dto)
+   * @param email User email (unique)
+   * @return UserResponse DTO
    */
   public UserResponse getMyInfo(String email) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
+        .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
     return modelMapper.map(user, UserResponse.class);
   }
@@ -69,15 +69,14 @@ public class UserQueryService {
   public List<InternalStudentResponse> searchStudents(
       com.mycompany.project.user.query.dto.StudentSearchRequest request) {
     if (request.getGrade() != null && request.getClassNo() != null) {
-      // 학년/반으로 조회
+      // Search by grade/class
       return studentDetailRepository.findByGradeAndClassNo(request.getGrade(), request.getClassNo())
           .stream()
           .map(detail -> modelMapper.map(detail, InternalStudentResponse.class))
           .toList();
     } else if (request.getName() != null) {
-      // 이름으로 조회 (User join 필요)
-      // 간단하게 전체에서 필터링하거나 Repository에 메소드 추가 필요. 여기서는 Repository 메소드 없으니 findAll 후 필터링
-      // (임시)
+      // Search by name (filtering in memory for now, consider repository method for
+      // performance)
       return studentDetailRepository.findAll().stream()
           .filter(s -> s.getUser().getName().contains(request.getName()))
           .map(detail -> modelMapper.map(detail, InternalStudentResponse.class))

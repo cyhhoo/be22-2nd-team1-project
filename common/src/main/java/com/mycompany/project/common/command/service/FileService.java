@@ -14,33 +14,33 @@ import java.util.UUID;
 @Service
 public class FileService {
 
-    // 파일 저장 경로: 프로젝트 루트/uploads
+    // File storage path: project root/uploads
     private final String uploadDir = "uploads/";
 
     public FileResponse uploadFile(MultipartFile file) {
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("파일이 비어있습니다.");
+            throw new IllegalArgumentException("File is empty.");
         }
 
-        // 1. 디렉토리 생성
+        // 1. Create directory
         File dir = new File(uploadDir);
         if (!dir.exists()) {
             dir.mkdirs();
         }
 
-        // 2. 파일명 중복 방지 (UUID 사용)
+        // 2. Prevent filename collision (using UUID)
         String originalFilename = file.getOriginalFilename();
         String savedFilename = UUID.randomUUID().toString() + "_" + originalFilename;
         Path filePath = Paths.get(uploadDir + savedFilename);
 
-        // 3. 파일 저장
+        // 3. Save file
         try {
             Files.write(filePath, file.getBytes());
         } catch (IOException e) {
-            throw new RuntimeException("파일 저장 중 오류가 발생했습니다: " + e.getMessage());
+            throw new RuntimeException("Error occurred while saving file: " + e.getMessage());
         }
 
-        // 4. 결과 반환 (URL은 /uploads/파일명 형태로 접근)
+        // 4. Return result (expose URL as /uploads/filename)
         return FileResponse.builder()
                 .originalFileName(originalFilename)
                 .savedFileName(savedFilename)

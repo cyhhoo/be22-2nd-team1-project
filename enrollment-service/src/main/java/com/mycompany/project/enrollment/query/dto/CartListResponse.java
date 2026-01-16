@@ -10,16 +10,16 @@ import lombok.*;
 public class CartListResponse {
 
   private Long cartId;
-  private Long courseId;          // 나중에 '신청' 버튼 누를 때 필요
+  private Long courseId;          // ?섏쨷??'?좎껌' 踰꾪듉 ?꾨? ???꾩슂
   private String courseName;
   private String teacherName;
 
-  private String timetableSummary; // 예: "월1,2 / 수3" (화면 편의용 요약 필드)
+  private String timetableSummary; // ?? "??,2 / ??" (?붾㈃ ?몄쓽???붿빟 ?꾨뱶)
 
-  // 마감 임박 확인용 데이터
-  private Integer currentCount;   // 현재 신청 인원
-  private Integer maxCapacity;    // 최대 정원
+  // 留덇컧 ?꾨컯 ?뺤씤???곗씠??
+  private Integer currentCount;   // ?꾩옱 ?좎껌 ?몄썝
+  private Integer maxCapacity;    // 理쒕? ?뺤썝
 
-  // [추가] CartMapper.xml에서 조회하는 필드들
-  private String courseType;    // 이수 구분 (전공필수, 교양 등)
+  // [異붽?] CartMapper.xml?먯꽌 議고쉶?섎뒗 ?꾨뱶??
+  private String courseType;    // ?댁닔 援щ텇 (?꾧났?꾩닔, 援먯뼇 ??
 }

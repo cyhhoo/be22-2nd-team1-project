@@ -17,7 +17,7 @@ public class ApiDTO<T> {
     }
 
     public static <T> ApiDTO<T> success(T data) {
-        return new ApiDTO<>("SUCCESS", "요청이 성공적으로 처리되었습니다.", data);
+        return new ApiDTO<>("SUCCESS", "?붿껌???깃났?곸쑝濡?泥섎━?섏뿀?듬땲??", data);
     }
 
     public static <T> ApiDTO<T> success(String message, T data) {
